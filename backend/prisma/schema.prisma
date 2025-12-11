@@ -1,0 +1,131 @@
+generator client {
+  provider     = "prisma-client-js"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  nom       String
+  prenom    String
+  role      UserRole @default(GESTIONNAIRE)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Technicien {
+  id         String   @id @default(uuid())
+  nom        String
+  prenom     String
+  telephone  String?
+  email      String?
+  specialite String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("techniciens")
+}
+
+model Vehicle {
+  id              String     @id @default(uuid())
+  immatriculation String     @unique
+  marque          String
+  modele          String
+  annee           Int
+  numeroSerie     String     @unique
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  workflows       Workflow[]
+
+  @@map("vehicles")
+}
+
+model Workflow {
+  id            String          @id @default(uuid())
+  vehicleId     String
+  statut        WorkflowStatus  @default(EN_COURS)
+  etapeActuelle Int             @default(1)
+  dateDebut     DateTime        @default(now())
+  dateFin       DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  etapes        WorkflowEtape[]
+  vehicle       Vehicle         @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@map("workflows")
+}
+
+model WorkflowEtape {
+  id           String      @id @default(uuid())
+  workflowId   String
+  numeroEtape  Int
+  nomEtape     String
+  description  String?
+  statut       EtapeStatus @default(EN_ATTENTE)
+  formulaire   Json?
+  dateDebut    DateTime?
+  dateFin      DateTime?
+  validePar    String?
+  commentaires String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  workflow     Workflow    @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@unique([workflowId, numeroEtape])
+  @@map("workflow_etapes")
+}
+
+model EtapeDefinition {
+  id               String   @id @default(uuid())
+  numeroEtape      Int      @unique
+  nom              String
+  description      String?
+  champsFormulaire Json?
+  ordre            Int      @default(0)
+  estObligatoire   Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("etape_definitions")
+}
+
+model HistoriqueModification {
+  id               String   @id @default(uuid())
+  entite           String
+  entiteId         String
+  action           String
+  modifiePar       String
+  dateModification DateTime @default(now())
+  anciennesValeurs Json?
+  nouvellesValeurs Json?
+  commentaire      String?
+
+  @@map("historique_modifications")
+}
+
+enum UserRole {
+  ADMIN
+  GESTIONNAIRE
+}
+
+enum WorkflowStatus {
+  EN_COURS
+  TERMINE
+  ANNULE
+}
+
+enum EtapeStatus {
+  EN_ATTENTE
+  EN_COURS
+  TERMINE
+  BLOQUE
+}

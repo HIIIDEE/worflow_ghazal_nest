@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "Bash(npx @nestjs/cli new:*)",
+      "Bash(npm install:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npx nest generate module:*)",
+      "Bash(npx nest generate service vehicles)",
+      "Bash(npx nest generate:*)",
+      "Bash(npm create:*)",
+      "Bash(npm run build:*)",
+      "Bash(dir:*)",
+      "Bash(npx vite build)",
+      "Bash(npm run start:dev:*)",
+      "Bash(curl:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill /F /PID 25352)",
+      "Bash(taskkill //F //PID 25352)"
+    ]
+  }
+}
