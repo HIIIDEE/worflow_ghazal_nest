@@ -16,30 +16,47 @@ export declare class WorkflowsController {
             annee: number;
             numeroSerie: string;
         };
-        etapes: {
+        etapes: ({
+            technicien: {
+                id: string;
+                nom: string;
+                prenom: string;
+                specialite: string | null;
+            } | null;
+            valideParUser: {
+                id: string;
+                email: string;
+                nom: string;
+                prenom: string;
+            } | null;
+        } & {
             id: string;
             createdAt: Date;
             updatedAt: Date;
             numeroEtape: number;
             description: string | null;
-            statut: import("@prisma/client").$Enums.EtapeStatus;
-            dateDebut: Date | null;
-            dateFin: Date | null;
             workflowId: string;
             nomEtape: string;
+            statut: import("@prisma/client").$Enums.EtapeStatus;
             formulaire: import("@prisma/client/runtime/client").JsonValue | null;
+            dateDebut: Date | null;
+            dateFin: Date | null;
             validePar: string | null;
+            valideParId: string | null;
+            technicienId: string | null;
+            signatureGestionnaire: string | null;
+            signatureTechnicien: string | null;
             commentaires: string | null;
-        }[];
+        })[];
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        vehicleId: string;
         statut: import("@prisma/client").$Enums.WorkflowStatus;
-        etapeActuelle: number;
         dateDebut: Date;
         dateFin: Date | null;
+        vehicleId: string;
+        etapeActuelle: number;
     }) | null>;
     findAll(): Promise<({
         vehicle: {
@@ -52,32 +69,50 @@ export declare class WorkflowsController {
             annee: number;
             numeroSerie: string;
         };
-        etapes: {
+        etapes: ({
+            technicien: {
+                id: string;
+                nom: string;
+                prenom: string;
+                specialite: string | null;
+            } | null;
+            valideParUser: {
+                id: string;
+                email: string;
+                nom: string;
+                prenom: string;
+            } | null;
+        } & {
             id: string;
             createdAt: Date;
             updatedAt: Date;
             numeroEtape: number;
             description: string | null;
-            statut: import("@prisma/client").$Enums.EtapeStatus;
-            dateDebut: Date | null;
-            dateFin: Date | null;
             workflowId: string;
             nomEtape: string;
+            statut: import("@prisma/client").$Enums.EtapeStatus;
             formulaire: import("@prisma/client/runtime/client").JsonValue | null;
+            dateDebut: Date | null;
+            dateFin: Date | null;
             validePar: string | null;
+            valideParId: string | null;
+            technicienId: string | null;
+            signatureGestionnaire: string | null;
+            signatureTechnicien: string | null;
             commentaires: string | null;
-        }[];
+        })[];
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        vehicleId: string;
         statut: import("@prisma/client").$Enums.WorkflowStatus;
-        etapeActuelle: number;
         dateDebut: Date;
         dateFin: Date | null;
+        vehicleId: string;
+        etapeActuelle: number;
     })[]>;
-    findOne(id: string): Promise<({
+    findOne(id: string, user: any): Promise<{
+        etapes: any[];
         vehicle: {
             id: string;
             createdAt: Date;
@@ -88,79 +123,61 @@ export declare class WorkflowsController {
             annee: number;
             numeroSerie: string;
         };
-        etapes: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            numeroEtape: number;
-            description: string | null;
-            statut: import("@prisma/client").$Enums.EtapeStatus;
-            dateDebut: Date | null;
-            dateFin: Date | null;
-            workflowId: string;
-            nomEtape: string;
-            formulaire: import("@prisma/client/runtime/client").JsonValue | null;
-            validePar: string | null;
-            commentaires: string | null;
-        }[];
-    } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        vehicleId: string;
         statut: import("@prisma/client").$Enums.WorkflowStatus;
-        etapeActuelle: number;
         dateDebut: Date;
         dateFin: Date | null;
-    }) | null>;
-    getEtapes(id: string): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        numeroEtape: number;
-        description: string | null;
-        statut: import("@prisma/client").$Enums.EtapeStatus;
-        dateDebut: Date | null;
-        dateFin: Date | null;
-        workflowId: string;
-        nomEtape: string;
-        formulaire: import("@prisma/client/runtime/client").JsonValue | null;
-        validePar: string | null;
-        commentaires: string | null;
-    }[]>;
+        vehicleId: string;
+        etapeActuelle: number;
+    } | null>;
+    getEtapes(id: string, user: any): Promise<any[]>;
+    getUserPermissions(id: string, user: any): Promise<Record<number, import("@prisma/client").$Enums.PermissionType[]>>;
     update(id: string, updateWorkflowDto: UpdateWorkflowDto): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        vehicleId: string;
         statut: import("@prisma/client").$Enums.WorkflowStatus;
-        etapeActuelle: number;
         dateDebut: Date;
         dateFin: Date | null;
+        vehicleId: string;
+        etapeActuelle: number;
     }>;
-    updateEtape(id: string, numeroEtape: string, updateEtapeDto: UpdateEtapeDto): Promise<{
+    updateEtape(id: string, numeroEtape: string, updateEtapeDto: UpdateEtapeDto, user: any): Promise<{
+        valideParUser: {
+            id: string;
+            email: string;
+            nom: string;
+            prenom: string;
+        } | null;
+    } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
         numeroEtape: number;
         description: string | null;
-        statut: import("@prisma/client").$Enums.EtapeStatus;
-        dateDebut: Date | null;
-        dateFin: Date | null;
         workflowId: string;
         nomEtape: string;
+        statut: import("@prisma/client").$Enums.EtapeStatus;
         formulaire: import("@prisma/client/runtime/client").JsonValue | null;
+        dateDebut: Date | null;
+        dateFin: Date | null;
         validePar: string | null;
+        valideParId: string | null;
+        technicienId: string | null;
+        signatureGestionnaire: string | null;
+        signatureTechnicien: string | null;
         commentaires: string | null;
     }>;
     remove(id: string): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        vehicleId: string;
         statut: import("@prisma/client").$Enums.WorkflowStatus;
-        etapeActuelle: number;
         dateDebut: Date;
         dateFin: Date | null;
+        vehicleId: string;
+        etapeActuelle: number;
     }>;
 }

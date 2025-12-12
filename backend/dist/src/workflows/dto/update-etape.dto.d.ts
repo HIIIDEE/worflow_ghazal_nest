@@ -4,5 +4,8 @@ export declare class UpdateEtapeDto {
     dateDebut?: Date;
     dateFin?: Date;
     validePar?: string;
+    technicienId?: string;
+    signatureGestionnaire?: string;
+    signatureTechnicien?: string;
     commentaires?: string;
 }

@@ -27,6 +27,32 @@ let VehiclesService = class VehiclesService {
         await this.workflowsService.create({ vehicleId: vehicle.id });
         return vehicle;
     }
+    async search(query) {
+        if (!query || query.length < 2) {
+            return [];
+        }
+        return this.prisma.vehicle.findMany({
+            where: {
+                OR: [
+                    { numeroSerie: { contains: query, mode: 'insensitive' } },
+                    { immatriculation: { contains: query, mode: 'insensitive' } },
+                ],
+            },
+            include: {
+                workflows: {
+                    orderBy: { createdAt: 'desc' },
+                    take: 1,
+                    include: {
+                        etapes: {
+                            where: { statut: { in: ['EN_COURS', 'TERMINE'] } },
+                            orderBy: { numeroEtape: 'desc' },
+                            take: 1,
+                        }
+                    }
+                },
+            },
+        });
+    }
     async findAll() {
         return this.prisma.vehicle.findMany({
             include: {

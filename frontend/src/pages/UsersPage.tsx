@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { usersApi } from '../services/api';
+import { usersApi } from '../features/users/services/users.api';
 import { Container, Box, CircularProgress, Alert, Snackbar } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 
-import UsersHeader from '../components/users/UsersHeader';
-import UsersList from '../components/users/UsersList';
-import UserCreationDialog from '../components/users/UserCreationDialog';
+import UsersHeader from '../features/users/components/UsersHeader';
+import UsersList from '../features/users/components/UsersList';
+import UserCreationDialog from '../features/users/components/UserCreationDialog';
 
 export default function UsersPage() {
   const queryClient = useQueryClient();

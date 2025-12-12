@@ -25,6 +25,9 @@ let VehiclesController = class VehiclesController {
     create(createVehicleDto) {
         return this.vehiclesService.create(createVehicleDto);
     }
+    search(q) {
+        return this.vehiclesService.search(q);
+    }
     findAll() {
         return this.vehiclesService.findAll();
     }
@@ -46,6 +49,13 @@ __decorate([
     __metadata("design:paramtypes", [create_vehicle_dto_1.CreateVehicleDto]),
     __metadata("design:returntype", void 0)
 ], VehiclesController.prototype, "create", null);
+__decorate([
+    (0, common_1.Get)('search'),
+    __param(0, (0, common_1.Query)('q')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], VehiclesController.prototype, "search", null);
 __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),

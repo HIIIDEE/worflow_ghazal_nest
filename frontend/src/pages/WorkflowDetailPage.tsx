@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { workflowsApi, type WorkflowEtape } from '../services/api';
+import { workflowsApi } from '../features/workflows/services/workflows.api';
+import type { WorkflowEtape } from '../features/workflows/types';
 import { Container, Box, CircularProgress, Alert } from '@mui/material';
 
-import WorkflowHeader from '../components/workflow/WorkflowHeader';
-import WorkflowProgress from '../components/workflow/WorkflowProgress';
-import WorkflowSteps from '../components/workflow/WorkflowSteps';
-import WorkflowValidationDialog from '../components/workflow/WorkflowValidationDialog';
+import WorkflowHeader from '../features/workflows/components/WorkflowHeader';
+import WorkflowProgress from '../features/workflows/components/WorkflowProgress';
+import WorkflowSteps from '../features/workflows/components/WorkflowSteps';
+import { useAuth } from '../context/AuthContext';
+import { useEtapePermissions } from '../hooks/useEtapePermissions';
 
 export default function WorkflowDetailPage() {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
-  const [openDialog, setOpenDialog] = useState(false);
+  const { user } = useAuth();
   const [selectedEtape, setSelectedEtape] = useState<WorkflowEtape | null>(null);
   const [formData, setFormData] = useState<any>({});
 
@@ -25,26 +27,32 @@ export default function WorkflowDetailPage() {
     enabled: !!id,
   });
 
+  // Récupérer les permissions de l'utilisateur pour ce workflow
+  const { data: permissions, isLoading: isLoadingPermissions } = useEtapePermissions(id);
+
   const updateEtapeMutation = useMutation({
     mutationFn: ({ numeroEtape, data }: { numeroEtape: number; data: any }) =>
       workflowsApi.updateEtape(id!, numeroEtape, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workflow', id] });
-      handleCloseDialog();
+      queryClient.invalidateQueries({ queryKey: ['workflows'] });
+      handleCloseForm();
     },
   });
 
-  const handleOpenDialog = (etape: WorkflowEtape) => {
+  const handleEditStep = (etape: WorkflowEtape) => {
     setSelectedEtape(etape);
     setFormData({
       commentaires: etape.commentaires || '',
       validePar: etape.validePar || '',
+      technicienId: (etape as any).technicienId || '',
+      signatureGestionnaire: (etape as any).signatureGestionnaire || '',
+      signatureTechnicien: (etape as any).signatureTechnicien || '',
+      formulaireData: etape.formulaire || {},
     });
-    setOpenDialog(true);
   };
 
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
+  const handleCloseForm = () => {
     setSelectedEtape(null);
     setFormData({});
   };
@@ -69,15 +77,19 @@ export default function WorkflowDetailPage() {
         dateFin: new Date().toISOString(),
         commentaires: formData.commentaires,
         validePar: formData.validePar,
+        technicienId: formData.technicienId || null,
+        signatureGestionnaire: formData.signatureGestionnaire || null,
+        signatureTechnicien: formData.signatureTechnicien || null,
+        formulaire: formData.formulaireData || {},
       },
     });
   };
 
-  const handleFormChange = (field: string, value: string) => {
+  const handleFormChange = (field: string, value: any) => {
     setFormData((prev: any) => ({ ...prev, [field]: value }));
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingPermissions) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
         <CircularProgress />
@@ -114,19 +126,18 @@ export default function WorkflowDetailPage() {
 
         <WorkflowSteps
           etapes={workflow.etapes}
+          vehicle={workflow.vehicle}
           onStartEtape={handleStartEtape}
-          onOpenDialog={handleOpenDialog}
+          onEditStep={handleEditStep}
           isMutationPending={updateEtapeMutation.isPending}
-        />
-
-        <WorkflowValidationDialog
-          open={openDialog}
+          permissions={permissions}
+          userRole={user?.role}
+          // Inline form props
           selectedEtape={selectedEtape}
           formData={formData}
-          onClose={handleCloseDialog}
-          onSubmit={handleCompleteEtape}
           onChange={handleFormChange}
-          isPending={updateEtapeMutation.isPending}
+          onSubmit={handleCompleteEtape}
+          onCancel={handleCloseForm}
         />
       </Container>
     </Box>

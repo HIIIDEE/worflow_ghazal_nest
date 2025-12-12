@@ -7,6 +7,9 @@ class UpdateEtapeDto {
     dateDebut;
     dateFin;
     validePar;
+    technicienId;
+    signatureGestionnaire;
+    signatureTechnicien;
     commentaires;
 }
 exports.UpdateEtapeDto = UpdateEtapeDto;

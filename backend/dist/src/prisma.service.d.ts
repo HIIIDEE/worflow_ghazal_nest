@@ -11,5 +11,6 @@ export declare class PrismaService implements OnModuleInit, OnModuleDestroy {
     get workflow(): import("@prisma/client").Prisma.WorkflowDelegate<import("@prisma/client/runtime/client").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     get workflowEtape(): import("@prisma/client").Prisma.WorkflowEtapeDelegate<import("@prisma/client/runtime/client").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     get etapeDefinition(): import("@prisma/client").Prisma.EtapeDefinitionDelegate<import("@prisma/client/runtime/client").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get etapePermission(): import("@prisma/client").Prisma.EtapePermissionDelegate<import("@prisma/client/runtime/client").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     get historiqueModification(): import("@prisma/client").Prisma.HistoriqueModificationDelegate<import("@prisma/client/runtime/client").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
 }

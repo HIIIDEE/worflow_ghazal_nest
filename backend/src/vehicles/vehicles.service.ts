@@ -22,6 +22,34 @@ export class VehiclesService {
     return vehicle;
   }
 
+  async search(query: string) {
+    if (!query || query.length < 2) {
+      return [];
+    }
+
+    return this.prisma.vehicle.findMany({
+      where: {
+        OR: [
+          { numeroSerie: { contains: query, mode: 'insensitive' } },
+          { immatriculation: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+      include: {
+        workflows: {
+          orderBy: { createdAt: 'desc' },
+          take: 1, // Only get the latest workflow to show current status
+          include: {
+            etapes: {
+              where: { statut: { in: ['EN_COURS', 'TERMINE'] } },
+              orderBy: { numeroEtape: 'desc' },
+              take: 1, // Get the latest active step
+            }
+          }
+        },
+      },
+    });
+  }
+
   async findAll() {
     return this.prisma.vehicle.findMany({
       include: {

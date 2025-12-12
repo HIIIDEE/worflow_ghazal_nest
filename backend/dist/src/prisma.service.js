@@ -50,6 +50,9 @@ let PrismaService = class PrismaService {
     get etapeDefinition() {
         return this.prisma.etapeDefinition;
     }
+    get etapePermission() {
+        return this.prisma.etapePermission;
+    }
     get historiqueModification() {
         return this.prisma.historiqueModification;
     }

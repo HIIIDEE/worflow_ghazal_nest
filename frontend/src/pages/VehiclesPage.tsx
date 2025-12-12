@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { vehiclesApi } from '../services/api';
+import { vehiclesApi } from '../features/vehicles/services/vehicles.api';
 import { Container, Box, CircularProgress, Alert } from '@mui/material';
 
-import VehiclesHeader from '../components/vehicles/VehiclesHeader';
-import VehicleList from '../components/vehicles/VehicleList';
-import VehicleCreationDialog from '../components/vehicles/VehicleCreationDialog';
+import VehiclesHeader from '../features/vehicles/components/VehiclesHeader';
+import VehicleList from '../features/vehicles/components/VehicleList';
+import VehicleCreationDialog from '../features/vehicles/components/VehicleCreationDialog';
 
 export default function VehiclesPage() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     immatriculation: '',
     marque: 'FIAT',
@@ -28,7 +28,7 @@ export default function VehiclesPage() {
   });
 
   const createVehicleMutation = useMutation({
-    mutationFn: vehiclesApi.create,
+    mutationFn: (data: typeof formData) => vehiclesApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
       handleClose();
@@ -57,7 +57,7 @@ export default function VehiclesPage() {
   };
 
   const handleScanSuccess = (text: string) => {
-      setFormData(prev => ({ ...prev, numeroSerie: text }));
+    setFormData(prev => ({ ...prev, numeroSerie: text }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -87,7 +87,7 @@ export default function VehiclesPage() {
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', py: 6 }}>
       <Container maxWidth="lg">
         <VehiclesHeader onAddClick={handleOpen} />
-        
+
         <VehicleList vehicles={vehicles} />
 
         <VehicleCreationDialog

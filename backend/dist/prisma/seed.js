@@ -67,7 +67,52 @@ async function main() {
         console.log('ℹ️  L\'utilisateur admin existe déjà.');
     }
     console.log('🌱 Vérification des définitions d\'étapes...');
-    for (let i = 1; i <= 10; i++) {
+    const etapesDefinitions = [
+        {
+            numeroEtape: 1,
+            nom: 'Réception du véhicule',
+            description: 'Vérification initiale et réception du véhicule',
+            champsFormulaire: {
+                controles: [
+                    'État extérieur du véhicule',
+                    'État intérieur du véhicule',
+                    'Niveau liquide de refroidissement est-il au <<Min>>',
+                    'Niveau liquide de refroidissement est-il au <<Max>>',
+                    'Niveau carburant est-il suffisant pour déplacement véhicule'
+                ],
+                champs: [
+                    { nom: 'kilometrage', label: 'Kilométrage (km) du véhicule', type: 'number', required: true }
+                ]
+            }
+        }
+    ];
+    for (const etapeDef of etapesDefinitions) {
+        const etape = await prisma.etapeDefinition.findUnique({
+            where: { numeroEtape: etapeDef.numeroEtape },
+        });
+        if (!etape) {
+            await prisma.etapeDefinition.create({
+                data: {
+                    ...etapeDef,
+                    ordre: etapeDef.numeroEtape,
+                    estObligatoire: true,
+                },
+            });
+            console.log(`✅ Définition d'étape créée: ${etapeDef.nom}`);
+        }
+        else {
+            await prisma.etapeDefinition.update({
+                where: { numeroEtape: etapeDef.numeroEtape },
+                data: {
+                    nom: etapeDef.nom,
+                    description: etapeDef.description,
+                    champsFormulaire: etapeDef.champsFormulaire,
+                },
+            });
+            console.log(`✅ Définition d'étape mise à jour: ${etapeDef.nom}`);
+        }
+    }
+    for (let i = 2; i <= 10; i++) {
         const etape = await prisma.etapeDefinition.findUnique({
             where: { numeroEtape: i },
         });
@@ -86,6 +131,52 @@ async function main() {
         }
     }
     console.log('✅ Vérification des étapes terminée.');
+    console.log('🌱 Configuration des permissions pour l\'admin...');
+    const admin = await prisma.user.findUnique({
+        where: { email: adminEmail },
+    });
+    if (admin) {
+        const allEtapes = await prisma.etapeDefinition.findMany();
+        const allPermissions = [
+            client_1.PermissionType.VIEW,
+            client_1.PermissionType.START,
+            client_1.PermissionType.EDIT,
+            client_1.PermissionType.VALIDATE,
+            client_1.PermissionType.EDIT_COMPLETED,
+        ];
+        let permissionsCreated = 0;
+        let permissionsExisting = 0;
+        for (const etape of allEtapes) {
+            for (const permType of allPermissions) {
+                const existingPerm = await prisma.etapePermission.findUnique({
+                    where: {
+                        etapeDefinitionId_userId_permissionType: {
+                            etapeDefinitionId: etape.id,
+                            userId: admin.id,
+                            permissionType: permType,
+                        },
+                    },
+                });
+                if (!existingPerm) {
+                    await prisma.etapePermission.create({
+                        data: {
+                            etapeDefinitionId: etape.id,
+                            userId: admin.id,
+                            permissionType: permType,
+                        },
+                    });
+                    permissionsCreated++;
+                }
+                else {
+                    permissionsExisting++;
+                }
+            }
+        }
+        console.log(`✅ Permissions configurées pour l'admin:`);
+        console.log(`   - ${permissionsCreated} permissions créées`);
+        console.log(`   - ${permissionsExisting} permissions déjà existantes`);
+    }
+    console.log('✅ Seed terminé avec succès!');
 }
 main()
     .catch((e) => {

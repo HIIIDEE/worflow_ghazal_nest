@@ -7,11 +7,19 @@ import { PrismaService } from './prisma.service';
 import { UsersModule } from './users/users.module';
 import { TechniciensModule } from './techniciens/techniciens.module';
 import { AuthModule } from './auth/auth.module';
+import { EtapeDefinitionsModule } from './etape-definitions/etape-definitions.module';
 
 @Module({
-  imports: [VehiclesModule, WorkflowsModule, UsersModule, TechniciensModule, AuthModule],
+  imports: [
+    VehiclesModule,
+    WorkflowsModule,
+    UsersModule,
+    TechniciensModule,
+    AuthModule,
+    EtapeDefinitionsModule,
+  ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
   exports: [PrismaService],
 })
-export class AppModule { }
+export class AppModule {}

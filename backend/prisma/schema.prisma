@@ -8,29 +8,32 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  nom       String
-  prenom    String
-  role      UserRole @default(GESTIONNAIRE)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                     String              @id @default(uuid())
+  email                  String              @unique
+  password               String
+  nom                    String
+  prenom                 String
+  role                   UserRole            @default(GESTIONNAIRE)
+  isActive               Boolean             @default(true)
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  etapePermissions       EtapePermission[]
+  workflowEtapesValidees WorkflowEtape[]
 
   @@map("users")
 }
 
 model Technicien {
-  id         String   @id @default(uuid())
-  nom        String
-  prenom     String
-  telephone  String?
-  email      String?
-  specialite String?
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id             String          @id @default(uuid())
+  nom            String
+  prenom         String
+  telephone      String?
+  email          String?
+  specialite     String?
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  workflowEtapes WorkflowEtape[]
 
   @@map("techniciens")
 }
@@ -65,37 +68,60 @@ model Workflow {
 }
 
 model WorkflowEtape {
-  id           String      @id @default(uuid())
-  workflowId   String
-  numeroEtape  Int
-  nomEtape     String
-  description  String?
-  statut       EtapeStatus @default(EN_ATTENTE)
-  formulaire   Json?
-  dateDebut    DateTime?
-  dateFin      DateTime?
-  validePar    String?
-  commentaires String?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  workflow     Workflow    @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  id                    String      @id @default(uuid())
+  workflowId            String
+  numeroEtape           Int
+  nomEtape              String
+  description           String?
+  statut                EtapeStatus @default(EN_ATTENTE)
+  formulaire            Json?
+  dateDebut             DateTime?
+  dateFin               DateTime?
+  validePar             String?
+  valideParId           String?
+  technicienId          String?
+  signatureGestionnaire String?     @db.Text
+  signatureTechnicien   String?     @db.Text
+  commentaires          String?
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+  workflow              Workflow    @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  valideParUser         User?       @relation(fields: [valideParId], references: [id], onDelete: SetNull)
+  technicien            Technicien? @relation(fields: [technicienId], references: [id], onDelete: SetNull)
 
   @@unique([workflowId, numeroEtape])
   @@map("workflow_etapes")
 }
 
 model EtapeDefinition {
-  id               String   @id @default(uuid())
-  numeroEtape      Int      @unique
+  id               String            @id @default(uuid())
+  numeroEtape      Int               @unique
   nom              String
   description      String?
   champsFormulaire Json?
-  ordre            Int      @default(0)
-  estObligatoire   Boolean  @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  ordre            Int               @default(0)
+  estObligatoire   Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  permissions      EtapePermission[]
 
   @@map("etape_definitions")
+}
+
+model EtapePermission {
+  id                String          @id @default(uuid())
+  etapeDefinitionId String
+  userId            String
+  permissionType    PermissionType
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  etapeDefinition   EtapeDefinition @relation(fields: [etapeDefinitionId], references: [id], onDelete: Cascade)
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([etapeDefinitionId, userId, permissionType])
+  @@index([userId, etapeDefinitionId])
+  @@index([permissionType])
+  @@map("etape_permissions")
 }
 
 model HistoriqueModification {
@@ -128,4 +154,12 @@ enum EtapeStatus {
   EN_COURS
   TERMINE
   BLOQUE
+}
+
+enum PermissionType {
+  VIEW
+  START
+  EDIT
+  VALIDATE
+  EDIT_COMPLETED
 }

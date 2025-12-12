@@ -18,6 +18,8 @@ const workflows_service_1 = require("./workflows.service");
 const create_workflow_dto_1 = require("./dto/create-workflow.dto");
 const update_workflow_dto_1 = require("./dto/update-workflow.dto");
 const update_etape_dto_1 = require("./dto/update-etape.dto");
+const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
+const current_user_decorator_1 = require("../common/decorators/current-user.decorator");
 let WorkflowsController = class WorkflowsController {
     workflowsService;
     constructor(workflowsService) {
@@ -29,17 +31,22 @@ let WorkflowsController = class WorkflowsController {
     findAll() {
         return this.workflowsService.findAll();
     }
-    findOne(id) {
-        return this.workflowsService.findOne(id);
+    findOne(id, user) {
+        return this.workflowsService.findOneWithPermissions(id, user.userId, user.role);
     }
-    getEtapes(id) {
-        return this.workflowsService.getEtapesByWorkflow(id);
+    async getEtapes(id, user) {
+        const workflow = await this.workflowsService.findOneWithPermissions(id, user.userId, user.role);
+        return workflow?.etapes || [];
+    }
+    getUserPermissions(id, user) {
+        return this.workflowsService.getUserPermissionsForWorkflow(id, user.userId, user.role);
     }
     update(id, updateWorkflowDto) {
         return this.workflowsService.update(id, updateWorkflowDto);
     }
-    updateEtape(id, numeroEtape, updateEtapeDto) {
-        return this.workflowsService.updateEtape(id, parseInt(numeroEtape), updateEtapeDto);
+    async updateEtape(id, numeroEtape, updateEtapeDto, user) {
+        await this.workflowsService.validateEtapeUpdate(id, parseInt(numeroEtape), updateEtapeDto, user.userId, user.role);
+        return this.workflowsService.updateEtape(id, parseInt(numeroEtape), updateEtapeDto, user.userId);
     }
     remove(id) {
         return this.workflowsService.remove(id);
@@ -62,17 +69,27 @@ __decorate([
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], WorkflowsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Get)(':id/etapes'),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
 ], WorkflowsController.prototype, "getEtapes", null);
+__decorate([
+    (0, common_1.Get)(':id/user-permissions'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], WorkflowsController.prototype, "getUserPermissions", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Param)('id')),
@@ -86,9 +103,10 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Param)('numeroEtape')),
     __param(2, (0, common_1.Body)()),
+    __param(3, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, update_etape_dto_1.UpdateEtapeDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, String, update_etape_dto_1.UpdateEtapeDto, Object]),
+    __metadata("design:returntype", Promise)
 ], WorkflowsController.prototype, "updateEtape", null);
 __decorate([
     (0, common_1.Delete)(':id'),
@@ -99,6 +117,7 @@ __decorate([
 ], WorkflowsController.prototype, "remove", null);
 exports.WorkflowsController = WorkflowsController = __decorate([
     (0, common_1.Controller)('workflows'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:paramtypes", [workflows_service_1.WorkflowsService])
 ], WorkflowsController);
 //# sourceMappingURL=workflows.controller.js.map

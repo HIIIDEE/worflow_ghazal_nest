@@ -1,13 +1,15 @@
-import { Container, Typography, Card, CardContent, CardActionArea, Box, Grid, Paper, Avatar } from '@mui/material';
+import { Container, Typography, Card, CardActionArea, Box, Grid, Paper, Avatar } from '@mui/material';
 import { Link } from 'react-router-dom';
 import PeopleIcon from '@mui/icons-material/People';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import LockPersonIcon from '@mui/icons-material/LockPerson';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useAuth } from '../context/AuthContext';
 
 const MenuCard = ({ title, description, icon: Icon, to, color }: { title: string, description: string, icon: any, to: string, color: string }) => (
-  <Grid item xs={12} sm={6} md={3}>
+  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
     <Card 
       elevation={0}
       className="card-hover"
@@ -59,6 +61,8 @@ const MenuCard = ({ title, description, icon: Icon, to, color }: { title: string
 );
 
 export default function HomePage() {
+  const { user } = useAuth();
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', py: 8 }}>
       <Container maxWidth="xl">
@@ -75,34 +79,43 @@ export default function HomePage() {
         </Box>
 
         <Grid container spacing={3}>
-          <MenuCard 
-            title="Utilisateurs" 
+          <MenuCard
+            title="Utilisateurs"
             description="Gérer les accès, les rôles et les profils des utilisateurs du système."
-            icon={PeopleIcon} 
-            to="/users" 
+            icon={PeopleIcon}
+            to="/users"
             color="#2563eb"
           />
-          <MenuCard 
-            title="Techniciens" 
+          <MenuCard
+            title="Techniciens"
             description="Administrer l'équipe technique et les assignations."
-            icon={EngineeringIcon} 
-            to="/techniciens" 
+            icon={EngineeringIcon}
+            to="/techniciens"
             color="#059669"
           />
-          <MenuCard 
-            title="Véhicules" 
+          <MenuCard
+            title="Véhicules"
             description="Suivi du parc automobile et historique des transformations."
-            icon={DirectionsCarIcon} 
-            to="/vehicles" 
+            icon={DirectionsCarIcon}
+            to="/vehicles"
             color="#d97706"
           />
-          <MenuCard 
-            title="Workflows" 
+          <MenuCard
+            title="Workflows"
             description="Pilotage des processus de transformation étape par étape."
-            icon={AccountTreeIcon} 
-            to="/workflows" 
+            icon={AccountTreeIcon}
+            to="/workflows"
             color="#7c3aed"
           />
+          {user?.role === 'ADMIN' && (
+            <MenuCard
+              title="Permissions"
+              description="Configurer les permissions d'accès pour chaque étape du workflow."
+              icon={LockPersonIcon}
+              to="/admin/etape-permissions"
+              color="#dc2626"
+            />
+          )}
         </Grid>
 
         <Paper sx={{ mt: 6, p: 4, borderRadius: 4, bgcolor: '#ffffff', border: '1px solid #e2e8f0' }} elevation={0}>
@@ -110,19 +123,19 @@ export default function HomePage() {
             Aperçu rapide
           </Typography>
           <Grid container spacing={4} sx={{ mt: 1 }}>
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <Box sx={{ p: 2, bgcolor: '#f1f5f9', borderRadius: 2 }}>
                 <Typography variant="subtitle2" color="text.secondary">Workflows en cours</Typography>
                 <Typography variant="h4" fontWeight="bold" color="primary">--</Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <Box sx={{ p: 2, bgcolor: '#f1f5f9', borderRadius: 2 }}>
                 <Typography variant="subtitle2" color="text.secondary">Véhicules enregistrés</Typography>
                 <Typography variant="h4" fontWeight="bold" sx={{ color: '#059669' }}>--</Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <Box sx={{ p: 2, bgcolor: '#f1f5f9', borderRadius: 2 }}>
                 <Typography variant="subtitle2" color="text.secondary">Techniciens actifs</Typography>
                 <Typography variant="h4" fontWeight="bold" sx={{ color: '#d97706' }}>--</Typography>

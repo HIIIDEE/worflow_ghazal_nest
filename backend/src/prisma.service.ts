@@ -52,6 +52,10 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return this.prisma.etapeDefinition;
   }
 
+  get etapePermission() {
+    return this.prisma.etapePermission;
+  }
+
   get historiqueModification() {
     return this.prisma.historiqueModification;
   }

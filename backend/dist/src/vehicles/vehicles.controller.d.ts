@@ -14,16 +14,57 @@ export declare class VehiclesController {
         annee: number;
         numeroSerie: string;
     }>;
+    search(q: string): Promise<({
+        workflows: ({
+            etapes: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                numeroEtape: number;
+                description: string | null;
+                workflowId: string;
+                nomEtape: string;
+                statut: import("@prisma/client").$Enums.EtapeStatus;
+                formulaire: import("@prisma/client/runtime/client").JsonValue | null;
+                dateDebut: Date | null;
+                dateFin: Date | null;
+                validePar: string | null;
+                valideParId: string | null;
+                technicienId: string | null;
+                signatureGestionnaire: string | null;
+                signatureTechnicien: string | null;
+                commentaires: string | null;
+            }[];
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            statut: import("@prisma/client").$Enums.WorkflowStatus;
+            dateDebut: Date;
+            dateFin: Date | null;
+            vehicleId: string;
+            etapeActuelle: number;
+        })[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        immatriculation: string;
+        marque: string;
+        modele: string;
+        annee: number;
+        numeroSerie: string;
+    })[]>;
     findAll(): Promise<({
         workflows: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            vehicleId: string;
             statut: import("@prisma/client").$Enums.WorkflowStatus;
-            etapeActuelle: number;
             dateDebut: Date;
             dateFin: Date | null;
+            vehicleId: string;
+            etapeActuelle: number;
         }[];
     } & {
         id: string;
@@ -43,24 +84,28 @@ export declare class VehiclesController {
                 updatedAt: Date;
                 numeroEtape: number;
                 description: string | null;
-                statut: import("@prisma/client").$Enums.EtapeStatus;
-                dateDebut: Date | null;
-                dateFin: Date | null;
                 workflowId: string;
                 nomEtape: string;
+                statut: import("@prisma/client").$Enums.EtapeStatus;
                 formulaire: import("@prisma/client/runtime/client").JsonValue | null;
+                dateDebut: Date | null;
+                dateFin: Date | null;
                 validePar: string | null;
+                valideParId: string | null;
+                technicienId: string | null;
+                signatureGestionnaire: string | null;
+                signatureTechnicien: string | null;
                 commentaires: string | null;
             }[];
         } & {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            vehicleId: string;
             statut: import("@prisma/client").$Enums.WorkflowStatus;
-            etapeActuelle: number;
             dateDebut: Date;
             dateFin: Date | null;
+            vehicleId: string;
+            etapeActuelle: number;
         })[];
     } & {
         id: string;

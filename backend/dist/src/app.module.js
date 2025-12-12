@@ -16,12 +16,20 @@ const prisma_service_1 = require("./prisma.service");
 const users_module_1 = require("./users/users.module");
 const techniciens_module_1 = require("./techniciens/techniciens.module");
 const auth_module_1 = require("./auth/auth.module");
+const etape_definitions_module_1 = require("./etape-definitions/etape-definitions.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [vehicles_module_1.VehiclesModule, workflows_module_1.WorkflowsModule, users_module_1.UsersModule, techniciens_module_1.TechniciensModule, auth_module_1.AuthModule],
+        imports: [
+            vehicles_module_1.VehiclesModule,
+            workflows_module_1.WorkflowsModule,
+            users_module_1.UsersModule,
+            techniciens_module_1.TechniciensModule,
+            auth_module_1.AuthModule,
+            etape_definitions_module_1.EtapeDefinitionsModule,
+        ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService, prisma_service_1.PrismaService],
         exports: [prisma_service_1.PrismaService],
