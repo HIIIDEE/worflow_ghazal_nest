@@ -42,8 +42,8 @@ async function main() {
     const etapesDefinitions = [
         {
             numeroEtape: 1,
-            nom: 'Réception du véhicule',
-            description: 'Vérification initiale et réception du véhicule',
+            nom: 'Reception',
+            description: 'Inspection visuelle, controles de reception et releve du kilometrage',
             champsFormulaire: {
                 controles: [
                     'État extérieur du véhicule',
@@ -56,6 +56,60 @@ async function main() {
                     { nom: 'kilometrage', label: 'Kilométrage (km) du véhicule', type: 'number', required: true }
                 ]
             }
+        },
+        {
+            numeroEtape: 2,
+            nom: 'Demontage',
+            description: 'Demontage des elements necessaires pour l\'installation GPL',
+            champsFormulaire: {}
+        },
+        {
+            numeroEtape: 3,
+            nom: 'Fixation Reservoir',
+            description: 'Installation et fixation du reservoir GPL',
+            champsFormulaire: {}
+        },
+        {
+            numeroEtape: 4,
+            nom: 'Compartiment Moteur',
+            description: 'Installation des composants dans le compartiment moteur',
+            champsFormulaire: {}
+        },
+        {
+            numeroEtape: 5,
+            nom: 'Raccordement',
+            description: 'Raccordement des tuyaux et connexions',
+            champsFormulaire: {}
+        },
+        {
+            numeroEtape: 6,
+            nom: 'Finition',
+            description: 'Finitions et remontage des elements',
+            champsFormulaire: {}
+        },
+        {
+            numeroEtape: 7,
+            nom: 'Verification avant controle',
+            description: 'Verifications avant le controle final',
+            champsFormulaire: {}
+        },
+        {
+            numeroEtape: 8,
+            nom: 'Controle Final',
+            description: 'Controle complet de tous les composants',
+            champsFormulaire: {}
+        },
+        {
+            numeroEtape: 9,
+            nom: 'Test d\'Etancheite',
+            description: 'Test d\'etancheite de l\'installation',
+            champsFormulaire: {}
+        },
+        {
+            numeroEtape: 10,
+            nom: 'Test sur Route',
+            description: 'Test sur route et validation finale',
+            champsFormulaire: {}
         }
     ];
 
@@ -84,27 +138,6 @@ async function main() {
                 },
             });
             console.log(`✅ Définition d'étape mise à jour: ${etapeDef.nom}`);
-        }
-    }
-
-    // Créer les étapes génériques pour les étapes 2-10 si elles n'existent pas
-    for (let i = 2; i <= 10; i++) {
-        const etape = await prisma.etapeDefinition.findUnique({
-            where: { numeroEtape: i },
-        });
-
-        if (!etape) {
-            await prisma.etapeDefinition.create({
-                data: {
-                    numeroEtape: i,
-                    nom: `Étape ${i}`,
-                    description: `Description générique pour l'étape ${i}. À configurer.`,
-                    ordre: i,
-                    estObligatoire: true,
-                    champsFormulaire: {},
-                },
-            });
-            console.log(`✅ Définition d'étape créée: Étape ${i}`);
         }
     }
 

@@ -28,7 +28,7 @@ import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../stores/useAuthStore';
 
 const drawerWidth = 280;
 

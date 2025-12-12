@@ -15,9 +15,18 @@ import { useQuery } from '@tanstack/react-query';
 import type { WorkflowEtape } from '../types';
 import { techniciensApi } from '../../techniciens/services/techniciens.api';
 import Etape1Form from './forms/Etape1Form';
+import Etape2Form from './forms/Etape2Form';
+import Etape3Form from './forms/Etape3Form';
+import Etape4Form from './forms/Etape4Form';
+import Etape5Form from './forms/Etape5Form';
+import Etape6Form from './forms/Etape6Form';
+import Etape7Form from './forms/Etape7Form';
+import Etape8Form from './forms/Etape8Form';
+import Etape9Form from './forms/Etape9Form';
+import Etape10Form from './forms/Etape10Form';
 import SignaturePad from './SignaturePad';
 import { useCanEditEtape } from '../../../hooks/useEtapePermissions';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../../stores/useAuthStore';
 
 interface WorkflowStepFormProps {
     etape: WorkflowEtape;
@@ -61,6 +70,42 @@ export default function WorkflowStepForm({
         onChange('formulaireData', data);
     };
 
+    const handleEtape2Change = (data: any) => {
+        onChange('formulaireData', data);
+    };
+
+    const handleEtape3Change = (data: any) => {
+        onChange('formulaireData', data);
+    };
+
+    const handleEtape4Change = (data: any) => {
+        onChange('formulaireData', data);
+    };
+
+    const handleEtape5Change = (data: any) => {
+        onChange('formulaireData', data);
+    };
+
+    const handleEtape6Change = (data: any) => {
+        onChange('formulaireData', data);
+    };
+
+    const handleEtape7Change = (data: any) => {
+        onChange('formulaireData', data);
+    };
+
+    const handleEtape8Change = (data: any) => {
+        onChange('formulaireData', data);
+    };
+
+    const handleEtape9Change = (data: any) => {
+        onChange('formulaireData', data);
+    };
+
+    const handleEtape10Change = (data: any) => {
+        onChange('formulaireData', data);
+    };
+
     const isFormValid = () => {
         if (etape.numeroEtape === 1) {
             const data = formData.formulaireData || {};
@@ -73,6 +118,135 @@ export default function WorkflowStepForm({
                 'Niveau carburant est-il suffisant pour déplacement véhicule'
             ].every(c => controles[c] === true);
             return allChecked && data.kilometrage && data.kilometrage > 0;
+        }
+        if (etape.numeroEtape === 2) {
+            const data = formData.formulaireData || {};
+            const demontages = data.demontages || {};
+            const allChecked = [
+                'Démontage garde-boue arrière',
+                'Démontage roue de secours',
+                'Démontage des vis garde-boue avant',
+                'Démontage filtre à air'
+            ].every(d => demontages[d] === true);
+            return allChecked;
+        }
+        if (etape.numeroEtape === 3) {
+            const data = formData.formulaireData || {};
+            const controles = data.controles || {};
+            const allChecked = [
+                'Couple de serrage support Détendeur',
+                'Branchement entrée eau détendeur',
+                'Branchement sortie eau détendeur',
+                'Branchement sortie Gaz détendeur',
+                'Raccordement « T » eau',
+                'Serrages colliers',
+                'Déménage tapis coffre',
+                'Perçage trou de fixation du réservoir',
+                "Application de l'antirouille",
+                'Perçage trou de fixation bouchon de remplissage',
+            ].every(c => controles[c] === true);
+            return allChecked;
+        }
+        if (etape.numeroEtape === 4) {
+            const data = formData.formulaireData || {};
+            const controles = data.controles || {};
+            const allChecked = [
+                "Perçage collecteur d'admission",
+                'Montage buse collecteur',
+                'Fixation rail injecteur couple de serrage',
+                "Branchement des tuyaux d'injecteurs",
+                'Raccordement tuyau de gaz au détendeur',
+                'Montage de la buse de compensation',
+                'Fixation support de remplissage',
+                'Couple de serrage rail d\'injecteurs sur le support',
+                'Fixation bouchon de remplissage',
+                'Raccordement cuivre Ø8 à la prise de remplissage',
+                'Serrage Raccordement cuivre Ø8 au couple',
+            ].every(c => controles[c] === true);
+            return allChecked;
+        }
+        if (etape.numeroEtape === 5) {
+            const data = formData.formulaireData || {};
+            const controles = data.controles || {};
+            const allChecked = [
+                'Couple de serrage réservoir',
+                'Couple serrage cuivre Ø6',
+                'Couple serrage cuivre Ø8',
+                'Passage du tuyau en cuivre Ø6',
+                "Passage fil d'indication de niveau",
+                'Raccordement de cuivre Ø6 et Ø8 ou réservoir',
+                'Montage réservoir',
+            ].every(c => controles[c] === true);
+            return allChecked;
+        }
+        if (etape.numeroEtape === 6) {
+            const data = formData.formulaireData || {};
+            const controles = data.controles || {};
+            const allChecked = [
+                'Montage centrale GPL',
+                'Couple de serrage central',
+                'Montage faisceaux électriques',
+                'Passage commutateur',
+                'Perçage commutateur',
+                'Branchement des fils de OBD',
+                'Remontage le tapis coffre',
+                'Remise en place de la roue de secours',
+                "Fixation de l'extincteur",
+                'Montage plaque GPL',
+            ].every(c => controles[c] === true);
+            return allChecked;
+        }
+        if (etape.numeroEtape === 7) {
+            const data = formData.formulaireData || {};
+            const controles = data.controles || {};
+            const allChecked = [
+                "Faire l'appoint du liquide de refroidissement",
+                "Teste d'étanchéité",
+                'Remplissage',
+                'Poly vanne',
+                'Cuivre Ø 8',
+                'Cuivre Ø 6',
+                'Détendeur',
+                'Électrovanne gaz',
+                'Régime moteur stable au ralenti',
+                'Absence de check au tableau de bord',
+            ].every(c => controles[c] === true);
+            return allChecked;
+        }
+        if (etape.numeroEtape === 8) {
+            const data = formData.formulaireData || {};
+            // Vérifier que toutes les sections sont complètes
+            const sections = ['electrovanne', 'detendeur', 'centrale', 'capteurPression', 'branchement', 'commutateur', 'reservoir', 'remplissage', 'tuyauterieHP'];
+            return sections.every(section => {
+                const sectionData = data[section] || {};
+                return Object.keys(sectionData).length > 0 && Object.values(sectionData).every(v => v === true);
+            });
+        }
+        if (etape.numeroEtape === 9) {
+            const data = formData.formulaireData || {};
+            const controles = data.controles || {};
+            const allChecked = [
+                'Remplissage',
+                'Poly vanne',
+                'Cuivre Ø 8',
+                'Cuivre Ø 6',
+                'Branchement détendeur',
+                'Électrovanne gaz',
+            ].every(c => controles[c] === true);
+            return allChecked;
+        }
+        if (etape.numeroEtape === 10) {
+            const data = formData.formulaireData || {};
+            const controles = data.controles || {};
+            const allChecked = [
+                'Test Accélération',
+                'Test Décélération',
+                'Série cut off',
+                "Série d'accélération et décélération",
+                'Véhicule au point mort (sans charge moteur)',
+                'Véhicule au point mort (avec charge moteur)',
+            ].every(c => controles[c] === true);
+            return allChecked;
         }
         return true;
     };
@@ -90,6 +264,123 @@ export default function WorkflowStepForm({
                         <Etape1Form
                             formData={formData.formulaireData || {}}
                             onChange={handleEtape1Change}
+                            disabled={!canEdit || isPending}
+                        />
+                    </Paper>
+                </Box>
+            )}
+
+            {etape.numeroEtape === 2 && (
+                <Box sx={{ mb: 4 }}>
+                    <Paper elevation={0} sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: 2, bgcolor: '#f8fafc' }}>
+                        <Typography variant="subtitle2" gutterBottom fontWeight="bold">Opérations de Démontage</Typography>
+                        <Etape2Form
+                            formData={formData.formulaireData || {}}
+                            onChange={handleEtape2Change}
+                            disabled={!canEdit || isPending}
+                        />
+                    </Paper>
+                </Box>
+            )}
+
+            {etape.numeroEtape === 3 && (
+                <Box sx={{ mb: 4 }}>
+                    <Paper elevation={0} sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: 2, bgcolor: '#f8fafc' }}>
+                        <Typography variant="subtitle2" gutterBottom fontWeight="bold">Fixation Réservoir</Typography>
+                        <Etape3Form
+                            formData={formData.formulaireData || {}}
+                            onChange={handleEtape3Change}
+                            disabled={!canEdit || isPending}
+                        />
+                    </Paper>
+                </Box>
+            )}
+
+            {etape.numeroEtape === 4 && (
+                <Box sx={{ mb: 4 }}>
+                    <Paper elevation={0} sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: 2, bgcolor: '#f8fafc' }}>
+                        <Typography variant="subtitle2" gutterBottom fontWeight="bold">Compartiment Moteur</Typography>
+                        <Etape4Form
+                            formData={formData.formulaireData || {}}
+                            onChange={handleEtape4Change}
+                            disabled={!canEdit || isPending}
+                        />
+                    </Paper>
+                </Box>
+            )}
+
+            {etape.numeroEtape === 5 && (
+                <Box sx={{ mb: 4 }}>
+                    <Paper elevation={0} sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: 2, bgcolor: '#f8fafc' }}>
+                        <Typography variant="subtitle2" gutterBottom fontWeight="bold">Raccordement</Typography>
+                        <Etape5Form
+                            formData={formData.formulaireData || {}}
+                            onChange={handleEtape5Change}
+                            disabled={!canEdit || isPending}
+                        />
+                    </Paper>
+                </Box>
+            )}
+
+            {etape.numeroEtape === 6 && (
+                <Box sx={{ mb: 4 }}>
+                    <Paper elevation={0} sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: 2, bgcolor: '#f8fafc' }}>
+                        <Typography variant="subtitle2" gutterBottom fontWeight="bold">Finition</Typography>
+                        <Etape6Form
+                            formData={formData.formulaireData || {}}
+                            onChange={handleEtape6Change}
+                            disabled={!canEdit || isPending}
+                        />
+                    </Paper>
+                </Box>
+            )}
+
+            {etape.numeroEtape === 7 && (
+                <Box sx={{ mb: 4 }}>
+                    <Paper elevation={0} sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: 2, bgcolor: '#f8fafc' }}>
+                        <Typography variant="subtitle2" gutterBottom fontWeight="bold">Vérification avant contrôle</Typography>
+                        <Etape7Form
+                            formData={formData.formulaireData || {}}
+                            onChange={handleEtape7Change}
+                            disabled={!canEdit || isPending}
+                        />
+                    </Paper>
+                </Box>
+            )}
+
+            {etape.numeroEtape === 8 && (
+                <Box sx={{ mb: 4 }}>
+                    <Paper elevation={0} sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: 2, bgcolor: '#f8fafc' }}>
+                        <Typography variant="subtitle2" gutterBottom fontWeight="bold">Contrôle Final</Typography>
+                        <Etape8Form
+                            formData={formData.formulaireData || {}}
+                            onChange={handleEtape8Change}
+                            disabled={!canEdit || isPending}
+                        />
+                    </Paper>
+                </Box>
+            )}
+
+            {etape.numeroEtape === 9 && (
+                <Box sx={{ mb: 4 }}>
+                    <Paper elevation={0} sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: 2, bgcolor: '#f8fafc' }}>
+                        <Typography variant="subtitle2" gutterBottom fontWeight="bold">Test d'Étanchéité</Typography>
+                        <Etape9Form
+                            formData={formData.formulaireData || {}}
+                            onChange={handleEtape9Change}
+                            disabled={!canEdit || isPending}
+                        />
+                    </Paper>
+                </Box>
+            )}
+
+            {etape.numeroEtape === 10 && (
+                <Box sx={{ mb: 4 }}>
+                    <Paper elevation={0} sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: 2, bgcolor: '#f8fafc' }}>
+                        <Typography variant="subtitle2" gutterBottom fontWeight="bold">Test sur Route</Typography>
+                        <Etape10Form
+                            formData={formData.formulaireData || {}}
+                            onChange={handleEtape10Change}
                             disabled={!canEdit || isPending}
                         />
                     </Paper>

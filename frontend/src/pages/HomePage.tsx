@@ -6,15 +6,15 @@ import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import LockPersonIcon from '@mui/icons-material/LockPerson';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../stores/useAuthStore';
 
 const MenuCard = ({ title, description, icon: Icon, to, color }: { title: string, description: string, icon: any, to: string, color: string }) => (
   <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-    <Card 
+    <Card
       elevation={0}
       className="card-hover"
-      sx={{ 
-        height: '100%', 
+      sx={{
+        height: '100%',
         borderRadius: 4,
         background: 'white',
         border: '1px solid #e2e8f0',
@@ -23,22 +23,22 @@ const MenuCard = ({ title, description, icon: Icon, to, color }: { title: string
       }}
     >
       <CardActionArea component={Link} to={to} sx={{ height: '100%', p: 3 }}>
-        <Box sx={{ 
-          position: 'absolute', 
-          top: 0, 
-          right: 0, 
-          p: 2, 
-          opacity: 0.1 
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          p: 2,
+          opacity: 0.1
         }}>
           <Icon sx={{ fontSize: 100, color: color }} />
         </Box>
-        
-        <Avatar sx={{ 
-          bgcolor: `${color}15`, 
-          color: color, 
-          width: 56, 
-          height: 56, 
-          mb: 2 
+
+        <Avatar sx={{
+          bgcolor: `${color}15`,
+          color: color,
+          width: 56,
+          height: 56,
+          mb: 2
         }}>
           <Icon sx={{ fontSize: 30 }} />
         </Avatar>
@@ -46,7 +46,7 @@ const MenuCard = ({ title, description, icon: Icon, to, color }: { title: string
         <Typography variant="h6" component="h2" gutterBottom fontWeight="bold" sx={{ color: '#1e293b' }}>
           {title}
         </Typography>
-        
+
         <Typography variant="body2" sx={{ color: '#64748b', mb: 2, minHeight: 40 }}>
           {description}
         </Typography>

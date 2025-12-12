@@ -204,7 +204,11 @@ export default function WorkflowSteps({
                                                 variant="contained"
                                                 size="small"
                                                 startIcon={<PlayCircleOutlineIcon />}
-                                                onClick={() => onStartEtape(etape.numeroEtape)}
+                                                onClick={() => {
+                                                    onStartEtape(etape.numeroEtape);
+                                                    // Ouvrir automatiquement le formulaire après avoir démarré
+                                                    setTimeout(() => onEditStep(etape), 100);
+                                                }}
                                                 disabled={isMutationPending}
                                                 sx={{ textTransform: 'none' }}
                                             >

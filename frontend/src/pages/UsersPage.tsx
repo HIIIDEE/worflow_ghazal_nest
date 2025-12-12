@@ -8,10 +8,13 @@ import SearchIcon from '@mui/icons-material/Search';
 import UsersHeader from '../features/users/components/UsersHeader';
 import UsersList from '../features/users/components/UsersList';
 import UserCreationDialog from '../features/users/components/UserCreationDialog';
+import UserEditDialog from '../features/users/components/UserEditDialog';
+import type { User } from '../features/users/types';
 
 export default function UsersPage() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
@@ -25,6 +28,7 @@ export default function UsersPage() {
     password: '',
     role: 'GESTIONNAIRE' as 'ADMIN' | 'GESTIONNAIRE',
   });
+  const [editingUser, setEditingUser] = useState<(Partial<User> & { password?: string }) | null>(null);
 
   const { data: users, isLoading, error } = useQuery({
     queryKey: ['users'],
@@ -45,6 +49,34 @@ export default function UsersPage() {
     onError: (error) => {
       console.error('Failed to create user:', error);
       setSnackbar({ open: true, message: 'Erreur lors de la création de l\'utilisateur', severity: 'error' });
+    },
+  });
+
+  const updateUserMutation = useMutation({
+    mutationFn: async (data: { id: string; updates: Partial<User> & { password?: string } }) => {
+      return await usersApi.update(data.id, data.updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      setEditOpen(false);
+      setEditingUser(null);
+      setSnackbar({ open: true, message: 'Utilisateur modifié avec succès', severity: 'success' });
+    },
+    onError: (error) => {
+      console.error('Failed to update user:', error);
+      setSnackbar({ open: true, message: 'Erreur lors de la modification de l\'utilisateur', severity: 'error' });
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: usersApi.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      setSnackbar({ open: true, message: 'Utilisateur supprimé avec succès', severity: 'success' });
+    },
+    onError: (error) => {
+      console.error('Failed to delete user:', error);
+      setSnackbar({ open: true, message: 'Erreur lors de la suppression de l\'utilisateur', severity: 'error' });
     },
   });
 
@@ -79,6 +111,43 @@ export default function UsersPage() {
       return;
     }
     createUserMutation.mutate(newUser);
+  };
+
+  const handleEdit = (user: User) => {
+    setEditingUser({ ...user, password: '' });
+    setEditOpen(true);
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (editingUser) {
+      setEditingUser({ ...editingUser, [e.target.name]: e.target.value });
+    }
+  };
+
+  const handleEditRoleChange = (e: SelectChangeEvent) => {
+    if (editingUser) {
+      setEditingUser({ ...editingUser, role: e.target.value as User['role'] });
+    }
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser?.id || !editingUser.nom || !editingUser.prenom || !editingUser.email) {
+      setSnackbar({ open: true, message: 'Veuillez remplir tous les champs obligatoires', severity: 'error' });
+      return;
+    }
+    const { id, ...updates } = editingUser;
+    // Remove password if empty
+    if (!updates.password) {
+      delete updates.password;
+    }
+    updateUserMutation.mutate({ id, updates });
+  };
+
+  const handleDelete = (user: User) => {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.prenom} ${user.nom} ?`)) {
+      deleteUserMutation.mutate(user.id);
+    }
   };
 
   if (isLoading) {
@@ -127,7 +196,7 @@ export default function UsersPage() {
           />
         </Box>
 
-        <UsersList users={filteredUsers} />
+        <UsersList users={filteredUsers} onEdit={handleEdit} onDelete={handleDelete} />
 
         <UserCreationDialog
           open={open}
@@ -137,6 +206,16 @@ export default function UsersPage() {
           onChange={handleChange}
           onRoleChange={handleRoleChange}
           isPending={createUserMutation.isPending}
+        />
+
+        <UserEditDialog
+          open={editOpen}
+          user={editingUser}
+          onClose={() => setEditOpen(false)}
+          onSubmit={handleEditSubmit}
+          onChange={handleEditChange}
+          onRoleChange={handleEditRoleChange}
+          isPending={updateUserMutation.isPending}
         />
 
         <Snackbar

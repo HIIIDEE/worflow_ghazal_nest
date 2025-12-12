@@ -22,9 +22,11 @@ import type { User } from '../types';
 
 interface UsersListProps {
     users?: User[];
+    onEdit?: (user: User) => void;
+    onDelete?: (user: User) => void;
 }
 
-export default function UsersList({ users }: UsersListProps) {
+export default function UsersList({ users, onEdit, onDelete }: UsersListProps) {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -105,12 +107,20 @@ export default function UsersList({ users }: UsersListProps) {
                                 </TableCell>
                                 <TableCell align="right">
                                     <Tooltip title="Modifier">
-                                        <IconButton size="small" sx={{ color: 'primary.main', mr: 1 }}>
+                                        <IconButton
+                                            size="small"
+                                            sx={{ color: 'primary.main', mr: 1 }}
+                                            onClick={() => onEdit?.(user)}
+                                        >
                                             <EditIcon fontSize="small" />
                                         </IconButton>
                                     </Tooltip>
                                     <Tooltip title="Supprimer">
-                                        <IconButton size="small" sx={{ color: 'error.main' }}>
+                                        <IconButton
+                                            size="small"
+                                            sx={{ color: 'error.main' }}
+                                            onClick={() => onDelete?.(user)}
+                                        >
                                             <DeleteIcon fontSize="small" />
                                         </IconButton>
                                     </Tooltip>

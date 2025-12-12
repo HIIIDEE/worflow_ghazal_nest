@@ -8,7 +8,7 @@ import { Container, Box, CircularProgress, Alert } from '@mui/material';
 import WorkflowHeader from '../features/workflows/components/WorkflowHeader';
 import WorkflowProgress from '../features/workflows/components/WorkflowProgress';
 import WorkflowSteps from '../features/workflows/components/WorkflowSteps';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../stores/useAuthStore';
 import { useEtapePermissions } from '../hooks/useEtapePermissions';
 import { useWorkflowSubscription } from '../hooks/useWorkflowSubscription';
 

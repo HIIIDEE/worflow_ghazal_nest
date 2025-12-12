@@ -17,9 +17,10 @@ import { useQuery } from '@tanstack/react-query';
 import type { WorkflowEtape } from '../types';
 import { techniciensApi } from '../../techniciens/services/techniciens.api';
 import Etape1Form from './forms/Etape1Form';
+import Etape2Form from './forms/Etape2Form';
 import SignaturePad from './SignaturePad';
 import { useCanEditEtape } from '../../../hooks/useEtapePermissions';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../../stores/useAuthStore';
 
 interface WorkflowSidePanelProps {
     selectedEtape: WorkflowEtape | null;
