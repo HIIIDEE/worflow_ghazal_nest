@@ -1,0 +1,1 @@
+{"version":3,"file":"cancel-workflow.dto.js","sourceRoot":"","sources":["../../../../src/workflows/dto/cancel-workflow.dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,qDAAkE;AAElE,MAAa,iBAAiB;IAI5B,MAAM,CAAS;CAChB;AALD,8CAKC;AADC;IAHC,IAAA,0BAAQ,GAAE;IACV,IAAA,4BAAU,EAAC,EAAE,OAAO,EAAE,wCAAwC,EAAE,CAAC;IACjE,IAAA,2BAAS,EAAC,EAAE,EAAE,EAAE,OAAO,EAAE,gDAAgD,EAAE,CAAC;;iDAC9D"}

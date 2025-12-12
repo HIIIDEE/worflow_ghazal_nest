@@ -11,9 +11,12 @@ export class VehiclesService {
     private workflowsService: WorkflowsService,
   ) { }
 
-  async create(createVehicleDto: CreateVehicleDto) {
+  async create(createVehicleDto: CreateVehicleDto, creePar?: string) {
     const vehicle = await this.prisma.vehicle.create({
-      data: createVehicleDto,
+      data: {
+        ...createVehicleDto,
+        creePar,
+      },
     });
 
     // Création automatique du workflow associé
@@ -48,6 +51,21 @@ export class VehiclesService {
         },
       },
     });
+  }
+
+  async getVehicleWorkflow(vehicleId: string) {
+    const workflow = await this.prisma.workflow.findFirst({
+      where: { vehicleId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        vehicle: true,
+        etapes: {
+          orderBy: { numeroEtape: 'asc' },
+        },
+      },
+    });
+
+    return workflow;
   }
 
   async findAll() {

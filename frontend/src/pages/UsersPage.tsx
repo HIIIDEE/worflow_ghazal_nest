@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usersApi } from '../features/users/services/users.api';
-import { Container, Box, CircularProgress, Alert, Snackbar } from '@mui/material';
+import { Container, Box, CircularProgress, Alert, Snackbar, TextField, InputAdornment } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 
 import UsersHeader from '../features/users/components/UsersHeader';
 import UsersList from '../features/users/components/UsersList';
@@ -11,6 +12,7 @@ import UserCreationDialog from '../features/users/components/UserCreationDialog'
 export default function UsersPage() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
@@ -45,6 +47,19 @@ export default function UsersPage() {
       setSnackbar({ open: true, message: 'Erreur lors de la création de l\'utilisateur', severity: 'error' });
     },
   });
+
+  // Filter users based on search query
+  const filteredUsers = useMemo(() => {
+    if (!users) return [];
+    if (!searchQuery.trim()) return users;
+
+    const query = searchQuery.toLowerCase();
+    return users.filter((user) =>
+      user.nom.toLowerCase().includes(query) ||
+      user.prenom.toLowerCase().includes(query) ||
+      user.email.toLowerCase().includes(query)
+    );
+  }, [users, searchQuery]);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -89,7 +104,30 @@ export default function UsersPage() {
       <Container maxWidth="lg">
         <UsersHeader onAddClick={handleOpen} />
 
-        <UsersList users={users} />
+        <Box sx={{ mb: 3 }}>
+          <TextField
+            fullWidth
+            placeholder="Rechercher par nom, prénom ou email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: 'text.secondary' }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              bgcolor: 'white',
+              borderRadius: 2,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+              },
+            }}
+          />
+        </Box>
+
+        <UsersList users={filteredUsers} />
 
         <UserCreationDialog
           open={open}

@@ -13,10 +13,13 @@ exports.WorkflowsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma.service");
 const permission_type_enum_1 = require("../common/enums/permission-type.enum");
+const workflows_gateway_1 = require("./workflows.gateway");
 let WorkflowsService = class WorkflowsService {
     prisma;
-    constructor(prisma) {
+    workflowsGateway;
+    constructor(prisma, workflowsGateway) {
         this.prisma = prisma;
+        this.workflowsGateway = workflowsGateway;
     }
     async create(createWorkflowDto) {
         const workflow = await this.prisma.workflow.create({
@@ -34,15 +37,18 @@ let WorkflowsService = class WorkflowsService {
                     numeroEtape: etapeDef.numeroEtape,
                     nomEtape: etapeDef.nom,
                     description: etapeDef.description,
-                    statut: etapeDef.numeroEtape === 1 ? 'EN_COURS' : 'EN_ATTENTE',
+                    statut: 'EN_ATTENTE',
                     formulaire: etapeDef.champsFormulaire ?? {},
                 },
             });
         }
-        return this.findOne(workflow.id);
+        return this.findOne(workflow.id).then((createdWorkflow) => {
+            this.workflowsGateway.emitWorkflowCreated(createdWorkflow);
+            return createdWorkflow;
+        });
     }
     async findAll() {
-        return this.prisma.workflow.findMany({
+        const workflows = await this.prisma.workflow.findMany({
             include: {
                 vehicle: true,
                 etapes: {
@@ -70,9 +76,17 @@ let WorkflowsService = class WorkflowsService {
                 },
             },
         });
+        return workflows.map(workflow => ({
+            ...workflow,
+            duration: this.calculateWorkflowDuration(workflow),
+            etapes: workflow.etapes.map(etape => ({
+                ...etape,
+                duration: this.calculateStepDuration(etape),
+            })),
+        }));
     }
     async findOne(id) {
-        return this.prisma.workflow.findUnique({
+        const workflow = await this.prisma.workflow.findUnique({
             where: { id },
             include: {
                 vehicle: true,
@@ -101,6 +115,16 @@ let WorkflowsService = class WorkflowsService {
                 },
             },
         });
+        if (!workflow)
+            return null;
+        return {
+            ...workflow,
+            duration: this.calculateWorkflowDuration(workflow),
+            etapes: workflow.etapes.map(etape => ({
+                ...etape,
+                duration: this.calculateStepDuration(etape),
+            })),
+        };
     }
     async findOneWithPermissions(id, userId, userRole) {
         const workflow = await this.findOne(id);
@@ -231,7 +255,31 @@ let WorkflowsService = class WorkflowsService {
             data: updateWorkflowDto,
         });
     }
-    async updateEtape(workflowId, numeroEtape, updateEtapeDto, userId) {
+    async canStartEtape(workflowId, numeroEtape, userRole) {
+        if (userRole === 'ADMIN') {
+            return { canStart: true };
+        }
+        if (numeroEtape === 1) {
+            return { canStart: true };
+        }
+        const previousEtape = await this.prisma.workflowEtape.findFirst({
+            where: {
+                workflowId,
+                numeroEtape: numeroEtape - 1,
+            },
+        });
+        if (!previousEtape) {
+            return { canStart: false, reason: 'Étape précédente introuvable' };
+        }
+        if (previousEtape.statut !== 'TERMINE') {
+            return {
+                canStart: false,
+                reason: `Vous devez d'abord terminer l'étape ${numeroEtape - 1} avant de démarrer cette étape`,
+            };
+        }
+        return { canStart: true };
+    }
+    async updateEtape(workflowId, numeroEtape, updateEtapeDto, userId, userRole) {
         const etape = await this.prisma.workflowEtape.findFirst({
             where: {
                 workflowId,
@@ -240,6 +288,12 @@ let WorkflowsService = class WorkflowsService {
         });
         if (!etape) {
             throw new common_1.BadRequestException('Étape non trouvée');
+        }
+        if (updateEtapeDto.statut === 'EN_COURS' && etape.statut === 'EN_ATTENTE') {
+            const validation = await this.canStartEtape(workflowId, numeroEtape, userRole || 'GESTIONNAIRE');
+            if (!validation.canStart) {
+                throw new common_1.BadRequestException(validation.reason || 'Impossible de démarrer cette étape');
+            }
         }
         const updateData = { ...updateEtapeDto };
         if (updateData.technicienId !== undefined) {
@@ -282,28 +336,73 @@ let WorkflowsService = class WorkflowsService {
                 },
             },
         });
+        if (updateEtapeDto.statut === 'EN_COURS' && etape.statut === 'EN_ATTENTE') {
+            await this.prisma.workflow.update({
+                where: { id: workflowId },
+                data: {
+                    etapeActuelle: numeroEtape,
+                    statut: 'EN_COURS'
+                }
+            });
+        }
         if (updateEtapeDto.statut === 'TERMINE') {
             const nextEtapeNumber = numeroEtape + 1;
             const nextEtape = await this.prisma.workflowEtape.findFirst({
                 where: { workflowId, numeroEtape: nextEtapeNumber }
             });
             if (nextEtape) {
-                await this.prisma.workflowEtape.update({
-                    where: { id: nextEtape.id },
-                    data: { statut: 'EN_COURS' }
-                });
                 await this.prisma.workflow.update({
                     where: { id: workflowId },
                     data: { etapeActuelle: nextEtapeNumber }
                 });
             }
+            else {
+                await this.prisma.workflow.update({
+                    where: { id: workflowId },
+                    data: {
+                        statut: 'TERMINE',
+                        dateFin: new Date()
+                    }
+                });
+            }
         }
+        this.workflowsGateway.emitEtapeUpdated(workflowId, updatedEtape);
         return updatedEtape;
     }
-    async remove(id) {
-        return this.prisma.workflow.delete({
+    async cancelWorkflow(id, raison, userId, userName) {
+        const workflow = await this.prisma.workflow.findUnique({
             where: { id },
         });
+        if (!workflow) {
+            throw new common_1.BadRequestException('Workflow non trouvé');
+        }
+        if (workflow.statut === 'TERMINE') {
+            throw new common_1.BadRequestException('Impossible d\'annuler un workflow terminé');
+        }
+        if (workflow.statut === 'ANNULE') {
+            throw new common_1.BadRequestException('Ce workflow est déjà annulé');
+        }
+        const updatedWorkflow = await this.prisma.workflow.update({
+            where: { id },
+            data: {
+                statut: 'ANNULE',
+                raisonAnnulation: raison,
+                dateAnnulation: new Date(),
+                annulePar: userName,
+                dateFin: new Date(),
+            },
+            include: {
+                vehicle: true,
+            },
+        });
+        this.workflowsGateway.emitWorkflowUpdated(updatedWorkflow);
+        return updatedWorkflow;
+    }
+    async remove(id) {
+        await this.prisma.workflow.delete({
+            where: { id },
+        });
+        this.workflowsGateway.emitWorkflowDeleted(id);
     }
     async getEtapesByWorkflow(workflowId) {
         return this.prisma.workflowEtape.findMany({
@@ -313,10 +412,76 @@ let WorkflowsService = class WorkflowsService {
             },
         });
     }
+    calculateWorkflowDuration(workflow) {
+        if (!workflow.dateDebut)
+            return null;
+        const endDate = workflow.dateFin || new Date();
+        const startDate = new Date(workflow.dateDebut);
+        return endDate.getTime() - startDate.getTime();
+    }
+    calculateStepDuration(step) {
+        if (!step.dateDebut)
+            return null;
+        const endDate = step.dateFin || new Date();
+        const startDate = new Date(step.dateDebut);
+        return endDate.getTime() - startDate.getTime();
+    }
+    async getStatistics() {
+        const totalVehicles = await this.prisma.vehicle.count();
+        const workflowsByStatus = await this.prisma.workflow.groupBy({
+            by: ['statut'],
+            _count: {
+                id: true,
+            },
+        });
+        const workflows = await this.prisma.workflow.findMany({
+            where: {
+                statut: 'EN_COURS',
+            },
+            select: {
+                id: true,
+                etapeActuelle: true,
+            },
+        });
+        const vehiclesByStep = {};
+        workflows.forEach((workflow) => {
+            const step = workflow.etapeActuelle;
+            vehiclesByStep[step] = (vehiclesByStep[step] || 0) + 1;
+        });
+        const completedWorkflows = await this.prisma.workflow.findMany({
+            where: { statut: 'TERMINE' },
+            select: {
+                dateDebut: true,
+                dateFin: true,
+            },
+        });
+        let averageWorkflowTime = null;
+        if (completedWorkflows.length > 0) {
+            const totalDuration = completedWorkflows.reduce((sum, workflow) => {
+                const duration = this.calculateWorkflowDuration(workflow);
+                return sum + (duration || 0);
+            }, 0);
+            averageWorkflowTime = Math.round(totalDuration / completedWorkflows.length);
+        }
+        const completedCount = workflowsByStatus.find((w) => w.statut === 'TERMINE')?._count.id || 0;
+        const inProgressCount = workflowsByStatus.find((w) => w.statut === 'EN_COURS')?._count.id || 0;
+        const cancelledCount = workflowsByStatus.find((w) => w.statut === 'ANNULE')?._count.id || 0;
+        const waitingCount = workflowsByStatus.find((w) => w.statut === 'EN_ATTENTE')?._count.id || 0;
+        return {
+            totalVehicles,
+            completedWorkflows: completedCount,
+            inProgressWorkflows: inProgressCount,
+            cancelledWorkflows: cancelledCount,
+            waitingWorkflows: waitingCount,
+            vehiclesByStep,
+            averageWorkflowTime,
+        };
+    }
 };
 exports.WorkflowsService = WorkflowsService;
 exports.WorkflowsService = WorkflowsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        workflows_gateway_1.WorkflowsGateway])
 ], WorkflowsService);
 //# sourceMappingURL=workflows.service.js.map

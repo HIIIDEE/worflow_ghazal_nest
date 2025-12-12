@@ -2,21 +2,15 @@ import { PrismaService } from '../prisma.service';
 import { CreateWorkflowDto } from './dto/create-workflow.dto';
 import { UpdateWorkflowDto } from './dto/update-workflow.dto';
 import { UpdateEtapeDto } from './dto/update-etape.dto';
+import { WorkflowsGateway } from './workflows.gateway';
 export declare class WorkflowsService {
     private prisma;
-    constructor(prisma: PrismaService);
-    create(createWorkflowDto: CreateWorkflowDto): Promise<({
-        vehicle: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            immatriculation: string;
-            marque: string;
-            modele: string;
-            annee: number;
-            numeroSerie: string;
-        };
-        etapes: ({
+    private workflowsGateway;
+    constructor(prisma: PrismaService, workflowsGateway: WorkflowsGateway);
+    create(createWorkflowDto: CreateWorkflowDto): Promise<{
+        duration: number | null;
+        etapes: {
+            duration: number | null;
             technicien: {
                 id: string;
                 nom: string;
@@ -29,7 +23,6 @@ export declare class WorkflowsService {
                 nom: string;
                 prenom: string;
             } | null;
-        } & {
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -47,18 +40,7 @@ export declare class WorkflowsService {
             signatureGestionnaire: string | null;
             signatureTechnicien: string | null;
             commentaires: string | null;
-        })[];
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        statut: import("@prisma/client").$Enums.WorkflowStatus;
-        dateDebut: Date;
-        dateFin: Date | null;
-        vehicleId: string;
-        etapeActuelle: number;
-    }) | null>;
-    findAll(): Promise<({
+        }[];
         vehicle: {
             id: string;
             createdAt: Date;
@@ -68,8 +50,24 @@ export declare class WorkflowsService {
             modele: string;
             annee: number;
             numeroSerie: string;
+            creePar: string | null;
         };
-        etapes: ({
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        statut: import("@prisma/client").$Enums.WorkflowStatus;
+        dateDebut: Date;
+        dateFin: Date | null;
+        vehicleId: string;
+        etapeActuelle: number;
+        raisonAnnulation: string | null;
+        dateAnnulation: Date | null;
+        annulePar: string | null;
+    } | null>;
+    findAll(): Promise<{
+        duration: number | null;
+        etapes: {
+            duration: number | null;
             technicien: {
                 id: string;
                 nom: string;
@@ -82,7 +80,6 @@ export declare class WorkflowsService {
                 nom: string;
                 prenom: string;
             } | null;
-        } & {
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -100,18 +97,7 @@ export declare class WorkflowsService {
             signatureGestionnaire: string | null;
             signatureTechnicien: string | null;
             commentaires: string | null;
-        })[];
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        statut: import("@prisma/client").$Enums.WorkflowStatus;
-        dateDebut: Date;
-        dateFin: Date | null;
-        vehicleId: string;
-        etapeActuelle: number;
-    })[]>;
-    findOne(id: string): Promise<({
+        }[];
         vehicle: {
             id: string;
             createdAt: Date;
@@ -121,8 +107,24 @@ export declare class WorkflowsService {
             modele: string;
             annee: number;
             numeroSerie: string;
+            creePar: string | null;
         };
-        etapes: ({
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        statut: import("@prisma/client").$Enums.WorkflowStatus;
+        dateDebut: Date;
+        dateFin: Date | null;
+        vehicleId: string;
+        etapeActuelle: number;
+        raisonAnnulation: string | null;
+        dateAnnulation: Date | null;
+        annulePar: string | null;
+    }[]>;
+    findOne(id: string): Promise<{
+        duration: number | null;
+        etapes: {
+            duration: number | null;
             technicien: {
                 id: string;
                 nom: string;
@@ -135,7 +137,6 @@ export declare class WorkflowsService {
                 nom: string;
                 prenom: string;
             } | null;
-        } & {
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -153,8 +154,18 @@ export declare class WorkflowsService {
             signatureGestionnaire: string | null;
             signatureTechnicien: string | null;
             commentaires: string | null;
-        })[];
-    } & {
+        }[];
+        vehicle: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            immatriculation: string;
+            marque: string;
+            modele: string;
+            annee: number;
+            numeroSerie: string;
+            creePar: string | null;
+        };
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -163,9 +174,13 @@ export declare class WorkflowsService {
         dateFin: Date | null;
         vehicleId: string;
         etapeActuelle: number;
-    }) | null>;
+        raisonAnnulation: string | null;
+        dateAnnulation: Date | null;
+        annulePar: string | null;
+    } | null>;
     findOneWithPermissions(id: string, userId: string, userRole: string): Promise<{
         etapes: any[];
+        duration: number | null;
         vehicle: {
             id: string;
             createdAt: Date;
@@ -175,6 +190,7 @@ export declare class WorkflowsService {
             modele: string;
             annee: number;
             numeroSerie: string;
+            creePar: string | null;
         };
         id: string;
         createdAt: Date;
@@ -184,6 +200,9 @@ export declare class WorkflowsService {
         dateFin: Date | null;
         vehicleId: string;
         etapeActuelle: number;
+        raisonAnnulation: string | null;
+        dateAnnulation: Date | null;
+        annulePar: string | null;
     } | null>;
     getUserPermissionsForWorkflow(workflowId: string, userId: string, userRole: string): Promise<Record<number, import("@prisma/client").$Enums.PermissionType[]>>;
     validateEtapeUpdate(workflowId: string, numeroEtape: number, updateDto: UpdateEtapeDto, userId: string, userRole: string): Promise<void>;
@@ -198,8 +217,12 @@ export declare class WorkflowsService {
         dateFin: Date | null;
         vehicleId: string;
         etapeActuelle: number;
+        raisonAnnulation: string | null;
+        dateAnnulation: Date | null;
+        annulePar: string | null;
     }>;
-    updateEtape(workflowId: string, numeroEtape: number, updateEtapeDto: UpdateEtapeDto, userId?: string): Promise<{
+    private canStartEtape;
+    updateEtape(workflowId: string, numeroEtape: number, updateEtapeDto: UpdateEtapeDto, userId?: string, userRole?: string): Promise<{
         valideParUser: {
             id: string;
             email: string;
@@ -225,7 +248,19 @@ export declare class WorkflowsService {
         signatureTechnicien: string | null;
         commentaires: string | null;
     }>;
-    remove(id: string): Promise<{
+    cancelWorkflow(id: string, raison: string, userId: string, userName: string): Promise<{
+        vehicle: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            immatriculation: string;
+            marque: string;
+            modele: string;
+            annee: number;
+            numeroSerie: string;
+            creePar: string | null;
+        };
+    } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -234,7 +269,11 @@ export declare class WorkflowsService {
         dateFin: Date | null;
         vehicleId: string;
         etapeActuelle: number;
+        raisonAnnulation: string | null;
+        dateAnnulation: Date | null;
+        annulePar: string | null;
     }>;
+    remove(id: string): Promise<void>;
     getEtapesByWorkflow(workflowId: string): Promise<{
         id: string;
         createdAt: Date;
@@ -254,4 +293,15 @@ export declare class WorkflowsService {
         signatureTechnicien: string | null;
         commentaires: string | null;
     }[]>;
+    private calculateWorkflowDuration;
+    private calculateStepDuration;
+    getStatistics(): Promise<{
+        totalVehicles: number;
+        completedWorkflows: number;
+        inProgressWorkflows: number;
+        cancelledWorkflows: number;
+        waitingWorkflows: number;
+        vehiclesByStep: Record<number, number>;
+        averageWorkflowTime: number | null;
+    }>;
 }

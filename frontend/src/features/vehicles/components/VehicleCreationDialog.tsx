@@ -21,6 +21,7 @@ interface VehicleCreationDialogProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onScanSuccess: (result: string) => void;
   isPending: boolean;
+  editMode?: boolean;
 }
 
 export default function VehicleCreationDialog({
@@ -31,6 +32,7 @@ export default function VehicleCreationDialog({
   onChange,
   onScanSuccess,
   isPending,
+  editMode = false,
 }: VehicleCreationDialogProps) {
   const [scanOpen, setScanOpen] = useState(false);
 
@@ -44,7 +46,9 @@ export default function VehicleCreationDialog({
   return (
     <>
       <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-        <DialogTitle fontWeight="bold">Nouveau Véhicule</DialogTitle>
+        <DialogTitle fontWeight="bold">
+          {editMode ? 'Modifier le Véhicule' : 'Nouveau Véhicule'}
+        </DialogTitle>
         <form onSubmit={onSubmit}>
           <DialogContent>
             <Grid container spacing={2} sx={{ mt: 0 }}>
@@ -135,7 +139,10 @@ export default function VehicleCreationDialog({
               color="warning"
               disabled={isPending}
             >
-              {isPending ? 'Création...' : 'Créer'}
+              {isPending
+                ? (editMode ? 'Modification...' : 'Création...')
+                : (editMode ? 'Modifier' : 'Créer')
+              }
             </Button>
           </DialogActions>
         </form>

@@ -17,12 +17,33 @@ const users_module_1 = require("./users/users.module");
 const techniciens_module_1 = require("./techniciens/techniciens.module");
 const auth_module_1 = require("./auth/auth.module");
 const etape_definitions_module_1 = require("./etape-definitions/etape-definitions.module");
+const cache_manager_1 = require("@nestjs/cache-manager");
+const throttler_1 = require("@nestjs/throttler");
+const core_1 = require("@nestjs/core");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            cache_manager_1.CacheModule.register({
+                isGlobal: true,
+                ttl: 60000,
+                max: 100,
+            }),
+            throttler_1.ThrottlerModule.forRoot([{
+                    name: 'short',
+                    ttl: 1000,
+                    limit: 10,
+                }, {
+                    name: 'medium',
+                    ttl: 10000,
+                    limit: 50,
+                }, {
+                    name: 'long',
+                    ttl: 60000,
+                    limit: 200,
+                }]),
             vehicles_module_1.VehiclesModule,
             workflows_module_1.WorkflowsModule,
             users_module_1.UsersModule,
@@ -31,7 +52,14 @@ exports.AppModule = AppModule = __decorate([
             etape_definitions_module_1.EtapeDefinitionsModule,
         ],
         controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService, prisma_service_1.PrismaService],
+        providers: [
+            app_service_1.AppService,
+            prisma_service_1.PrismaService,
+            {
+                provide: core_1.APP_GUARD,
+                useClass: throttler_1.ThrottlerGuard,
+            },
+        ],
         exports: [prisma_service_1.PrismaService],
     })
 ], AppModule);

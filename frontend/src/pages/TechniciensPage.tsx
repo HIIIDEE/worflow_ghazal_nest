@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { techniciensApi } from '../features/techniciens/services/techniciens.api';
-import { Container, Box, CircularProgress, Alert } from '@mui/material';
+import { Container, Box, CircularProgress, Alert, TextField, InputAdornment } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 
 import TechniciensHeader from '../features/techniciens/components/TechniciensHeader';
 import TechniciensList from '../features/techniciens/components/TechniciensList';
@@ -11,6 +12,7 @@ export default function TechniciensPage() {
   const queryClient = useQueryClient();
   const [openDialog, setOpenDialog] = useState(false);
   const [editingTechnicien, setEditingTechnicien] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [technicienData, setTechnicienData] = useState({
     nom: '',
     prenom: '',
@@ -50,6 +52,20 @@ export default function TechniciensPage() {
       queryClient.invalidateQueries({ queryKey: ['techniciens'] });
     },
   });
+
+  // Filter technicians based on search query
+  const filteredTechniciens = useMemo(() => {
+    if (!techniciens) return [];
+    if (!searchQuery.trim()) return techniciens;
+
+    const query = searchQuery.toLowerCase();
+    return techniciens.filter((tech) =>
+      tech.nom.toLowerCase().includes(query) ||
+      tech.prenom.toLowerCase().includes(query) ||
+      tech.email?.toLowerCase().includes(query) ||
+      tech.specialite?.toLowerCase().includes(query)
+    );
+  }, [techniciens, searchQuery]);
 
   const handleOpenDialog = () => {
     setEditingTechnicien(null);
@@ -132,8 +148,31 @@ export default function TechniciensPage() {
       <Container maxWidth="lg">
         <TechniciensHeader onAddClick={handleOpenDialog} />
 
+        <Box sx={{ mb: 3 }}>
+          <TextField
+            fullWidth
+            placeholder="Rechercher par nom, prénom, email ou spécialité..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: 'text.secondary' }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              bgcolor: 'white',
+              borderRadius: 2,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+              },
+            }}
+          />
+        </Box>
+
         <TechniciensList
-          techniciens={techniciens}
+          techniciens={filteredTechniciens}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />

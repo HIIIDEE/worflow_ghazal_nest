@@ -45,25 +45,36 @@ model Vehicle {
   modele          String
   annee           Int
   numeroSerie     String     @unique
+  creePar         String?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   workflows       Workflow[]
 
+  @@index([marque])
+  @@index([modele])
+  @@index([annee])
   @@map("vehicles")
 }
 
 model Workflow {
-  id            String          @id @default(uuid())
-  vehicleId     String
-  statut        WorkflowStatus  @default(EN_COURS)
-  etapeActuelle Int             @default(1)
-  dateDebut     DateTime        @default(now())
-  dateFin       DateTime?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  etapes        WorkflowEtape[]
-  vehicle       Vehicle         @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  id                   String          @id @default(uuid())
+  vehicleId            String
+  statut               WorkflowStatus  @default(EN_ATTENTE)
+  etapeActuelle        Int             @default(0)
+  dateDebut            DateTime        @default(now())
+  dateFin              DateTime?
+  raisonAnnulation     String?
+  dateAnnulation       DateTime?
+  annulePar            String?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  etapes               WorkflowEtape[]
+  vehicle              Vehicle         @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
 
+  @@index([statut])
+  @@index([etapeActuelle])
+  @@index([vehicleId])
+  @@index([dateDebut])
   @@map("workflows")
 }
 
@@ -90,6 +101,11 @@ model WorkflowEtape {
   technicien            Technicien? @relation(fields: [technicienId], references: [id], onDelete: SetNull)
 
   @@unique([workflowId, numeroEtape])
+  @@index([workflowId])
+  @@index([statut])
+  @@index([numeroEtape])
+  @@index([valideParId])
+  @@index([technicienId])
   @@map("workflow_etapes")
 }
 
@@ -135,6 +151,10 @@ model HistoriqueModification {
   nouvellesValeurs Json?
   commentaire      String?
 
+  @@index([entiteId])
+  @@index([entite])
+  @@index([dateModification])
+  @@index([modifiePar])
   @@map("historique_modifications")
 }
 
@@ -144,6 +164,7 @@ enum UserRole {
 }
 
 enum WorkflowStatus {
+  EN_ATTENTE
   EN_COURS
   TERMINE
   ANNULE

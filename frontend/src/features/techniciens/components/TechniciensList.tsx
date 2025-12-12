@@ -10,9 +10,11 @@ import {
     TableContainer,
     TableHead,
     TableRow,
+    TablePagination,
     Tooltip,
     Typography,
 } from '@mui/material';
+import { useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EngineeringIcon from '@mui/icons-material/Engineering';
@@ -25,6 +27,20 @@ interface TechniciensListProps {
 }
 
 export default function TechniciensList({ techniciens, onEdit, onDelete }: TechniciensListProps) {
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+
+    const handleChangePage = (_event: unknown, newPage: number) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
+    const paginatedTechniciens = techniciens?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
     return (
         <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 4, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
             <Table sx={{ minWidth: 650 }}>
@@ -38,7 +54,7 @@ export default function TechniciensList({ techniciens, onEdit, onDelete }: Techn
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {techniciens?.length === 0 ? (
+                    {!paginatedTechniciens || paginatedTechniciens.length === 0 ? (
                         <TableRow>
                             <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
                                 <Typography variant="body1" color="text.secondary">
@@ -47,7 +63,7 @@ export default function TechniciensList({ techniciens, onEdit, onDelete }: Techn
                             </TableCell>
                         </TableRow>
                     ) : (
-                        techniciens?.map((technicien) => (
+                        paginatedTechniciens.map((technicien) => (
                             <TableRow key={technicien.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                                 <TableCell component="th" scope="row">
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -115,6 +131,17 @@ export default function TechniciensList({ techniciens, onEdit, onDelete }: Techn
                     )}
                 </TableBody>
             </Table>
+            <TablePagination
+                rowsPerPageOptions={[5, 10, 25, 50]}
+                component="div"
+                count={techniciens?.length || 0}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                labelRowsPerPage="Lignes par page:"
+                labelDisplayedRows={({ from, to, count }) => `${from}-${to} sur ${count}`}
+            />
         </TableContainer>
     );
 }

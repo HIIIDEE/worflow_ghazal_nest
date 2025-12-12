@@ -20,9 +20,12 @@ let VehiclesService = class VehiclesService {
         this.prisma = prisma;
         this.workflowsService = workflowsService;
     }
-    async create(createVehicleDto) {
+    async create(createVehicleDto, creePar) {
         const vehicle = await this.prisma.vehicle.create({
-            data: createVehicleDto,
+            data: {
+                ...createVehicleDto,
+                creePar,
+            },
         });
         await this.workflowsService.create({ vehicleId: vehicle.id });
         return vehicle;
@@ -52,6 +55,19 @@ let VehiclesService = class VehiclesService {
                 },
             },
         });
+    }
+    async getVehicleWorkflow(vehicleId) {
+        const workflow = await this.prisma.workflow.findFirst({
+            where: { vehicleId },
+            orderBy: { createdAt: 'desc' },
+            include: {
+                vehicle: true,
+                etapes: {
+                    orderBy: { numeroEtape: 'asc' },
+                },
+            },
+        });
+        return workflow;
     }
     async findAll() {
         return this.prisma.vehicle.findMany({

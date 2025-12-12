@@ -18,8 +18,10 @@ const workflows_service_1 = require("./workflows.service");
 const create_workflow_dto_1 = require("./dto/create-workflow.dto");
 const update_workflow_dto_1 = require("./dto/update-workflow.dto");
 const update_etape_dto_1 = require("./dto/update-etape.dto");
+const cancel_workflow_dto_1 = require("./dto/cancel-workflow.dto");
 const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
 const current_user_decorator_1 = require("../common/decorators/current-user.decorator");
+const cache_manager_1 = require("@nestjs/cache-manager");
 let WorkflowsController = class WorkflowsController {
     workflowsService;
     constructor(workflowsService) {
@@ -30,6 +32,9 @@ let WorkflowsController = class WorkflowsController {
     }
     findAll() {
         return this.workflowsService.findAll();
+    }
+    getStatistics() {
+        return this.workflowsService.getStatistics();
     }
     findOne(id, user) {
         return this.workflowsService.findOneWithPermissions(id, user.userId, user.role);
@@ -46,7 +51,10 @@ let WorkflowsController = class WorkflowsController {
     }
     async updateEtape(id, numeroEtape, updateEtapeDto, user) {
         await this.workflowsService.validateEtapeUpdate(id, parseInt(numeroEtape), updateEtapeDto, user.userId, user.role);
-        return this.workflowsService.updateEtape(id, parseInt(numeroEtape), updateEtapeDto, user.userId);
+        return this.workflowsService.updateEtape(id, parseInt(numeroEtape), updateEtapeDto, user.userId, user.role);
+    }
+    cancelWorkflow(id, cancelWorkflowDto, user) {
+        return this.workflowsService.cancelWorkflow(id, cancelWorkflowDto.raison, user.userId, `${user.nom} ${user.prenom}`);
     }
     remove(id) {
         return this.workflowsService.remove(id);
@@ -66,6 +74,14 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], WorkflowsController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('statistics'),
+    (0, common_1.UseInterceptors)(cache_manager_1.CacheInterceptor),
+    (0, cache_manager_1.CacheTTL)(30000),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], WorkflowsController.prototype, "getStatistics", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
@@ -108,6 +124,15 @@ __decorate([
     __metadata("design:paramtypes", [String, String, update_etape_dto_1.UpdateEtapeDto, Object]),
     __metadata("design:returntype", Promise)
 ], WorkflowsController.prototype, "updateEtape", null);
+__decorate([
+    (0, common_1.Post)(':id/cancel'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, cancel_workflow_dto_1.CancelWorkflowDto, Object]),
+    __metadata("design:returntype", void 0)
+], WorkflowsController.prototype, "cancelWorkflow", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),

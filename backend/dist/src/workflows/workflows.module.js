@@ -10,13 +10,14 @@ exports.WorkflowsModule = void 0;
 const common_1 = require("@nestjs/common");
 const workflows_service_1 = require("./workflows.service");
 const workflows_controller_1 = require("./workflows.controller");
+const workflows_gateway_1 = require("./workflows.gateway");
 const prisma_service_1 = require("../prisma.service");
 let WorkflowsModule = class WorkflowsModule {
 };
 exports.WorkflowsModule = WorkflowsModule;
 exports.WorkflowsModule = WorkflowsModule = __decorate([
     (0, common_1.Module)({
-        providers: [workflows_service_1.WorkflowsService, prisma_service_1.PrismaService],
+        providers: [workflows_service_1.WorkflowsService, workflows_gateway_1.WorkflowsGateway, prisma_service_1.PrismaService],
         controllers: [workflows_controller_1.WorkflowsController],
         exports: [workflows_service_1.WorkflowsService],
     })

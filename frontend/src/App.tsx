@@ -11,8 +11,10 @@ import WorkflowsPage from './pages/WorkflowsPage';
 import WorkflowDetailPage from './pages/WorkflowDetailPage';
 import EtapePermissionsPage from './pages/EtapePermissionsPage';
 import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
 import MainLayout from './layouts/MainLayout';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { WebSocketProvider } from './context/WebSocketContext';
 import theme from './theme/theme';
 import './App.css';
 
@@ -65,30 +67,33 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <AuthProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
+          <WebSocketProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
 
-              {/* Protected Routes wrapped in MainLayout */}
-              <Route element={
-                <ProtectedRoute>
-                  <MainLayout />
-                </ProtectedRoute>
-              }>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/users" element={<UsersPage />} />
-                <Route path="/techniciens" element={<TechniciensPage />} />
-                <Route path="/vehicles" element={<VehiclesPage />} />
-                <Route path="/workflows" element={<WorkflowsPage />} />
-                <Route path="/workflows/:id" element={<WorkflowDetailPage />} />
-                <Route path="/admin/etape-permissions" element={
-                  <AdminRoute>
-                    <EtapePermissionsPage />
-                  </AdminRoute>
-                } />
-              </Route>
-            </Routes>
-          </BrowserRouter>
+                {/* Protected Routes wrapped in MainLayout */}
+                <Route element={
+                  <ProtectedRoute>
+                    <MainLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/users" element={<UsersPage />} />
+                  <Route path="/techniciens" element={<TechniciensPage />} />
+                  <Route path="/vehicles" element={<VehiclesPage />} />
+                  <Route path="/workflows" element={<WorkflowsPage />} />
+                  <Route path="/workflows/:id" element={<WorkflowDetailPage />} />
+                  <Route path="/admin/etape-permissions" element={
+                    <AdminRoute>
+                      <EtapePermissionsPage />
+                    </AdminRoute>
+                  } />
+                </Route>
+              </Routes>
+            </BrowserRouter>
+          </WebSocketProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

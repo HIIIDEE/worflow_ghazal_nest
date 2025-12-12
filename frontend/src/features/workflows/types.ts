@@ -14,19 +14,24 @@ export interface WorkflowEtape {
     commentaires?: string;
     createdAt: string;
     updatedAt: string;
+    duration?: number | null; // Duration in milliseconds
 }
 
 export interface Workflow {
     id: string;
     vehicleId: string;
     vehicle?: Vehicle;
-    statut: 'EN_COURS' | 'TERMINE' | 'ANNULE';
+    statut: 'EN_ATTENTE' | 'EN_COURS' | 'TERMINE' | 'ANNULE';
     etapeActuelle: number;
     dateDebut: string;
     dateFin?: string;
+    raisonAnnulation?: string;
+    dateAnnulation?: string;
+    annulePar?: string;
     etapes?: WorkflowEtape[];
     createdAt: string;
     updatedAt: string;
+    duration?: number | null; // Duration in milliseconds
 }
 
 export interface EtapeDefinition {

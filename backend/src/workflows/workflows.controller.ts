@@ -1,15 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors } from '@nestjs/common';
 import { WorkflowsService } from './workflows.service';
 import { CreateWorkflowDto } from './dto/create-workflow.dto';
 import { UpdateWorkflowDto } from './dto/update-workflow.dto';
 import { UpdateEtapeDto } from './dto/update-etape.dto';
+import { CancelWorkflowDto } from './dto/cancel-workflow.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 
 @Controller('workflows')
 @UseGuards(JwtAuthGuard)
 export class WorkflowsController {
-  constructor(private readonly workflowsService: WorkflowsService) {}
+  constructor(private readonly workflowsService: WorkflowsService) { }
 
   @Post()
   create(@Body() createWorkflowDto: CreateWorkflowDto) {
@@ -19,6 +21,13 @@ export class WorkflowsController {
   @Get()
   findAll() {
     return this.workflowsService.findAll();
+  }
+
+  @Get('statistics')
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(30000) // Cache for 30 seconds
+  getStatistics() {
+    return this.workflowsService.getStatistics();
   }
 
   @Get(':id')
@@ -78,6 +87,21 @@ export class WorkflowsController {
       parseInt(numeroEtape),
       updateEtapeDto,
       user.userId,
+      user.role,
+    );
+  }
+
+  @Post(':id/cancel')
+  cancelWorkflow(
+    @Param('id') id: string,
+    @Body() cancelWorkflowDto: CancelWorkflowDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.workflowsService.cancelWorkflow(
+      id,
+      cancelWorkflowDto.raison,
+      user.userId,
+      `${user.nom} ${user.prenom}`,
     );
   }
 

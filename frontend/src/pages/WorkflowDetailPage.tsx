@@ -10,6 +10,7 @@ import WorkflowProgress from '../features/workflows/components/WorkflowProgress'
 import WorkflowSteps from '../features/workflows/components/WorkflowSteps';
 import { useAuth } from '../context/AuthContext';
 import { useEtapePermissions } from '../hooks/useEtapePermissions';
+import { useWorkflowSubscription } from '../hooks/useWorkflowSubscription';
 
 export default function WorkflowDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +18,9 @@ export default function WorkflowDetailPage() {
   const { user } = useAuth();
   const [selectedEtape, setSelectedEtape] = useState<WorkflowEtape | null>(null);
   const [formData, setFormData] = useState<any>({});
+
+  // Subscribe to WebSocket events for real-time updates
+  useWorkflowSubscription(id);
 
   const { data: workflow, isLoading, error } = useQuery({
     queryKey: ['workflow', id],
@@ -120,7 +124,14 @@ export default function WorkflowDetailPage() {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', py: 6 }}>
       <Container maxWidth="lg">
-        <WorkflowHeader vehicle={workflow.vehicle} statut={workflow.statut} />
+        <WorkflowHeader
+          vehicle={workflow.vehicle}
+          statut={workflow.statut}
+          duration={workflow.duration}
+          raisonAnnulation={workflow.raisonAnnulation}
+          dateAnnulation={workflow.dateAnnulation}
+          annulePar={workflow.annulePar}
+        />
 
         <WorkflowProgress etapes={workflow.etapes} />
 

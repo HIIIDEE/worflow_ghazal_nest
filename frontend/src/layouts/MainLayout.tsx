@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import PeopleIcon from '@mui/icons-material/People';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
@@ -32,7 +33,8 @@ import { useAuth } from '../context/AuthContext';
 const drawerWidth = 280;
 
 const MENU_ITEMS = [
-    { text: 'Tableau de bord', icon: DashboardIcon, path: '/' },
+    { text: 'Accueil', icon: DashboardIcon, path: '/' },
+    { text: 'Statistiques', icon: BarChartIcon, path: '/dashboard' },
     { text: 'Utilisateurs', icon: PeopleIcon, path: '/users' },
     { text: 'Techniciens', icon: EngineeringIcon, path: '/techniciens' },
     { text: 'Véhicules', icon: DirectionsCarIcon, path: '/vehicles' },

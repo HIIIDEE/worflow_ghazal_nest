@@ -18,10 +18,12 @@ import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import EditIcon from '@mui/icons-material/Edit';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import type { WorkflowEtape } from '../types';
 import { useCanViewEtape, useCanStartEtape, useCanValidateEtape, useCanEditEtape } from '../../../hooks/useEtapePermissions';
 import { generateStep1Pdf } from '../../../utils/pdfGenerator';
 import PrintIcon from '@mui/icons-material/Print';
+import { getStepDuration } from '../../../utils/workflowStatus';
 
 import WorkflowStepForm from './WorkflowStepForm';
 
@@ -146,6 +148,16 @@ export default function WorkflowSteps({
                                                         <Typography variant="body2">
                                                             <strong>Fin:</strong> {new Date(etape.dateFin).toLocaleString('fr-FR')}
                                                         </Typography>
+                                                    </Grid>
+                                                )}
+                                                {(etape.dateDebut || etape.dateFin) && (
+                                                    <Grid size={{ xs: 12, sm: 6 }}>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <AccessTimeIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                                                            <Typography variant="body2">
+                                                                <strong>Durée:</strong> {getStepDuration(etape.statut, etape.duration)}
+                                                            </Typography>
+                                                        </Box>
                                                     </Grid>
                                                 )}
                                                 {etape.validePar && (
