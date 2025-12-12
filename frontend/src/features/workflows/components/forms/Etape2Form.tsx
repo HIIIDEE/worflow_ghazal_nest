@@ -44,49 +44,59 @@ export default function Etape2Form({ formData, onChange, disabled = false }: Eta
 
                 <Stack spacing={1.5}>
                     {DEMONTAGES.map((demontage, index) => (
-                        <Paper
-                            key={index}
+                        <Box
                             onClick={() => !disabled && handleDemontageChange(demontage, !demontages[demontage])}
-                            sx={{
-                                p: 2,
-                                bgcolor: demontages[demontage] ? '#eff6ff' : 'white',
-                                border: demontages[demontage] ? '2px solid #2563eb' : '1px solid #e2e8f0',
-                                transition: 'all 0.2s',
-                                cursor: disabled ? 'default' : 'pointer',
-                                '&:hover': !disabled ? {
-                                    borderColor: '#2563eb',
-                                    boxShadow: '0 2px 8px rgba(37, 99, 235, 0.1)',
-                                } : {},
-                            }}
-                            elevation={0}
+                            sx={{ cursor: disabled ? 'default' : 'pointer' }}
                         >
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        checked={demontages[demontage] || false}
-                                        onChange={(e) => handleDemontageChange(demontage, e.target.checked)}
-                                        disabled={disabled}
-                                        sx={{
-                                            color: '#94a3b8',
-                                            '&.Mui-checked': {
-                                                color: '#2563eb',
-                                            },
-                                        }}
-                                    />
-                                }
-                                label={
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            color: demontages[demontage] ? '#1e293b' : '#64748b',
-                                            fontWeight: demontages[demontage] ? 600 : 400
-                                        }}
-                                    >
-                                        {demontage}
-                                    </Typography>
-                                }
-                            />
-                        </Paper>
+                            <Paper
+                                key={index}
+                                sx={{
+                                    p: 2,
+                                    bgcolor: demontages[demontage] ? '#eff6ff' : 'white',
+                                    border: demontages[demontage] ? '2px solid #2563eb' : '1px solid #e2e8f0',
+                                    transition: 'all 0.2s',
+
+                                    '&:hover': !disabled ? {
+                                        borderColor: '#2563eb',
+                                        boxShadow: '0 2px 8px rgba(37, 99, 235, 0.1)',
+                                    } : {},
+                                }}
+                                elevation={0}
+                            >
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={demontages[demontage] || false}
+                                            onChange={(e) => {
+                                                e.stopPropagation();
+                                                handleDemontageChange(demontage, e.target.checked);
+                                            }}
+                                            disabled={disabled}
+                                            sx={{
+                                                color: '#94a3b8',
+                                                '&.Mui-checked': {
+                                                    color: '#2563eb',
+                                                },
+                                                pointerEvents: 'auto',
+                                            }}
+                                        />
+                                    }
+                                    label={
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                color: demontages[demontage] ? '#1e293b' : '#64748b',
+                                                fontWeight: demontages[demontage] ? 600 : 400,
+                                                userSelect: 'none',
+                                            }}
+                                        >
+                                            {demontage}
+                                        </Typography>
+                                    }
+                                    sx={{ width: '100%', m: 0, userSelect: 'none', pointerEvents: 'none' }}
+                                />
+                            </Paper>
+                        </Box>
                     ))}
                 </Stack>
 

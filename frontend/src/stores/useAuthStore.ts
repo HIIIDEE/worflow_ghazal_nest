@@ -39,6 +39,10 @@ export const useAuthStore = create<AuthState>()(
                     const response = await authApi.login(credentials);
                     const { access_token, user } = response.data;
 
+                    // Synchronize token with localStorage immediately for axios interceptor
+                    localStorage.setItem('token', access_token);
+                    localStorage.setItem('user', JSON.stringify(user));
+
                     set({
                         user,
                         token: access_token,
@@ -51,11 +55,17 @@ export const useAuthStore = create<AuthState>()(
                 }
             },
 
-            logout: () => set({
-                user: null,
-                token: null,
-                isAuthenticated: false,
-            }),
+            logout: () => {
+                // Clear localStorage
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+
+                set({
+                    user: null,
+                    token: null,
+                    isAuthenticated: false,
+                });
+            },
 
             updateUser: (updates) => set((state) => ({
                 user: state.user ? { ...state.user, ...updates } : null,

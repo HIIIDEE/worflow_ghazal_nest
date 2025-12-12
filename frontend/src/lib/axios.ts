@@ -23,10 +23,17 @@ axiosInstance.interceptors.request.use((config) => {
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
-        // Optional: Handle global errors like 401 Unauthorized
+        // Handle global errors like 401 Unauthorized
         if (error.response?.status === 401) {
-            // Handle logout or redirect logic here if needed
-            // For now, just reject
+            // Clear authentication data
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('auth-storage');
+
+            // Redirect to login page
+            if (window.location.pathname !== '/login') {
+                window.location.href = '/login';
+            }
         }
         return Promise.reject(error);
     }

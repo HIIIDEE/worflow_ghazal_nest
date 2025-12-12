@@ -79,43 +79,58 @@ export default function Etape1Form({ formData, onChange, disabled = false }: Eta
 
         <Stack spacing={1.5}>
           {CONTROLES.map((controle, index) => (
-            <Paper
-              key={index}
-              sx={{
-                p: 2,
-                bgcolor: controles[controle] ? '#eff6ff' : 'white',
-                border: controles[controle] ? '2px solid #2563eb' : '1px solid #e2e8f0',
-                transition: 'all 0.2s'
-              }}
-              elevation={0}
+            <Box
+              onClick={() => !disabled && handleControleChange(controle, !controles[controle])}
+              sx={{ cursor: disabled ? 'default' : 'pointer' }}
             >
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={controles[controle] || false}
-                    onChange={(e) => handleControleChange(controle, e.target.checked)}
-                    disabled={disabled}
-                    sx={{
-                      color: '#94a3b8',
-                      '&.Mui-checked': {
-                        color: '#2563eb',
-                      },
-                    }}
-                  />
-                }
-                label={
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: controles[controle] ? '#1e293b' : '#64748b',
-                      fontWeight: controles[controle] ? 600 : 400
-                    }}
-                  >
-                    {controle}
-                  </Typography>
-                }
-              />
-            </Paper>
+              <Paper
+                key={index}
+                sx={{
+                  p: 2,
+                  bgcolor: controles[controle] ? '#eff6ff' : 'white',
+                  border: controles[controle] ? '2px solid #2563eb' : '1px solid #e2e8f0',
+                  transition: 'all 0.2s',
+
+                  '&:hover': !disabled ? {
+                    bgcolor: controles[controle] ? '#dbeafe' : '#f8fafc',
+                    borderColor: '#2563eb'
+                  } : {}
+                }}
+                elevation={0}
+              >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={controles[controle] || false}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        handleControleChange(controle, e.target.checked);
+                      }}
+                      disabled={disabled}
+                      sx={{
+                        color: '#94a3b8',
+                        '&.Mui-checked': {
+                          color: '#2563eb',
+                        },
+                        pointerEvents: 'auto',
+                      }}
+                    />
+                  }
+                  label={
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: controles[controle] ? '#1e293b' : '#64748b',
+                        fontWeight: controles[controle] ? 600 : 400
+                      }}
+                    >
+                      {controle}
+                    </Typography>
+                  }
+                  sx={{ width: '100%', m: 0, userSelect: 'none', pointerEvents: 'none' }}
+                />
+              </Paper>
+            </Box>
           ))}
         </Stack>
 

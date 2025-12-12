@@ -202,48 +202,56 @@ export default function Etape8Form({ formData, onChange, disabled = false }: Eta
 
                                             return (
                                                 <Grid size={{ xs: 12, md: 6 }} key={index}>
-                                                    <Paper
+                                                    <Box
                                                         onClick={() => !disabled && handleSectionChange(sectionKey, item, !isChecked)}
-                                                        sx={{
-                                                            p: 1.5,
-                                                            bgcolor: isChecked ? '#eff6ff' : 'white',
-                                                            border: isChecked ? '2px solid #2563eb' : '1px solid #e2e8f0',
-                                                            transition: 'all 0.2s',
-                                                            cursor: disabled ? 'default' : 'pointer',
-                                                            '&:hover': !disabled ? {
-                                                                borderColor: '#2563eb',
-                                                                boxShadow: '0 2px 8px rgba(37, 99, 235, 0.1)',
-                                                            } : {},
-                                                        }}
-                                                        elevation={0}
+                                                        sx={{ height: '100%', cursor: disabled ? 'default' : 'pointer' }}
                                                     >
-                                                        <FormControlLabel
-                                                            control={
-                                                                <Checkbox
-                                                                    checked={isChecked}
-                                                                    onChange={(e) => handleSectionChange(sectionKey, item, e.target.checked)}
-                                                                    disabled={disabled}
-                                                                    sx={{
-                                                                        color: '#94a3b8',
-                                                                        '&.Mui-checked': {
-                                                                            color: '#2563eb',
-                                                                        },
-                                                                    }}
-                                                                />
-                                                            }
-                                                            label={
-                                                                <Typography
-                                                                    variant="body2"
-                                                                    sx={{
-                                                                        color: isChecked ? '#1e293b' : '#64748b',
-                                                                        fontWeight: isChecked ? 600 : 400,
-                                                                    }}
-                                                                >
-                                                                    {item}
-                                                                </Typography>
-                                                            }
-                                                        />
-                                                    </Paper>
+                                                        <Paper
+                                                            sx={{
+                                                                p: 1.5,
+                                                                bgcolor: isChecked ? '#eff6ff' : 'white',
+                                                                border: isChecked ? '2px solid #2563eb' : '1px solid #e2e8f0',
+                                                                transition: 'all 0.2s',
+                                                                '&:hover': !disabled ? {
+                                                                    borderColor: '#2563eb',
+                                                                    boxShadow: '0 2px 8px rgba(37, 99, 235, 0.1)',
+                                                                } : {},
+                                                            }}
+                                                            elevation={0}
+                                                        >
+                                                            <FormControlLabel
+                                                                control={
+                                                                    <Checkbox
+                                                                        checked={isChecked}
+                                                                        onChange={(e) => {
+                                                                            e.stopPropagation();
+                                                                            handleSectionChange(sectionKey, item, e.target.checked);
+                                                                        }}
+                                                                        disabled={disabled}
+                                                                        sx={{
+                                                                            color: '#94a3b8',
+                                                                            '&.Mui-checked': {
+                                                                                color: '#2563eb',
+                                                                            },
+                                                                            pointerEvents: 'auto',
+                                                                        }}
+                                                                    />
+                                                                }
+                                                                label={
+                                                                    <Typography
+                                                                        variant="body2"
+                                                                        sx={{
+                                                                            color: isChecked ? '#1e293b' : '#64748b',
+                                                                            fontWeight: isChecked ? 600 : 400,
+                                                                        }}
+                                                                    >
+                                                                        {item}
+                                                                    </Typography>
+                                                                }
+                                                                sx={{ width: '100%', m: 0, userSelect: 'none', pointerEvents: 'none' }}
+                                                            />
+                                                        </Paper>
+                                                    </Box>
                                                 </Grid>
                                             );
                                         })}

@@ -53,49 +53,57 @@ export default function Etape10Form({ formData, onChange, disabled = false }: Et
                 <Grid container spacing={1.5}>
                     {CONTROLES.map((controle, index) => (
                         <Grid size={{ xs: 12, md: 6 }} key={index}>
-                            <Paper
+                            <Box
                                 onClick={() => !disabled && handleControleChange(controle, !controles[controle])}
-                                sx={{
-                                    p: 2,
-                                    bgcolor: controles[controle] ? '#eff6ff' : 'white',
-                                    border: controles[controle] ? '2px solid #2563eb' : '1px solid #e2e8f0',
-                                    transition: 'all 0.2s',
-                                    height: '100%',
-                                    cursor: disabled ? 'default' : 'pointer',
-                                    '&:hover': !disabled ? {
-                                        borderColor: '#2563eb',
-                                        boxShadow: '0 2px 8px rgba(37, 99, 235, 0.1)',
-                                    } : {},
-                                }}
-                                elevation={0}
+                                sx={{ height: '100%', cursor: disabled ? 'default' : 'pointer' }}
                             >
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            checked={controles[controle] || false}
-                                            onChange={(e) => handleControleChange(controle, e.target.checked)}
-                                            disabled={disabled}
-                                            sx={{
-                                                color: '#94a3b8',
-                                                '&.Mui-checked': {
-                                                    color: '#2563eb',
-                                                },
-                                            }}
-                                        />
-                                    }
-                                    label={
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                color: controles[controle] ? '#1e293b' : '#64748b',
-                                                fontWeight: controles[controle] ? 600 : 400
-                                            }}
-                                        >
-                                            {controle}
-                                        </Typography>
-                                    }
-                                />
-                            </Paper>
+                                <Paper
+                                    sx={{
+                                        p: 2,
+                                        bgcolor: controles[controle] ? '#eff6ff' : 'white',
+                                        border: controles[controle] ? '2px solid #2563eb' : '1px solid #e2e8f0',
+                                        transition: 'all 0.2s',
+                                        height: '100%',
+                                        '&:hover': !disabled ? {
+                                            borderColor: '#2563eb',
+                                            boxShadow: '0 2px 8px rgba(37, 99, 235, 0.1)',
+                                        } : {},
+                                    }}
+                                    elevation={0}
+                                >
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={controles[controle] || false}
+                                                onChange={(e) => {
+                                                    e.stopPropagation();
+                                                    handleControleChange(controle, e.target.checked);
+                                                }}
+                                                disabled={disabled}
+                                                sx={{
+                                                    color: '#94a3b8',
+                                                    '&.Mui-checked': {
+                                                        color: '#2563eb',
+                                                    },
+                                                    pointerEvents: 'auto',
+                                                }}
+                                            />
+                                        }
+                                        label={
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    color: controles[controle] ? '#1e293b' : '#64748b',
+                                                    fontWeight: controles[controle] ? 600 : 400
+                                                }}
+                                            >
+                                                {controle}
+                                            </Typography>
+                                        }
+                                        sx={{ width: '100%', m: 0, userSelect: 'none', pointerEvents: 'none' }}
+                                    />
+                                </Paper>
+                            </Box>
                         </Grid>
                     ))}
                 </Grid>
