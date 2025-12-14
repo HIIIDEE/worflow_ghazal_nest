@@ -1,6 +1,7 @@
 import { PrismaService } from '../prisma.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
+import { PaginationDto, PaginatedResponse } from '../common/dto/pagination.dto';
 import { WorkflowsService } from '../workflows/workflows.service';
 export declare class VehiclesService {
     private prisma;
@@ -106,31 +107,7 @@ export declare class VehiclesService {
         dateAnnulation: Date | null;
         annulePar: string | null;
     }) | null>;
-    findAll(): Promise<({
-        workflows: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            statut: import("@prisma/client").$Enums.WorkflowStatus;
-            dateDebut: Date;
-            dateFin: Date | null;
-            vehicleId: string;
-            etapeActuelle: number;
-            raisonAnnulation: string | null;
-            dateAnnulation: Date | null;
-            annulePar: string | null;
-        }[];
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        immatriculation: string;
-        marque: string;
-        modele: string;
-        annee: number;
-        numeroSerie: string;
-        creePar: string | null;
-    })[]>;
+    findAll(paginationDto: PaginationDto): Promise<PaginatedResponse<any>>;
     findOne(id: string): Promise<({
         workflows: ({
             etapes: {

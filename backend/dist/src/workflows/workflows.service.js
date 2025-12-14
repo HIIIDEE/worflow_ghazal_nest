@@ -47,8 +47,13 @@ let WorkflowsService = class WorkflowsService {
             return createdWorkflow;
         });
     }
-    async findAll() {
+    async findAll(paginationDto) {
+        const { page = 1, limit = 10 } = paginationDto;
+        const skip = (page - 1) * limit;
+        const total = await this.prisma.workflow.count();
         const workflows = await this.prisma.workflow.findMany({
+            skip,
+            take: limit,
             include: {
                 vehicle: true,
                 etapes: {
@@ -75,8 +80,11 @@ let WorkflowsService = class WorkflowsService {
                     },
                 },
             },
+            orderBy: {
+                createdAt: 'desc',
+            },
         });
-        return workflows.map(workflow => ({
+        const data = workflows.map(workflow => ({
             ...workflow,
             duration: this.calculateWorkflowDuration(workflow),
             etapes: workflow.etapes.map(etape => ({
@@ -84,6 +92,18 @@ let WorkflowsService = class WorkflowsService {
                 duration: this.calculateStepDuration(etape),
             })),
         }));
+        const totalPages = Math.ceil(total / limit);
+        return {
+            data,
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages,
+                hasNext: page < totalPages,
+                hasPrevious: page > 1,
+            },
+        };
     }
     async findOne(id) {
         const workflow = await this.prisma.workflow.findUnique({

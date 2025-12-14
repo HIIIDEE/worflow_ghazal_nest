@@ -1,15 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { authApi } from '../features/auth/services/auth.api';
-
-interface User {
-    id: string;
-    email: string;
-    nom: string;
-    prenom: string;
-    role: 'ADMIN' | 'GESTIONNAIRE' | 'TECHNICIEN';
-    isActive: boolean;
-}
+import type { User } from '../features/auth/types';
 
 interface AuthState {
     user: User | null;

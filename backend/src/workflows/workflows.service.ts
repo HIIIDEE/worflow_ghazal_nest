@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma.service';
 import { CreateWorkflowDto } from './dto/create-workflow.dto';
 import { UpdateWorkflowDto } from './dto/update-workflow.dto';
 import { UpdateEtapeDto } from './dto/update-etape.dto';
+import { PaginationDto, PaginatedResponse } from '../common/dto/pagination.dto';
 import { PermissionType } from '../common/enums/permission-type.enum';
 import { WorkflowsGateway } from './workflows.gateway';
 
@@ -47,8 +48,17 @@ export class WorkflowsService {
     });
   }
 
-  async findAll() {
+  async findAll(paginationDto: PaginationDto): Promise<PaginatedResponse<any>> {
+    const { page = 1, limit = 10 } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    // Get total count
+    const total = await this.prisma.workflow.count();
+
+    // Get paginated data
     const workflows = await this.prisma.workflow.findMany({
+      skip,
+      take: limit,
       include: {
         vehicle: true,
         etapes: {
@@ -75,10 +85,13 @@ export class WorkflowsService {
           },
         },
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
 
     // Add duration to each workflow
-    return workflows.map(workflow => ({
+    const data = workflows.map(workflow => ({
       ...workflow,
       duration: this.calculateWorkflowDuration(workflow),
       etapes: workflow.etapes.map(etape => ({
@@ -86,6 +99,21 @@ export class WorkflowsService {
         duration: this.calculateStepDuration(etape),
       })),
     }));
+
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrevious: page > 1,
+      },
+    };
   }
 
 

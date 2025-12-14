@@ -43,7 +43,9 @@ export default function WorkflowsPage() {
     queryKey: ['workflows'],
     queryFn: async () => {
       const response = await workflowsApi.getAll();
-      return response.data;
+      // Backend now returns paginated response: { data: [], meta: {} }
+      // Extract the array from the paginated response
+      return response.data?.data || response.data;
     },
   });
 

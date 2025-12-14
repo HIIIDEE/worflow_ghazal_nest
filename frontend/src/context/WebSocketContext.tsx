@@ -13,12 +13,26 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const [isConnected, setIsConnected] = useState(false);
 
     useEffect(() => {
-        // Connect to WebSocket server
-        const socketInstance = io('http://localhost:3000', {
+        // Connect to WebSocket server using environment variable
+        const wsUrl = import.meta.env.VITE_WS_URL || 'http://localhost:3000';
+
+        // Get authentication token from localStorage
+        const token = localStorage.getItem('token');
+
+        // Don't connect if no token available
+        if (!token) {
+            console.log('⚠️ No authentication token available, skipping WebSocket connection');
+            return;
+        }
+
+        const socketInstance = io(wsUrl, {
             transports: ['websocket'],
             reconnection: true,
             reconnectionDelay: 1000,
             reconnectionAttempts: 5,
+            auth: {
+                token: token, // Send JWT token for authentication
+            },
         });
 
         socketInstance.on('connect', () => {

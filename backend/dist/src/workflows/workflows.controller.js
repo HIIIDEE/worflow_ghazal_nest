@@ -14,11 +14,13 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WorkflowsController = void 0;
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
 const workflows_service_1 = require("./workflows.service");
 const create_workflow_dto_1 = require("./dto/create-workflow.dto");
 const update_workflow_dto_1 = require("./dto/update-workflow.dto");
 const update_etape_dto_1 = require("./dto/update-etape.dto");
 const cancel_workflow_dto_1 = require("./dto/cancel-workflow.dto");
+const pagination_dto_1 = require("../common/dto/pagination.dto");
 const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
 const current_user_decorator_1 = require("../common/decorators/current-user.decorator");
 const cache_manager_1 = require("@nestjs/cache-manager");
@@ -30,8 +32,8 @@ let WorkflowsController = class WorkflowsController {
     create(createWorkflowDto) {
         return this.workflowsService.create(createWorkflowDto);
     }
-    findAll() {
-        return this.workflowsService.findAll();
+    findAll(paginationDto) {
+        return this.workflowsService.findAll(paginationDto);
     }
     getStatistics() {
         return this.workflowsService.getStatistics();
@@ -70,14 +72,15 @@ __decorate([
 ], WorkflowsController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [pagination_dto_1.PaginationDto]),
     __metadata("design:returntype", void 0)
 ], WorkflowsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)('statistics'),
     (0, common_1.UseInterceptors)(cache_manager_1.CacheInterceptor),
-    (0, cache_manager_1.CacheTTL)(30000),
+    (0, cache_manager_1.CacheTTL)(60000),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
@@ -141,6 +144,8 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], WorkflowsController.prototype, "remove", null);
 exports.WorkflowsController = WorkflowsController = __decorate([
+    (0, swagger_1.ApiTags)('workflows'),
+    (0, swagger_1.ApiBearerAuth)('JWT-auth'),
     (0, common_1.Controller)('workflows'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:paramtypes", [workflows_service_1.WorkflowsService])

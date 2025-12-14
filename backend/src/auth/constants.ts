@@ -1,3 +1,5 @@
 export const jwtConstants = {
-    secret: 'SECRET_KEY_A_REMPLACER_PAR_ENV_VAR', // TODO: Utiliser une variable d'environnement
+    secret: process.env.JWT_SECRET || (() => {
+        throw new Error('JWT_SECRET is not defined in environment variables');
+    })(),
 };

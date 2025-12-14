@@ -14,9 +14,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VehiclesController = void 0;
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
 const vehicles_service_1 = require("./vehicles.service");
 const create_vehicle_dto_1 = require("./dto/create-vehicle.dto");
 const update_vehicle_dto_1 = require("./dto/update-vehicle.dto");
+const pagination_dto_1 = require("../common/dto/pagination.dto");
 const current_user_decorator_1 = require("../common/decorators/current-user.decorator");
 const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
 let VehiclesController = class VehiclesController {
@@ -33,8 +35,8 @@ let VehiclesController = class VehiclesController {
     getVehicleWorkflow(id) {
         return this.vehiclesService.getVehicleWorkflow(id);
     }
-    findAll() {
-        return this.vehiclesService.findAll();
+    findAll(paginationDto) {
+        return this.vehiclesService.findAll(paginationDto);
     }
     findOne(id) {
         return this.vehiclesService.findOne(id);
@@ -71,8 +73,9 @@ __decorate([
 ], VehiclesController.prototype, "getVehicleWorkflow", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [pagination_dto_1.PaginationDto]),
     __metadata("design:returntype", void 0)
 ], VehiclesController.prototype, "findAll", null);
 __decorate([
@@ -98,6 +101,8 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], VehiclesController.prototype, "remove", null);
 exports.VehiclesController = VehiclesController = __decorate([
+    (0, swagger_1.ApiTags)('vehicles'),
+    (0, swagger_1.ApiBearerAuth)('JWT-auth'),
     (0, common_1.Controller)('vehicles'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:paramtypes", [vehicles_service_1.VehiclesService])

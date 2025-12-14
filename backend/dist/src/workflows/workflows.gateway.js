@@ -14,14 +14,40 @@ exports.WorkflowsGateway = void 0;
 const websockets_1 = require("@nestjs/websockets");
 const socket_io_1 = require("socket.io");
 const common_1 = require("@nestjs/common");
+const jwt_1 = require("@nestjs/jwt");
 let WorkflowsGateway = WorkflowsGateway_1 = class WorkflowsGateway {
+    jwtService;
     server;
     logger = new common_1.Logger(WorkflowsGateway_1.name);
-    handleConnection(client) {
-        this.logger.log(`Client connected: ${client.id}`);
+    authenticatedClients = new Map();
+    constructor(jwtService) {
+        this.jwtService = jwtService;
+    }
+    async handleConnection(client) {
+        try {
+            const token = client.handshake.auth.token || client.handshake.headers.authorization?.split(' ')[1];
+            if (!token) {
+                this.logger.warn(`Client ${client.id} tried to connect without token`);
+                client.disconnect();
+                return;
+            }
+            const payload = await this.jwtService.verifyAsync(token);
+            this.authenticatedClients.set(client.id, {
+                userId: payload.sub,
+                email: payload.email,
+                role: payload.role,
+            });
+            this.logger.log(`Client connected: ${client.id} (User: ${payload.email})`);
+        }
+        catch (error) {
+            this.logger.error(`Authentication failed for client ${client.id}:`, error.message);
+            client.disconnect();
+        }
     }
     handleDisconnect(client) {
-        this.logger.log(`Client disconnected: ${client.id}`);
+        const user = this.authenticatedClients.get(client.id);
+        this.logger.log(`Client disconnected: ${client.id}${user ? ` (User: ${user.email})` : ''}`);
+        this.authenticatedClients.delete(client.id);
     }
     emitWorkflowCreated(workflow) {
         this.logger.log(`Emitting workflowCreated event for workflow ${workflow.id}`);
@@ -48,9 +74,10 @@ __decorate([
 exports.WorkflowsGateway = WorkflowsGateway = WorkflowsGateway_1 = __decorate([
     (0, websockets_1.WebSocketGateway)({
         cors: {
-            origin: 'http://localhost:5173',
+            origin: process.env.FRONTEND_URL || 'http://localhost:5173',
             credentials: true,
         },
-    })
+    }),
+    __metadata("design:paramtypes", [jwt_1.JwtService])
 ], WorkflowsGateway);
 //# sourceMappingURL=workflows.gateway.js.map

@@ -15,6 +15,7 @@ import DashboardPage from './pages/DashboardPage';
 import MainLayout from './layouts/MainLayout';
 import { useAuth } from './stores/useAuthStore';
 import { WebSocketProvider } from './context/WebSocketContext';
+import { OnlineStatusIndicator } from './components/OnlineStatusIndicator';
 import theme from './theme/theme';
 import './App.css';
 
@@ -66,6 +67,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+        <OnlineStatusIndicator />
         <WebSocketProvider>
           <BrowserRouter>
             <Routes>

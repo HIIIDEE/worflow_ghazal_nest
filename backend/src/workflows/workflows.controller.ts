@@ -1,13 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, Query } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { WorkflowsService } from './workflows.service';
 import { CreateWorkflowDto } from './dto/create-workflow.dto';
 import { UpdateWorkflowDto } from './dto/update-workflow.dto';
 import { UpdateEtapeDto } from './dto/update-etape.dto';
 import { CancelWorkflowDto } from './dto/cancel-workflow.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 
+@ApiTags('workflows')
+@ApiBearerAuth('JWT-auth')
 @Controller('workflows')
 @UseGuards(JwtAuthGuard)
 export class WorkflowsController {
@@ -19,13 +23,13 @@ export class WorkflowsController {
   }
 
   @Get()
-  findAll() {
-    return this.workflowsService.findAll();
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.workflowsService.findAll(paginationDto);
   }
 
   @Get('statistics')
   @UseInterceptors(CacheInterceptor)
-  @CacheTTL(30000) // Cache for 30 seconds
+  @CacheTTL(60000) // Cache for 60 seconds
   getStatistics() {
     return this.workflowsService.getStatistics();
   }

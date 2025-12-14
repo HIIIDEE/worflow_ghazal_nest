@@ -53,6 +53,8 @@ model Vehicle {
   @@index([marque])
   @@index([modele])
   @@index([annee])
+  @@index([createdAt])
+  @@index([immatriculation, numeroSerie])
   @@map("vehicles")
 }
 
@@ -75,6 +77,8 @@ model Workflow {
   @@index([etapeActuelle])
   @@index([vehicleId])
   @@index([dateDebut])
+  @@index([createdAt])
+  @@index([statut, createdAt])
   @@map("workflows")
 }
 

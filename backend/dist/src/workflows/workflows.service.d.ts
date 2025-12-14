@@ -2,6 +2,7 @@ import { PrismaService } from '../prisma.service';
 import { CreateWorkflowDto } from './dto/create-workflow.dto';
 import { UpdateWorkflowDto } from './dto/update-workflow.dto';
 import { UpdateEtapeDto } from './dto/update-etape.dto';
+import { PaginationDto, PaginatedResponse } from '../common/dto/pagination.dto';
 import { WorkflowsGateway } from './workflows.gateway';
 export declare class WorkflowsService {
     private prisma;
@@ -64,63 +65,7 @@ export declare class WorkflowsService {
         dateAnnulation: Date | null;
         annulePar: string | null;
     } | null>;
-    findAll(): Promise<{
-        duration: number | null;
-        etapes: {
-            duration: number | null;
-            technicien: {
-                id: string;
-                nom: string;
-                prenom: string;
-                specialite: string | null;
-            } | null;
-            valideParUser: {
-                id: string;
-                email: string;
-                nom: string;
-                prenom: string;
-            } | null;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            numeroEtape: number;
-            description: string | null;
-            workflowId: string;
-            nomEtape: string;
-            statut: import("@prisma/client").$Enums.EtapeStatus;
-            formulaire: import("@prisma/client/runtime/client").JsonValue | null;
-            dateDebut: Date | null;
-            dateFin: Date | null;
-            validePar: string | null;
-            valideParId: string | null;
-            technicienId: string | null;
-            signatureGestionnaire: string | null;
-            signatureTechnicien: string | null;
-            commentaires: string | null;
-        }[];
-        vehicle: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            immatriculation: string;
-            marque: string;
-            modele: string;
-            annee: number;
-            numeroSerie: string;
-            creePar: string | null;
-        };
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        statut: import("@prisma/client").$Enums.WorkflowStatus;
-        dateDebut: Date;
-        dateFin: Date | null;
-        vehicleId: string;
-        etapeActuelle: number;
-        raisonAnnulation: string | null;
-        dateAnnulation: Date | null;
-        annulePar: string | null;
-    }[]>;
+    findAll(paginationDto: PaginationDto): Promise<PaginatedResponse<any>>;
     findOne(id: string): Promise<{
         duration: number | null;
         etapes: {

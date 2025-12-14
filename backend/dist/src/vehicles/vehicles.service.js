@@ -69,12 +69,35 @@ let VehiclesService = class VehiclesService {
         });
         return workflow;
     }
-    async findAll() {
-        return this.prisma.vehicle.findMany({
+    async findAll(paginationDto) {
+        const { page = 1, limit = 10 } = paginationDto;
+        const skip = (page - 1) * limit;
+        const total = await this.prisma.vehicle.count();
+        const data = await this.prisma.vehicle.findMany({
+            skip,
+            take: limit,
             include: {
-                workflows: true,
+                workflows: {
+                    orderBy: { createdAt: 'desc' },
+                    take: 1,
+                },
+            },
+            orderBy: {
+                createdAt: 'desc',
             },
         });
+        const totalPages = Math.ceil(total / limit);
+        return {
+            data,
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages,
+                hasNext: page < totalPages,
+                hasPrevious: page > 1,
+            },
+        };
     }
     async findOne(id) {
         return this.prisma.vehicle.findUnique({

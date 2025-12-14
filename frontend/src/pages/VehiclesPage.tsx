@@ -32,7 +32,9 @@ export default function VehiclesPage() {
     queryKey: ['vehicles'],
     queryFn: async () => {
       const response = await vehiclesApi.getAll();
-      return response.data;
+      // Backend now returns paginated response: { data: [], meta: {} }
+      // Extract the array from the paginated response
+      return response.data?.data || response.data;
     },
   });
 
@@ -43,6 +45,11 @@ export default function VehiclesPage() {
       handleClose();
       setSnackbar({ open: true, message: 'Véhicule créé avec succès' });
     },
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.message || 'Erreur lors de la création du véhicule';
+      const errorMessages = Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage;
+      setSnackbar({ open: true, message: errorMessages });
+    },
   });
 
   const updateVehicleMutation = useMutation({
@@ -52,6 +59,11 @@ export default function VehiclesPage() {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
       handleClose();
       setSnackbar({ open: true, message: 'Véhicule modifié avec succès' });
+    },
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.message || 'Erreur lors de la modification du véhicule';
+      const errorMessages = Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage;
+      setSnackbar({ open: true, message: errorMessages });
     },
   });
 
