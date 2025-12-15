@@ -15,7 +15,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, // Remove properties that are not in the DTO
-      forbidNonWhitelisted: false, // Don't throw error, just strip unknown properties
+      forbidNonWhitelisted: true, // Don't throw error, just strip unknown properties
       transform: true, // Automatically transform payloads to DTO instances
       transformOptions: {
         enableImplicitConversion: true, // Convert types automatically (string to number, etc.)
@@ -27,18 +27,19 @@ async function bootstrap() {
   app.use(compression());
 
   // CORS configuration with environment variables
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const frontendUrl = process.env.FRONTEND_URL || 'https://www.ghazal.dz/workflow';
   const corsOrigins = process.env.NODE_ENV === 'production'
     ? frontendUrl.split(',') // Support multiple origins in production
-    : [frontendUrl, 'http://localhost:5173']; // Allow localhost in development
+    : [frontendUrl, 'https://www.ghazal.dz/workflow']; // Allow localhost in development
 
   app.enableCors({
-    origin: corsOrigins,
+    origin: "*",
+    allowedHeaders : "*",
     credentials: true,
   });
 
   // API prefix from environment
-  const apiPrefix = process.env.API_PREFIX || 'api';
+  const apiPrefix = process.env.API_PREFIX || 'apiworkflow';
   app.setGlobalPrefix(apiPrefix);
 
   // Swagger/OpenAPI documentation

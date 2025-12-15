@@ -16,22 +16,23 @@ async function bootstrap() {
     });
     app.useGlobalPipes(new common_1.ValidationPipe({
         whitelist: true,
-        forbidNonWhitelisted: false,
+        forbidNonWhitelisted: true,
         transform: true,
         transformOptions: {
             enableImplicitConversion: true,
         },
     }));
     app.use((0, compression_1.default)());
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://www.ghazal.dz/workflow';
     const corsOrigins = process.env.NODE_ENV === 'production'
         ? frontendUrl.split(',')
-        : [frontendUrl, 'http://localhost:5173'];
+        : [frontendUrl, 'https://www.ghazal.dz/workflow'];
     app.enableCors({
-        origin: corsOrigins,
+        origin: "*",
+        allowedHeaders: "*",
         credentials: true,
     });
-    const apiPrefix = process.env.API_PREFIX || 'api';
+    const apiPrefix = process.env.API_PREFIX || 'apiworkflow';
     app.setGlobalPrefix(apiPrefix);
     const config = new swagger_1.DocumentBuilder()
         .setTitle('WorkflowGhazal API')

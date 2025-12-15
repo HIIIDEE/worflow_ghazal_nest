@@ -1,0 +1,37 @@
+version: '2.36.0'
+
+services:
+  postgres_db_ghazal_workflow:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_password
+      POSTGRES_DB: workflow
+    ports:
+      - '5433:5432'
+    volumes:
+      - pgdata_ghazal_workflow:/var/lib/postgresql/data
+    restart: always
+
+  nestjs_ghazal_workflow:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - '3010:3000'
+    depends_on:
+      - postgres_db_ghazal_workflow
+    environment:
+      DATABASE_HOST: postgres_db_ghazal_workflow
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: your_password
+      DATABASE_NAME: workflow
+    command: npm run start:dev
+    restart: always
+
+volumes:
+  pgdata_ghazal_workflow:
