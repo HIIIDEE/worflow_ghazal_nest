@@ -10,7 +10,6 @@ import {
   IconButton,
   Tooltip,
   Badge as MuiBadge,
-  Alert,
 } from '@mui/material';
 import {
   FormatPaint as FormatPaintIcon,
@@ -59,7 +58,7 @@ export default function CarInspectionAnnotator({
   const [selectedAnomalyId, setSelectedAnomalyId] = useState<number | null>(null);
   const [hoveredMarkerId, setHoveredMarkerId] = useState<string | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
+
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
   const handleAnomalySelect = (_event: React.MouseEvent<HTMLElement>, value: number | null) => {
@@ -171,23 +170,17 @@ export default function CarInspectionAnnotator({
           border: selectedAnomalyId ? '2px solid #2563eb' : '2px solid #e2e8f0',
           overflow: 'hidden',
           transition: 'border-color 0.2s',
-          bgcolor: imageError ? '#f1f5f9' : 'transparent',
-          minHeight: imageError ? '200px' : 'auto',
+          bgcolor:  'transparent',
+          minHeight:'auto',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
         onClick={handleImageClick}
       >
-        {imageError ? (
-          <Alert severity="warning" sx={{ m: 2 }}>
-            Impossible de charger l'image car-inspection.png. Veuillez vérifier que l'image existe dans le dossier
-            /public/images/
-          </Alert>
-        ) : (
-          <>
-            <img
-              src="/images/car-inspection.png"
+           <img
+              //src="/car-inspection.png"
+              src={`${import.meta.env.BASE_URL}/car-inspection.png`}
               alt="Inspection du véhicule"
               style={{
                 width: '100%',
@@ -196,7 +189,7 @@ export default function CarInspectionAnnotator({
                 maxWidth: '800px',
               }}
               onLoad={() => setImageLoaded(true)}
-              onError={() => setImageError(true)}
+             
             />
 
             {/* Markers */}
@@ -273,8 +266,6 @@ export default function CarInspectionAnnotator({
                 </Tooltip>
               );
             })}
-          </>
-        )}
       </Paper>
 
       {/* Annotations Summary */}

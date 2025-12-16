@@ -2,16 +2,18 @@
  * Types d'erreurs standardisés pour l'application
  */
 
-export enum ErrorType {
-  VALIDATION = 'VALIDATION_ERROR',
-  AUTHENTICATION = 'AUTHENTICATION_ERROR',
-  AUTHORIZATION = 'AUTHORIZATION_ERROR',
-  NOT_FOUND = 'NOT_FOUND',
-  CONFLICT = 'CONFLICT',
-  SERVER = 'SERVER_ERROR',
-  NETWORK = 'NETWORK_ERROR',
-  UNKNOWN = 'UNKNOWN_ERROR',
-}
+export const ErrorType = {
+  VALIDATION: "VALIDATION_ERROR",
+  AUTHENTICATION: "AUTHENTICATION_ERROR",
+  AUTHORIZATION: "AUTHORIZATION_ERROR",
+  NOT_FOUND: "NOT_FOUND",
+  CONFLICT: "CONFLICT",
+  SERVER: "SERVER_ERROR",
+  NETWORK: "NETWORK_ERROR",
+  UNKNOWN: "UNKNOWN_ERROR",
+} as const;
+
+export type ErrorType = (typeof ErrorType)[keyof typeof ErrorType];
 
 export interface ApiError {
   type: ErrorType;
@@ -22,12 +24,12 @@ export interface ApiError {
 }
 
 export interface ValidationError extends ApiError {
-  type: ErrorType.VALIDATION;
+  type: typeof ErrorType.VALIDATION;
   errors: Record<string, string[]>;
 }
 
 export interface AuthError extends ApiError {
-  type: ErrorType.AUTHENTICATION | ErrorType.AUTHORIZATION;
+  type: typeof ErrorType.AUTHENTICATION | typeof ErrorType.AUTHORIZATION;
 }
 
 /**
@@ -38,7 +40,8 @@ export const parseApiError = (error: any): ApiError => {
   if (!error.response) {
     return {
       type: ErrorType.NETWORK,
-      message: 'Impossible de se connecter au serveur. Vérifiez votre connexion internet.',
+      message:
+        "Impossible de se connecter au serveur. Vérifiez votre connexion internet.",
       statusCode: 0,
     };
   }
@@ -47,37 +50,39 @@ export const parseApiError = (error: any): ApiError => {
 
   // Map status codes to error types
   let errorType: ErrorType;
-  let message: string = data.message || 'Une erreur est survenue';
+  let message: string = data.message || "Une erreur est survenue";
 
   switch (status) {
     case 400:
       errorType = ErrorType.VALIDATION;
       // NestJS validation errors format
       if (Array.isArray(data.message)) {
-        message = data.message.join(', ');
+        message = data.message.join(", ");
       }
       break;
     case 401:
       errorType = ErrorType.AUTHENTICATION;
-      message = 'Vous devez vous connecter pour accéder à cette ressource';
+      message = "Vous devez vous connecter pour accéder à cette ressource";
       break;
     case 403:
       errorType = ErrorType.AUTHORIZATION;
-      message = 'Vous n\'avez pas les permissions nécessaires pour effectuer cette action';
+      message =
+        "Vous n'avez pas les permissions nécessaires pour effectuer cette action";
       break;
     case 404:
       errorType = ErrorType.NOT_FOUND;
-      message = 'La ressource demandée n\'existe pas';
+      message = "La ressource demandée n'existe pas";
       break;
     case 409:
       errorType = ErrorType.CONFLICT;
-      message = data.message || 'Cette ressource existe déjà';
+      message = data.message || "Cette ressource existe déjà";
       break;
     case 500:
     case 502:
     case 503:
       errorType = ErrorType.SERVER;
-      message = 'Une erreur serveur est survenue. Veuillez réessayer plus tard.';
+      message =
+        "Une erreur serveur est survenue. Veuillez réessayer plus tard.";
       break;
     default:
       errorType = ErrorType.UNKNOWN;

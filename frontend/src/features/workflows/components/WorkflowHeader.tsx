@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import InfoIcon from '@mui/icons-material/Info';
-import type { Vehicle } from '../../vehicles/types';
+//import type { Vehicle } from '../../vehicles/types';
 import { getWorkflowDuration, getStatutColor, getStatutBg, getStatutLabel } from '../../../utils/workflowStatus';
+import type { Vehicle } from '../../vehicles/vehicleTypes';
 
 interface WorkflowHeaderProps {
     vehicle?: Vehicle;

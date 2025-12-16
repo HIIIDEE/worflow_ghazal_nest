@@ -67,8 +67,8 @@ export default function VehicleList({ vehicles, onEdit, onDelete }: VehicleListP
             </TableRow>
           ) : (
             paginatedVehicles.map((vehicle) => {
-              const hasWorkflow = vehicle.workflows && vehicle.workflows.length > 0;
-              const workflowId = hasWorkflow ? vehicle.workflows[0].id : null;
+              const hasWorkflow = vehicle?.workflows && vehicle?.workflows?.length > 0;
+              const workflowId = hasWorkflow &&  vehicle?.workflows !== undefined ? vehicle?.workflows[0]?.id : null;
 
               return (
                 <TableRow key={vehicle.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>

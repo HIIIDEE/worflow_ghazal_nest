@@ -14,7 +14,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     useEffect(() => {
         // Connect to WebSocket server using environment variable
-        const wsUrl = import.meta.env.VITE_WS_URL || 'http://localhost:3000';
+//        const wsUrl = import.meta.env.VITE_WS_URL || 'https://www.ghazal.dz/apiworkflow';
 
         // Get authentication token from localStorage
         const token = localStorage.getItem('token');
@@ -25,8 +25,16 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             return;
         }
 
-        const socketInstance = io(wsUrl, {
-            transports: ['websocket'],
+        const socketInstance = io('https://www.ghazal.dz', {
+path: '/apiworkflow/socket.io',
+withCredentials: true,
+  autoConnect: true,
+                //path: '/socket.io',              // ✅ Ajouté
+		transports: ['websocket', 'polling'], // ✅ Modifié (était websocket seulement)
+    reconnectionDelayMax: 5000,      // ✅ Ajouté
+    timeout: 20000,                  // ✅ Ajouté
+
+	    //transports: ['websocket'],
             reconnection: true,
             reconnectionDelay: 1000,
             reconnectionAttempts: 5,

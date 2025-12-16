@@ -69,7 +69,7 @@ function App() {
         <CssBaseline />
         <OnlineStatusIndicator />
         <WebSocketProvider>
-          <BrowserRouter>
+          <BrowserRouter basename="/workflow">
             <Routes>
               <Route path="/login" element={<LoginPage />} />
 

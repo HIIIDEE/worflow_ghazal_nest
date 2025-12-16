@@ -86,7 +86,8 @@ const Step1PdfTemplate = ({ data, vehicle }: { data: any, vehicle: any }) => {
 
                     <Box sx={{ position: 'relative', border: '1px solid #e2e8f0', borderRadius: 2, overflow: 'hidden', mb: 2 }}>
                         <img
-                            src="/images/car-inspection.png"
+                            //src="/images/car-inspection.png"
+			    src={`${import.meta.env.BASE_URL}/car-inspection.png`}
                             alt="Inspection"
                             style={{ width: '100%', display: 'block' }}
                         />

@@ -1,14 +1,22 @@
-import { useState, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { vehiclesApi } from '../features/vehicles/services/vehicles.api';
-import { Container, Box, CircularProgress, Alert, Snackbar, TextField, InputAdornment } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import { useState, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { vehiclesApi } from "../features/vehicles/services/vehicles.api";
+import {
+  Container,
+  Box,
+  CircularProgress,
+  Alert,
+  Snackbar,
+  TextField,
+  InputAdornment,
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 
-import VehiclesHeader from '../features/vehicles/components/VehiclesHeader';
-import VehicleList from '../features/vehicles/components/VehicleList';
-import VehicleCreationDialog from '../features/vehicles/components/VehicleCreationDialog';
-import DeleteConfirmDialog from '../features/vehicles/components/DeleteConfirmDialog';
-import type { Vehicle } from '../features/vehicles/vehicleTypes';
+import VehiclesHeader from "../features/vehicles/components/VehiclesHeader";
+import VehicleList from "../features/vehicles/components/VehicleList";
+import VehicleCreationDialog from "../features/vehicles/components/VehicleCreationDialog";
+import DeleteConfirmDialog from "../features/vehicles/components/DeleteConfirmDialog";
+import type { Vehicle } from "../features/vehicles/vehicleTypes";
 
 export default function VehiclesPage() {
   const queryClient = useQueryClient();
@@ -16,38 +24,50 @@ export default function VehiclesPage() {
   const [editMode, setEditMode] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [vehicleToDelete, setVehicleToDelete] = useState<{ id: string; name: string } | null>(null);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '' });
-  const [searchQuery, setSearchQuery] = useState('');
+  const [vehicleToDelete, setVehicleToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "" });
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [formData, setFormData] = useState({
-    immatriculation: '',
-    marque: 'FIAT',
-    modele: 'Doblo',
+    immatriculation: "",
+    marque: "FIAT",
+    modele: "Doblo",
     annee: new Date().getFullYear(),
-    numeroSerie: '',
+    numeroSerie: "",
   });
 
-  const { data: vehicles, isLoading, error } = useQuery({
-    queryKey: ['vehicles'],
+  const {
+    data: vehicles,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["vehicles"],
     queryFn: async () => {
       const response = await vehiclesApi.getAll();
       // Backend now returns paginated response: { data: [], meta: {} }
       // Extract the array from the paginated response
-      return response.data?.data || response.data;
+      const rawData = response.data as any;
+      return (rawData?.data || rawData) as Vehicle[];
     },
   });
 
   const createVehicleMutation = useMutation({
     mutationFn: (data: typeof formData) => vehiclesApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+      queryClient.invalidateQueries({ queryKey: ["vehicles"] });
       handleClose();
-      setSnackbar({ open: true, message: 'Véhicule créé avec succès' });
+      setSnackbar({ open: true, message: "Véhicule créé avec succès" });
     },
     onError: (error: any) => {
-      const errorMessage = error.response?.data?.message || 'Erreur lors de la création du véhicule';
-      const errorMessages = Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage;
+      const errorMessage =
+        error.response?.data?.message ||
+        "Erreur lors de la création du véhicule";
+      const errorMessages = Array.isArray(errorMessage)
+        ? errorMessage.join(", ")
+        : errorMessage;
       setSnackbar({ open: true, message: errorMessages });
     },
   });
@@ -56,13 +76,17 @@ export default function VehiclesPage() {
     mutationFn: ({ id, data }: { id: string; data: Partial<Vehicle> }) =>
       vehiclesApi.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+      queryClient.invalidateQueries({ queryKey: ["vehicles"] });
       handleClose();
-      setSnackbar({ open: true, message: 'Véhicule modifié avec succès' });
+      setSnackbar({ open: true, message: "Véhicule modifié avec succès" });
     },
     onError: (error: any) => {
-      const errorMessage = error.response?.data?.message || 'Erreur lors de la modification du véhicule';
-      const errorMessages = Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage;
+      const errorMessage =
+        error.response?.data?.message ||
+        "Erreur lors de la modification du véhicule";
+      const errorMessages = Array.isArray(errorMessage)
+        ? errorMessage.join(", ")
+        : errorMessage;
       setSnackbar({ open: true, message: errorMessages });
     },
   });
@@ -70,10 +94,10 @@ export default function VehiclesPage() {
   const deleteVehicleMutation = useMutation({
     mutationFn: (id: string) => vehiclesApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+      queryClient.invalidateQueries({ queryKey: ["vehicles"] });
       setDeleteDialogOpen(false);
       setVehicleToDelete(null);
-      setSnackbar({ open: true, message: 'Véhicule supprimé avec succès' });
+      setSnackbar({ open: true, message: "Véhicule supprimé avec succès" });
     },
   });
 
@@ -83,11 +107,12 @@ export default function VehiclesPage() {
     if (!searchQuery.trim()) return vehicles;
 
     const query = searchQuery.toLowerCase();
-    return vehicles.filter((vehicle) =>
-      vehicle.immatriculation.toLowerCase().includes(query) ||
-      vehicle.marque.toLowerCase().includes(query) ||
-      vehicle.modele.toLowerCase().includes(query) ||
-      vehicle.numeroSerie.toLowerCase().includes(query)
+    return vehicles.filter(
+      (vehicle) =>
+        vehicle.immatriculation.toLowerCase().includes(query) ||
+        vehicle.marque.toLowerCase().includes(query) ||
+        vehicle.modele.toLowerCase().includes(query) ||
+        vehicle.numeroSerie.toLowerCase().includes(query)
     );
   }, [vehicles, searchQuery]);
 
@@ -98,11 +123,11 @@ export default function VehiclesPage() {
     setEditMode(false);
     setEditingVehicle(null);
     setFormData({
-      immatriculation: '',
-      marque: 'FIAT',
-      modele: 'Doblo',
+      immatriculation: "",
+      marque: "FIAT",
+      modele: "Doblo",
       annee: new Date().getFullYear(),
-      numeroSerie: '',
+      numeroSerie: "",
     });
   };
 
@@ -120,7 +145,7 @@ export default function VehiclesPage() {
   };
 
   const handleDelete = (vehicleId: string) => {
-    const vehicle = vehicles?.find(v => v.id === vehicleId);
+    const vehicle = vehicles?.find((v) => v.id === vehicleId);
     if (vehicle) {
       setVehicleToDelete({
         id: vehicleId,
@@ -138,14 +163,15 @@ export default function VehiclesPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: name === 'annee' ? parseInt(value) || new Date().getFullYear() : value
+      [name]:
+        name === "annee" ? parseInt(value) || new Date().getFullYear() : value,
     }));
   };
 
   const handleScanSuccess = (text: string) => {
-    setFormData(prev => ({ ...prev, numeroSerie: text }));
+    setFormData((prev) => ({ ...prev, numeroSerie: text }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -162,7 +188,14 @@ export default function VehiclesPage() {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "60vh",
+        }}
+      >
         <CircularProgress />
       </Box>
     );
@@ -179,7 +212,7 @@ export default function VehiclesPage() {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', py: 6 }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "#f8fafc", py: 6 }}>
       <Container maxWidth="lg">
         <VehiclesHeader onAddClick={handleOpen} />
 
@@ -192,14 +225,14 @@ export default function VehiclesPage() {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{ color: 'text.secondary' }} />
+                  <SearchIcon sx={{ color: "text.secondary" }} />
                 </InputAdornment>
               ),
             }}
             sx={{
-              bgcolor: 'white',
+              bgcolor: "white",
               borderRadius: 2,
-              '& .MuiOutlinedInput-root': {
+              "& .MuiOutlinedInput-root": {
                 borderRadius: 2,
               },
             }}
@@ -219,7 +252,9 @@ export default function VehiclesPage() {
           formData={formData}
           onChange={handleChange}
           onScanSuccess={handleScanSuccess}
-          isPending={createVehicleMutation.isPending || updateVehicleMutation.isPending}
+          isPending={
+            createVehicleMutation.isPending || updateVehicleMutation.isPending
+          }
           editMode={editMode}
         />
 
@@ -227,14 +262,14 @@ export default function VehiclesPage() {
           open={deleteDialogOpen}
           onClose={() => setDeleteDialogOpen(false)}
           onConfirm={handleConfirmDelete}
-          vehicleName={vehicleToDelete?.name || ''}
+          vehicleName={vehicleToDelete?.name || ""}
           isPending={deleteVehicleMutation.isPending}
         />
 
         <Snackbar
           open={snackbar.open}
           autoHideDuration={3000}
-          onClose={() => setSnackbar({ open: false, message: '' })}
+          onClose={() => setSnackbar({ open: false, message: "" })}
           message={snackbar.message}
         />
       </Container>

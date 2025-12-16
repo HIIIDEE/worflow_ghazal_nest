@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { parseApiError, ApiError, ErrorType } from '../types/errors';
+import { parseApiError,type ApiError, ErrorType } from '../types/errors';
 
 /**
  * Hook pour gérer les erreurs de manière uniforme

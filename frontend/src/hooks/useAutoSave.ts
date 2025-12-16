@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 export interface AutoSaveOptions<T> {
   key: string; // Unique key for localStorage
@@ -31,7 +31,7 @@ export const useAutoSave = <T>({
     hasUnsavedChanges: false,
   });
 
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previousDataRef = useRef<T>(data);
   const isFirstRender = useRef(true);
 
@@ -56,7 +56,8 @@ export const useAutoSave = <T>({
     }
 
     // Check if data has actually changed
-    const dataChanged = JSON.stringify(data) !== JSON.stringify(previousDataRef.current);
+    const dataChanged =
+      JSON.stringify(data) !== JSON.stringify(previousDataRef.current);
     if (!dataChanged) {
       return;
     }
@@ -92,7 +93,7 @@ export const useAutoSave = <T>({
           hasUnsavedChanges: false,
         });
       } catch (error) {
-        console.error('Auto-save error:', error);
+        console.error("Auto-save error:", error);
         setStatus((prev) => ({ ...prev, isSaving: false }));
       }
     }, delay);
@@ -132,7 +133,7 @@ export const useAutoSave = <T>({
         hasUnsavedChanges: false,
       });
     } catch (error) {
-      console.error('Manual save error:', error);
+      console.error("Manual save error:", error);
       setStatus((prev) => ({ ...prev, isSaving: false }));
       throw error;
     }
@@ -160,7 +161,9 @@ export const useAutoSave = <T>({
 /**
  * Load saved data from localStorage
  */
-export const loadSavedData = <T>(key: string): { data: T; timestamp: Date } | null => {
+export const loadSavedData = <T>(
+  key: string
+): { data: T; timestamp: Date } | null => {
   try {
     const saved = localStorage.getItem(key);
     if (!saved) {
@@ -173,7 +176,7 @@ export const loadSavedData = <T>(key: string): { data: T; timestamp: Date } | nu
       timestamp: new Date(parsed.timestamp),
     };
   } catch (error) {
-    console.error('Error loading saved data:', error);
+    console.error("Error loading saved data:", error);
     return null;
   }
 };
@@ -183,13 +186,13 @@ export const loadSavedData = <T>(key: string): { data: T; timestamp: Date } | nu
  */
 export const formatTimeSince = (date: Date | null): string => {
   if (!date) {
-    return 'Jamais sauvegardé';
+    return "Jamais sauvegardé";
   }
 
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
 
   if (seconds < 5) {
-    return 'À l\'instant';
+    return "À l'instant";
   }
   if (seconds < 60) {
     return `Il y a ${seconds}s`;

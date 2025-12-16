@@ -1,31 +1,32 @@
-import { useState, useMemo, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
-import { workflowsApi } from '../features/workflows/services/workflows.api';
-import { Container, Box, CircularProgress, Alert } from '@mui/material';
+import { useState, useMemo, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
+import { workflowsApi } from "../features/workflows/services/workflows.api";
+import { Container, Box, CircularProgress, Alert } from "@mui/material";
 
-import WorkflowsHeader from '../features/workflows/components/WorkflowsHeader';
-import WorkflowList from '../features/workflows/components/WorkflowList';
-import VehicleSelectionDialog from '../features/workflows/components/VehicleSelectionDialog';
-import WorkflowFiltersBar from '../features/workflows/components/WorkflowFiltersBar';
-import type { WorkflowFilters } from '../features/workflows/components/WorkflowFiltersBar';
-import { useWorkflowSubscription } from '../hooks/useWorkflowSubscription';
+import WorkflowsHeader from "../features/workflows/components/WorkflowsHeader";
+import WorkflowList from "../features/workflows/components/WorkflowList";
+import VehicleSelectionDialog from "../features/workflows/components/VehicleSelectionDialog";
+import WorkflowFiltersBar from "../features/workflows/components/WorkflowFiltersBar";
+import type { WorkflowFilters } from "../features/workflows/components/WorkflowFiltersBar";
+import type { Workflow } from "../features/workflows/types";
+import { useWorkflowSubscription } from "../hooks/useWorkflowSubscription";
 
 export default function WorkflowsPage() {
   const [searchParams] = useSearchParams();
   const [openSelectionDialog, setOpenSelectionDialog] = useState(false);
   const [filters, setFilters] = useState<WorkflowFilters>({
-    step: '',
-    status: '',
-    dateFrom: '',
-    dateTo: '',
-    vin: '',
+    step: "",
+    status: "",
+    dateFrom: "",
+    dateTo: "",
+    vin: "",
   });
 
   // Initialize filters from URL parameters
   useEffect(() => {
-    const stepParam = searchParams.get('step');
-    const statusParam = searchParams.get('status');
+    const stepParam = searchParams.get("step");
+    const statusParam = searchParams.get("status");
 
     if (stepParam || statusParam) {
       setFilters((prev) => ({
@@ -39,13 +40,18 @@ export default function WorkflowsPage() {
   // Subscribe to WebSocket events for real-time updates
   useWorkflowSubscription();
 
-  const { data: workflows, isLoading, error } = useQuery({
-    queryKey: ['workflows'],
+  const {
+    data: workflows,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["workflows"],
     queryFn: async () => {
       const response = await workflowsApi.getAll();
       // Backend now returns paginated response: { data: [], meta: {} }
       // Extract the array from the paginated response
-      return response.data?.data || response.data;
+      const responseData = response.data as any;
+      return (responseData?.data || responseData) as Workflow[];
     },
   });
 
@@ -53,7 +59,7 @@ export default function WorkflowsPage() {
   const filteredWorkflows = useMemo(() => {
     if (!workflows) return [];
 
-    return workflows.filter((workflow) => {
+    return workflows.filter((workflow: Workflow) => {
       // Filter by status
       if (filters.status && workflow.statut !== filters.status) {
         return false;
@@ -85,10 +91,14 @@ export default function WorkflowsPage() {
       // Filter by VIN/Immatriculation
       if (filters.vin) {
         const searchTerm = filters.vin.toLowerCase();
-        const immatriculation = workflow.vehicle?.immatriculation?.toLowerCase() || '';
-        const numeroSerie = workflow.vehicle?.numeroSerie?.toLowerCase() || '';
+        const immatriculation =
+          workflow.vehicle?.immatriculation?.toLowerCase() || "";
+        const numeroSerie = workflow.vehicle?.numeroSerie?.toLowerCase() || "";
 
-        if (!immatriculation.includes(searchTerm) && !numeroSerie.includes(searchTerm)) {
+        if (
+          !immatriculation.includes(searchTerm) &&
+          !numeroSerie.includes(searchTerm)
+        ) {
           return false;
         }
       }
@@ -99,17 +109,24 @@ export default function WorkflowsPage() {
 
   const handleClearFilters = () => {
     setFilters({
-      step: '',
-      status: '',
-      dateFrom: '',
-      dateTo: '',
-      vin: '',
+      step: "",
+      status: "",
+      dateFrom: "",
+      dateTo: "",
+      vin: "",
     });
   };
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "60vh",
+        }}
+      >
         <CircularProgress />
       </Box>
     );
@@ -126,7 +143,7 @@ export default function WorkflowsPage() {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', py: 6 }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "#f8fafc", py: 6 }}>
       <Container maxWidth="xl">
         <WorkflowsHeader onAdd={() => setOpenSelectionDialog(true)} />
 
