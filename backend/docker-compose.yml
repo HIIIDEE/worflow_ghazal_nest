@@ -17,8 +17,10 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+    # 🔥 REMOVE THE BIND VOLUME MAPPING (.-:/usr/src/app)
+    #    This is crucial if you want to run the compiled 'dist' files
+    #    The volume mapping below is only for node_modules optimization 
     volumes:
-      - .:/usr/src/app
       - /usr/src/app/node_modules
     ports:
       - '3010:3000'
@@ -30,7 +32,8 @@ services:
       DATABASE_USER: postgres
       DATABASE_PASSWORD: your_password
       DATABASE_NAME: workflow
-    command: npm run start:dev
+      NODE_ENV: production
+    command: npm run start:prod
     restart: always
 
 volumes:

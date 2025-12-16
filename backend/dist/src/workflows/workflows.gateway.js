@@ -74,9 +74,10 @@ __decorate([
 exports.WorkflowsGateway = WorkflowsGateway = WorkflowsGateway_1 = __decorate([
     (0, websockets_1.WebSocketGateway)({
         cors: {
-            origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+            origin: "*",
             credentials: true,
         },
+        transports: ['websocket', 'polling'],
     }),
     __metadata("design:paramtypes", [jwt_1.JwtService])
 ], WorkflowsGateway);

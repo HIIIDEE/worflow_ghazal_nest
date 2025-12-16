@@ -33,14 +33,21 @@ async function bootstrap() {
     : [frontendUrl, 'https://www.ghazal.dz/workflow']; // Allow localhost in development
 
   app.enableCors({
-    origin: "*",
-    allowedHeaders : "*",
+    origin: [
+        'https://www.ghazal.dz', 
+        'https://ghazal.dz',
+	// Add the configured FRONTEND_URL to the allowed origins
+        'https://www.ghazal.dz/workflow',
+	'https://ghazal.dz/workflow',        
+	// Add localhost for dev if needed
+        'http://localhost:5173' 
+    ],    
     credentials: true,
   });
 
   // API prefix from environment
-  const apiPrefix = process.env.API_PREFIX || 'apiworkflow';
-  app.setGlobalPrefix(apiPrefix);
+  //const apiPrefix = process.env.API_PREFIX || 'apiworkflow';
+  //app.setGlobalPrefix(apiPrefix);
 
   // Swagger/OpenAPI documentation
   const config = new DocumentBuilder()

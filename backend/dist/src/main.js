@@ -28,12 +28,15 @@ async function bootstrap() {
         ? frontendUrl.split(',')
         : [frontendUrl, 'https://www.ghazal.dz/workflow'];
     app.enableCors({
-        origin: "*",
-        allowedHeaders: "*",
+        origin: [
+            'https://www.ghazal.dz',
+            'https://ghazal.dz',
+            'https://www.ghazal.dz/workflow',
+            'https://ghazal.dz/workflow',
+            'http://localhost:5173'
+        ],
         credentials: true,
     });
-    const apiPrefix = process.env.API_PREFIX || 'apiworkflow';
-    app.setGlobalPrefix(apiPrefix);
     const config = new swagger_1.DocumentBuilder()
         .setTitle('WorkflowGhazal API')
         .setDescription('API de gestion des workflows de transformation GPL - Ghazal GPL')
