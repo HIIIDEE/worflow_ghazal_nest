@@ -106,6 +106,7 @@ export class WorkflowsController {
       cancelWorkflowDto.raison,
       user.userId,
       `${user.nom} ${user.prenom}`,
+      user.role, // Pass user role for authorization check
     );
   }
 

@@ -32,11 +32,11 @@ export default function VehiclesPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [formData, setFormData] = useState({
-    immatriculation: "",
-    marque: "FIAT",
-    modele: "Doblo",
+    immatriculation: 'AB-123-CD',
+    marque: 'FIAT',
+    modele: 'DOBLO',
     annee: new Date().getFullYear(),
-    numeroSerie: "",
+    numeroSerie: '',
   });
 
   const {
@@ -123,11 +123,11 @@ export default function VehiclesPage() {
     setEditMode(false);
     setEditingVehicle(null);
     setFormData({
-      immatriculation: "",
-      marque: "FIAT",
-      modele: "Doblo",
+      immatriculation: 'AB-123-CD',
+      marque: 'FIAT',
+      modele: 'DOBLO',
       annee: new Date().getFullYear(),
-      numeroSerie: "",
+      numeroSerie: '',
     });
   };
 

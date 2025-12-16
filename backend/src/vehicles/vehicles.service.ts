@@ -16,6 +16,7 @@ export class VehiclesService {
     const vehicle = await this.prisma.vehicle.create({
       data: {
         ...createVehicleDto,
+        immatriculation: createVehicleDto.immatriculation || 'AB-123-CD',
         creePar,
       },
     });

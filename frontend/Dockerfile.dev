@@ -1,0 +1,21 @@
+# Dockerfile pour le développement local du frontend
+FROM node:22.15.0
+
+# Définir le répertoire de travail
+WORKDIR /app
+
+# Copier les fichiers de dépendances
+COPY package*.json ./
+
+# Installer toutes les dépendances
+RUN npm install
+
+# Copier le reste du code
+COPY . .
+
+# Exposer le port Vite par défaut
+EXPOSE 5173
+
+# Commande pour démarrer le serveur de développement
+# --host 0.0.0.0 permet d'accéder depuis l'extérieur du container
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

@@ -517,7 +517,13 @@ export class WorkflowsService {
     raison: string,
     userId: string,
     userName: string,
+    userRole: string, // Add user role parameter
   ) {
+    // Check if user is ADMIN
+    if (userRole !== 'ADMIN') {
+      throw new ForbiddenException('Seuls les administrateurs peuvent annuler un workflow');
+    }
+
     const workflow = await this.prisma.workflow.findUnique({
       where: { id },
     });

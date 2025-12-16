@@ -128,9 +128,8 @@ export default function VehicleCreationDialog({
                   onChange={onChange}
                   onBlur={() => handleBlur('immatriculation')}
                   error={touched.immatriculation && !!errors.immatriculation}
-                  helperText={touched.immatriculation ? errors.immatriculation : 'Formats: XX-123-XX ou 123 AB 12'}
+                  helperText={touched.immatriculation ? errors.immatriculation : 'Formats: XX-123-XX ou 123 AB 12 (optionnel)'}
                   placeholder="AB-123-CD ou 1234 AB 12"
-                  required
                 />
               </Grid>
               <Grid size={{ xs: 8 }}>

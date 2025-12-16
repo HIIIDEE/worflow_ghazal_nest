@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsNumber, Matches, Length, Min, Max } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, Matches, Length, Min, Max, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateVehicleDto {
@@ -6,16 +6,18 @@ export class CreateVehicleDto {
     description: 'Immatriculation du véhicule (formats français)',
     example: 'AB-123-CD',
     pattern: '^[A-Z]{2}-\\d{3}-[A-Z]{2}$|^[0-9]{1,4}\\s?[A-Z]{1,3}\\s?[0-9]{2}$',
+    required: false,
+    default: 'AB-123-CD',
   })
   @IsString()
-  @IsNotEmpty({ message: 'L\'immatriculation est obligatoire' })
+  @IsOptional()
   @Matches(
     /^[A-Z]{2}-\d{3}-[A-Z]{2}$|^[0-9]{1,4}\s?[A-Z]{1,3}\s?[0-9]{2}$/i,
     {
       message: 'Format d\'immatriculation invalide. Formats acceptés: XX-123-XX (nouveau) ou 123 AB 12 (ancien)',
     },
   )
-  immatriculation: string;
+  immatriculation?: string;
 
   @ApiProperty({
     description: 'Marque du véhicule',

@@ -33,12 +33,12 @@ import { useAuth } from '../stores/useAuthStore';
 const drawerWidth = 280;
 
 const MENU_ITEMS = [
-    { text: 'Accueil', icon: DashboardIcon, path: '/' },
-    { text: 'Statistiques', icon: BarChartIcon, path: '/dashboard' },
-    { text: 'Utilisateurs', icon: PeopleIcon, path: '/users' },
-    { text: 'Techniciens', icon: EngineeringIcon, path: '/techniciens' },
-    { text: 'Véhicules', icon: DirectionsCarIcon, path: '/vehicles' },
-    { text: 'Workflows', icon: AccountTreeIcon, path: '/workflows' },
+    { text: 'Accueil', icon: DashboardIcon, path: '/', roles: ['ADMIN'] },
+    { text: 'Statistiques', icon: BarChartIcon, path: '/dashboard', roles: ['ADMIN'] },
+    { text: 'Utilisateurs', icon: PeopleIcon, path: '/users', roles: ['ADMIN'] },
+    { text: 'Techniciens', icon: EngineeringIcon, path: '/techniciens', roles: ['ADMIN'] },
+    { text: 'Véhicules', icon: DirectionsCarIcon, path: '/vehicles', roles: ['ADMIN', 'GESTIONNAIRE'] },
+    { text: 'Workflows', icon: AccountTreeIcon, path: '/workflows', roles: ['ADMIN', 'GESTIONNAIRE'] },
 ];
 
 export default function MainLayout() {
@@ -99,34 +99,36 @@ export default function MainLayout() {
             </Box>
 
             <List sx={{ px: 2 }}>
-                {MENU_ITEMS.map((item) => {
-                    const isActive = location.pathname === item.path;
-                    return (
-                        <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
-                            <ListItemButton
-                                component={Link}
-                                to={item.path}
-                                onClick={isMobile ? handleDrawerToggle : undefined}
-                                sx={{
-                                    borderRadius: 3,
-                                    bgcolor: isActive ? 'primary.main' : 'transparent',
-                                    color: isActive ? 'primary.contrastText' : 'text.secondary',
-                                    '&:hover': {
-                                        bgcolor: isActive ? 'primary.dark' : 'action.hover',
-                                    },
-                                }}
-                            >
-                                <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
-                                    <item.icon />
-                                </ListItemIcon>
-                                <ListItemText
-                                    primary={item.text}
-                                    primaryTypographyProps={{ fontWeight: isActive ? 600 : 500 }}
-                                />
-                            </ListItemButton>
-                        </ListItem>
-                    );
-                })}
+                {MENU_ITEMS
+                    .filter(item => item.roles.includes(user?.role || ''))
+                    .map((item) => {
+                        const isActive = location.pathname === item.path;
+                        return (
+                            <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
+                                <ListItemButton
+                                    component={Link}
+                                    to={item.path}
+                                    onClick={isMobile ? handleDrawerToggle : undefined}
+                                    sx={{
+                                        borderRadius: 3,
+                                        bgcolor: isActive ? 'primary.main' : 'transparent',
+                                        color: isActive ? 'primary.contrastText' : 'text.secondary',
+                                        '&:hover': {
+                                            bgcolor: isActive ? 'primary.dark' : 'action.hover',
+                                        },
+                                    }}
+                                >
+                                    <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
+                                        <item.icon />
+                                    </ListItemIcon>
+                                    <ListItemText
+                                        primary={item.text}
+                                        primaryTypographyProps={{ fontWeight: isActive ? 600 : 500 }}
+                                    />
+                                </ListItemButton>
+                            </ListItem>
+                        );
+                    })}
 
                 {user?.role === 'ADMIN' && (
                     <>
