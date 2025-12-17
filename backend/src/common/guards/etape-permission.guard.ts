@@ -2,6 +2,7 @@ import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from '../../prisma.service';
 import { PermissionType } from '../enums/permission-type.enum';
+import { SecurityLoggerService } from '../logger/security-logger.service';
 
 const REQUIRED_PERMISSION_KEY = 'requiredPermission';
 
@@ -10,6 +11,7 @@ export class EtapePermissionGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private prisma: PrismaService,
+    private securityLogger: SecurityLoggerService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -43,8 +45,21 @@ export class EtapePermissionGuard implements CanActivate {
     );
 
     if (!hasPermission) {
+      const ip = request.ip || request.headers['x-forwarded-for'] || 'unknown';
+      const resource = `Etape ${numeroEtape}`;
+
+      // Log permission violation
+      this.securityLogger.logPermissionViolation(
+        user.userId,
+        user.email,
+        user.role,
+        requiredPermission,
+        resource,
+        ip,
+      );
+
       throw new ForbiddenException(
-        `You don't have ${requiredPermission} permission for this step`,
+        `Vous n'avez pas la permission ${requiredPermission} pour cette étape`,
       );
     }
 

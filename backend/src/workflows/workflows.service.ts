@@ -414,99 +414,105 @@ export class WorkflowsService {
       }
     }
 
-    // Prepare update data with proper Prisma relation syntax
-    const updateData: any = { ...updateEtapeDto };
+    // ✅ TRANSACTION : Garantit que l'étape ET le workflow sont mis à jour ensemble
+    const updatedEtape = await this.prisma.$transaction(async (tx) => {
+      // Prepare update data with proper Prisma relation syntax
+      const updateData: any = { ...updateEtapeDto };
 
-    // Handle technicien relation
-    // Handle technicien relation
-    if (updateData.technicienId !== undefined) {
-      const technicienId = updateData.technicienId;
-      delete updateData.technicienId; // Remove the field to avoid "Unknown argument" error
+      // Handle technicien relation
+      if (updateData.technicienId !== undefined) {
+        const technicienId = updateData.technicienId;
+        delete updateData.technicienId; // Remove the field to avoid "Unknown argument" error
 
-      if (technicienId && technicienId !== '') {
-        // Connect to technicien
-        updateData.technicien = {
-          connect: { id: technicienId },
-        };
-      } else {
-        // Disconnect from technicien
-        updateData.technicien = {
-          disconnect: true,
-        };
+        if (technicienId && technicienId !== '') {
+          // Connect to technicien
+          updateData.technicien = {
+            connect: { id: technicienId },
+          };
+        } else {
+          // Disconnect from technicien
+          updateData.technicien = {
+            disconnect: true,
+          };
+        }
       }
-    }
 
-    // Convert empty strings to null for signature fields
-    if (updateData.signatureGestionnaire === '') {
-      updateData.signatureGestionnaire = null;
-    }
-    if (updateData.signatureTechnicien === '') {
-      updateData.signatureTechnicien = null;
-    }
+      // Convert empty strings to null for signature fields
+      if (updateData.signatureGestionnaire === '') {
+        updateData.signatureGestionnaire = null;
+      }
+      if (updateData.signatureTechnicien === '') {
+        updateData.signatureTechnicien = null;
+      }
 
-    // If completing the step, set valideParId via relation
-    if (updateEtapeDto.statut === 'TERMINE' && userId) {
-      updateData.valideParUser = {
-        connect: { id: userId }
-      };
-      delete updateData.valideParId; // Ensure scalar field is not present
-    }
+      // If completing the step, set valideParId via relation
+      if (updateEtapeDto.statut === 'TERMINE' && userId) {
+        updateData.valideParUser = {
+          connect: { id: userId }
+        };
+        delete updateData.valideParId; // Ensure scalar field is not present
+      }
 
-    const updatedEtape = await this.prisma.workflowEtape.update({
-      where: { id: etape.id },
-      data: updateData,
-      include: {
-        valideParUser: {
-          select: {
-            id: true,
-            email: true,
-            nom: true,
-            prenom: true,
+      // Étape 1: Mettre à jour l'étape
+      const updated = await tx.workflowEtape.update({
+        where: { id: etape.id },
+        data: updateData,
+        include: {
+          valideParUser: {
+            select: {
+              id: true,
+              email: true,
+              nom: true,
+              prenom: true,
+            },
           },
         },
-      },
-    });
-
-    // Update workflow etapeActuelle and status when step is started
-    if (updateEtapeDto.statut === 'EN_COURS' && etape.statut === 'EN_ATTENTE') {
-      await this.prisma.workflow.update({
-        where: { id: workflowId },
-        data: {
-          etapeActuelle: numeroEtape,
-          statut: 'EN_COURS' // Workflow becomes EN_COURS when any step is started
-        }
-      });
-    }
-
-    // Update parent workflow if step is completed
-    if (updateEtapeDto.statut === 'TERMINE') {
-      const nextEtapeNumber = numeroEtape + 1;
-
-      // Check if there is a next step
-      const nextEtape = await this.prisma.workflowEtape.findFirst({
-        where: { workflowId, numeroEtape: nextEtapeNumber }
       });
 
-      if (nextEtape) {
-        // Update workflow progress to next step number
-        // But DO NOT automatically start the next step - it stays in EN_ATTENTE
-        await this.prisma.workflow.update({
-          where: { id: workflowId },
-          data: { etapeActuelle: nextEtapeNumber }
-        });
-      } else {
-        // No next step - this was the last step, mark workflow as complete
-        await this.prisma.workflow.update({
+      // Étape 2: Update workflow etapeActuelle and status when step is started
+      if (updateEtapeDto.statut === 'EN_COURS' && etape.statut === 'EN_ATTENTE') {
+        await tx.workflow.update({
           where: { id: workflowId },
           data: {
-            statut: 'TERMINE',
-            dateFin: new Date()
+            etapeActuelle: numeroEtape,
+            statut: 'EN_COURS' // Workflow becomes EN_COURS when any step is started
           }
         });
       }
-    }
 
-    // Emit WebSocket event for the updated etape
+      // Étape 3: Update parent workflow if step is completed
+      if (updateEtapeDto.statut === 'TERMINE') {
+        const nextEtapeNumber = numeroEtape + 1;
+
+        // Check if there is a next step
+        const nextEtape = await tx.workflowEtape.findFirst({
+          where: { workflowId, numeroEtape: nextEtapeNumber }
+        });
+
+        if (nextEtape) {
+          // Update workflow progress to next step number
+          // But DO NOT automatically start the next step - it stays in EN_ATTENTE
+          await tx.workflow.update({
+            where: { id: workflowId },
+            data: { etapeActuelle: nextEtapeNumber }
+          });
+        } else {
+          // No next step - this was the last step, mark workflow as complete
+          await tx.workflow.update({
+            where: { id: workflowId },
+            data: {
+              statut: 'TERMINE',
+              dateFin: new Date()
+            }
+          });
+        }
+      }
+
+      return updated;
+    });
+    // Si une erreur survient, TOUTES les modifications sont annulées (rollback)
+
+    // Emit WebSocket event for the updated etape (après succès de la transaction)
     this.workflowsGateway.emitEtapeUpdated(workflowId, updatedEtape);
 
     return updatedEtape;

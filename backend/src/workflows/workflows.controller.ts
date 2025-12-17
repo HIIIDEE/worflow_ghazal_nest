@@ -8,6 +8,8 @@ import { CancelWorkflowDto } from './dto/cancel-workflow.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { ClientInfo } from '../common/decorators/client-info.decorator';
+import { SecurityLoggerService } from '../common/logger/security-logger.service';
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 
 @ApiTags('workflows')
@@ -15,7 +17,10 @@ import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 @Controller('workflows')
 @UseGuards(JwtAuthGuard)
 export class WorkflowsController {
-  constructor(private readonly workflowsService: WorkflowsService) { }
+  constructor(
+    private readonly workflowsService: WorkflowsService,
+    private readonly securityLogger: SecurityLoggerService,
+  ) { }
 
   @Post()
   create(@Body() createWorkflowDto: CreateWorkflowDto) {
@@ -96,18 +101,33 @@ export class WorkflowsController {
   }
 
   @Post(':id/cancel')
-  cancelWorkflow(
+  async cancelWorkflow(
     @Param('id') id: string,
     @Body() cancelWorkflowDto: CancelWorkflowDto,
     @CurrentUser() user: any,
+    @ClientInfo() clientInfo: { ip: string; userAgent: string },
   ) {
-    return this.workflowsService.cancelWorkflow(
+    const result = await this.workflowsService.cancelWorkflow(
       id,
       cancelWorkflowDto.raison,
       user.userId,
       `${user.nom} ${user.prenom}`,
       user.role, // Pass user role for authorization check
     );
+
+    // Log workflow cancellation (after successful cancellation)
+    if (result && result.vehicle) {
+      this.securityLogger.logWorkflowCancelled(
+        result.id,
+        result.vehicle.immatriculation,
+        user.userId,
+        user.email,
+        cancelWorkflowDto.raison,
+        clientInfo.ip,
+      );
+    }
+
+    return result;
   }
 
   @Delete(':id')

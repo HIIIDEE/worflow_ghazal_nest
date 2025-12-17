@@ -8,12 +8,15 @@ import { UsersModule } from './users/users.module';
 import { TechniciensModule } from './techniciens/techniciens.module';
 import { AuthModule } from './auth/auth.module';
 import { EtapeDefinitionsModule } from './etape-definitions/etape-definitions.module';
+import { CommonModule } from './common/common.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
+    // Common Module - Global services (SecurityLogger, etc.)
+    CommonModule,
     // Cache Module - In-memory caching for better performance
     CacheModule.register({
       isGlobal: true,
