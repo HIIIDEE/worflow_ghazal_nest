@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  # Base de données PostgreSQL
+  postgres:
+    image: postgres:16
+    container_name: ghazal_postgres_dev
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: workflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    networks:
+      - ghazal_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend NestJS
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: ghazal_backend_dev
+    environment:
+      # Configuration de la base de données
+      DATABASE_URL: "postgresql://postgres:postgres123@postgres:5432/workflow?schema=public"
+
+      # Configuration JWT
+      JWT_SECRET: "dev_secret_key_change_in_production"
+      JWT_EXPIRES_IN: "24h"
+
+      # Configuration serveur
+      PORT: 3000
+      NODE_ENV: development
+
+      # Configuration CORS
+      CORS_ORIGIN: "http://localhost:5173"
+    ports:
+      - "3000:3000"
+    volumes:
+      # Montage du code source pour le hot-reload
+      - ./backend/src:/usr/src/app/src
+      - ./backend/prisma:/usr/src/app/prisma
+      # Volume anonyme pour node_modules (évite les conflits)
+      - /usr/src/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ghazal_network
+    command: >
+      sh -c "
+        echo 'Attente de la base de données...' &&
+        npx prisma generate &&
+        npx prisma migrate deploy &&
+        npm run start:dev
+      "
+
+  # Frontend React + Vite
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: ghazal_frontend_dev
+    environment:
+      VITE_API_URL: "http://localhost:3000"
+      VITE_WS_URL: "ws://localhost:3000"
+    ports:
+      - "5173:5173"
+    volumes:
+      # Montage du code source pour le hot-reload
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.ts:/app/vite.config.ts
+      # Volume anonyme pour node_modules
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - ghazal_network
+
+volumes:
+  postgres_data_dev:
+    driver: local
+
+networks:
+  ghazal_network:
+    driver: bridge

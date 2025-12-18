@@ -33,10 +33,27 @@ const CONTROLES = [
     'Niveau carburant est-il suffisant pour déplacement véhicule'
 ];
 
-// PDF Template Component (Internal)
+const EQUIPEMENTS_MANQUANTS = [
+    'Boîte à pharmacie',
+    'Roue de secours',
+    'Manuel d\'utilisation',
+    'Cosse pièce avant/arrière',
+    'Manivelle',
+    'Tablette tactile',
+    'Antenne',
+    'Triangle',
+    'Cric',
+    'Boîte à outils 5 éléments',
+    'État joint trappe à essence',
+    'Cache boîte fusible (agrafe rouge)',
+    'Téflon au niveau de trappe à essence',
+    'Kit (Œillet de sécurité + pince + tournevis)'
+];
+
 const Step1PdfTemplate = ({ data, vehicle }: { data: any, vehicle: any }) => {
     const annotations: Annotation[] = data.formulaire?.annotations || [];
     const controles = data.formulaire?.controles || {};
+    const equipementsManquants = data.formulaire?.equipementsManquants || {};
     const kilometrage = data.formulaire?.kilometrage || 'Non renseigné';
 
     const getAnomalyColor = (id: number) => ANOMALIES.find(a => a.id === id)?.color || '#64748b';
@@ -87,7 +104,7 @@ const Step1PdfTemplate = ({ data, vehicle }: { data: any, vehicle: any }) => {
                     <Box sx={{ position: 'relative', border: '1px solid #e2e8f0', borderRadius: 2, overflow: 'hidden', mb: 2 }}>
                         <img
                             //src="/images/car-inspection.png"
-			    src={`${import.meta.env.BASE_URL}/car-inspection.png`}
+                            src={`${import.meta.env.BASE_URL}/car-inspection.png`}
                             alt="Inspection"
                             style={{ width: '100%', display: 'block' }}
                         />
@@ -182,6 +199,51 @@ const Step1PdfTemplate = ({ data, vehicle }: { data: any, vehicle: any }) => {
                     </Box>
                 </Grid>
             </Grid>
+
+            {/* Missing Equipment Section */}
+            <Box sx={{ mt: 4, pt: 3, borderTop: '2px solid #fb923c' }}>
+                <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: '#ea580c', borderBottom: '1px solid #fb923c', pb: 1 }}>
+                    ÉQUIPEMENTS MANQUANTS À LA RÉCEPTION
+                </Typography>
+                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2, fontStyle: 'italic' }}>
+                    Les équipements cochés (X) sont MANQUANTS lors de la réception du véhicule
+                </Typography>
+
+                <Grid container spacing={1}>
+                    {EQUIPEMENTS_MANQUANTS.map((equipement) => (
+                        <Grid size={{ xs: 6 }} key={equipement}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
+                                <Box
+                                    sx={{
+                                        width: 16,
+                                        height: 16,
+                                        border: '2px solid #dc2626',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        bgcolor: equipementsManquants[equipement] ? '#fee2e2' : 'white',
+                                        fontSize: '12px',
+                                        fontWeight: 'bold',
+                                        color: '#dc2626'
+                                    }}
+                                >
+                                    {equipementsManquants[equipement] ? 'X' : ''}
+                                </Box>
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        fontSize: '0.8rem',
+                                        color: equipementsManquants[equipement] ? '#dc2626' : 'text.secondary',
+                                        fontWeight: equipementsManquants[equipement] ? 600 : 400
+                                    }}
+                                >
+                                    {equipement}
+                                </Typography>
+                            </Box>
+                        </Grid>
+                    ))}
+                </Grid>
+            </Box>
         </Box>
     );
 };

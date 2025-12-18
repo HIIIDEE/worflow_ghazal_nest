@@ -1,0 +1,27 @@
+# Dockerfile pour le développement local du backend
+FROM node:22.15.0
+
+# Installer les dépendances système nécessaires pour Prisma
+RUN apt-get update && apt-get install -y openssl
+
+# Définir le répertoire de travail
+WORKDIR /usr/src/app
+
+# Copier les fichiers de dépendances
+COPY package*.json ./
+
+# Installer toutes les dépendances (dev + prod)
+RUN npm install
+
+# Copier le schéma Prisma
+COPY prisma ./prisma
+
+# Copier le reste du code
+COPY . .
+
+# Exposer le port
+EXPOSE 3000
+
+# Commande pour le mode développement avec hot-reload
+# On génère Prisma au démarrage pour avoir le schéma à jour
+CMD ["sh", "-c", "npx prisma generate && npm run start:dev"]

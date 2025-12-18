@@ -95,6 +95,32 @@ export default function WorkflowFiltersBar({ filters, onFilterChange, onClearFil
                         sx={{ bgcolor: '#f8fafc', borderRadius: 2 }}
                     />
                 </Grid>
+
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                    <TextField
+                        fullWidth
+                        label="Date de début (à partir de)"
+                        type="date"
+                        value={filters.dateFrom}
+                        onChange={(e) => handleChange('dateFrom', e.target.value)}
+                        size="small"
+                        InputLabelProps={{ shrink: true }}
+                        sx={{ bgcolor: '#f8fafc', borderRadius: 2 }}
+                    />
+                </Grid>
+
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                    <TextField
+                        fullWidth
+                        label="Date de début (jusqu'à)"
+                        type="date"
+                        value={filters.dateTo}
+                        onChange={(e) => handleChange('dateTo', e.target.value)}
+                        size="small"
+                        InputLabelProps={{ shrink: true }}
+                        sx={{ bgcolor: '#f8fafc', borderRadius: 2 }}
+                    />
+                </Grid>
             </Grid>
 
             {hasActiveFilters && (

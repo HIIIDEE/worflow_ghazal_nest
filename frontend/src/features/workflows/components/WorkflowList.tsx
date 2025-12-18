@@ -26,6 +26,7 @@ import {
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '../../../stores/useAuthStore';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -53,6 +54,7 @@ export default function WorkflowList({ workflows }: WorkflowListProps) {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [selectedWorkflowToCancel, setSelectedWorkflowToCancel] = useState<Workflow | null>(null);
   const queryClient = useQueryClient();
+  const { user } = useAuth(); // Get current user to check role
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
@@ -227,7 +229,7 @@ export default function WorkflowList({ workflows }: WorkflowListProps) {
                     >
                       Voir détails
                     </Button>
-                    {workflow.statut !== 'TERMINE' && workflow.statut !== 'ANNULE' && (
+                    {workflow.statut !== 'TERMINE' && workflow.statut !== 'ANNULE' && user?.role === 'ADMIN' && (
                       <Button
                         variant="outlined"
                         size="small"
@@ -414,7 +416,7 @@ export default function WorkflowList({ workflows }: WorkflowListProps) {
                       >
                         Détails
                       </Button>
-                      {workflow.statut !== 'TERMINE' && workflow.statut !== 'ANNULE' && (
+                      {workflow.statut !== 'TERMINE' && workflow.statut !== 'ANNULE' && user?.role === 'ADMIN' && (
                         <Button
                           variant="outlined"
                           size="small"

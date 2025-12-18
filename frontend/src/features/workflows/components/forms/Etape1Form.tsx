@@ -1,12 +1,14 @@
-import { Box, Typography, Checkbox, FormControlLabel, TextField, Paper, Stack } from '@mui/material';
+import { Box, Typography, Checkbox, FormControlLabel, TextField, Paper, Stack, Grid } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import CarInspectionAnnotator, { type Annotation } from './CarInspectionAnnotator';
 
 interface Etape1FormProps {
   formData: {
     annotations?: Annotation[];
     controles?: { [key: string]: boolean };
+    equipementsManquants?: { [key: string]: boolean };
     kilometrage?: number;
   };
   onChange: (data: any) => void;
@@ -21,9 +23,27 @@ const CONTROLES = [
   'Niveau carburant est-il suffisant pour déplacement véhicule'
 ];
 
+const EQUIPEMENTS_MANQUANTS = [
+  'Boîte à pharmacie',
+  'Roue de secours',
+  'Manuel d\'utilisation',
+  'Cosse pièce avant/arrière',
+  'Manivelle',
+  'Tablette tactile',
+  'Antenne',
+  'Triangle',
+  'Cric',
+  'Boîte à outils 5 éléments',
+  'État joint trappe à essence',
+  'Cache boîte fusible (agrafe rouge)',
+  'Téflon au niveau de trappe à essence',
+  'Kit (Œillet de sécurité + pince + tournevis)'
+];
+
 export default function Etape1Form({ formData, onChange, disabled = false }: Etape1FormProps) {
   const annotations = formData?.annotations || [];
   const controles = formData?.controles || {};
+  const equipementsManquants = formData?.equipementsManquants || {};
   const kilometrage = formData?.kilometrage || '';
 
   const handleAnnotationsChange = (newAnnotations: Annotation[]) => {
@@ -33,6 +53,11 @@ export default function Etape1Form({ formData, onChange, disabled = false }: Eta
   const handleControleChange = (controle: string, checked: boolean) => {
     const newControles = { ...controles, [controle]: checked };
     onChange({ ...formData, controles: newControles });
+  };
+
+  const handleEquipementManquantChange = (equipement: string, checked: boolean) => {
+    const newEquipements = { ...equipementsManquants, [equipement]: checked };
+    onChange({ ...formData, equipementsManquants: newEquipements });
   };
 
   const handleKilometrageChange = (value: string) => {
@@ -62,6 +87,78 @@ export default function Etape1Form({ formData, onChange, disabled = false }: Eta
           onChange={handleAnnotationsChange}
           disabled={disabled}
         />
+      </Paper>
+
+      {/* Section Équipements manquants */}
+      <Paper sx={{ p: 3, mb: 3, bgcolor: '#fff8f1', border: '1px solid #fb923c' }} elevation={0}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <WarningAmberIcon sx={{ mr: 1, color: '#ea580c' }} />
+          <Typography variant="h6" fontWeight="bold" sx={{ color: '#1e293b' }}>
+            Équipements manquants à la réception
+          </Typography>
+        </Box>
+
+        <Typography variant="body2" sx={{ mb: 3, color: '#64748b' }}>
+          Mettre une croix (X) sur l'équipement et caractéristiques MANQUANTS à la réception
+        </Typography>
+
+        <Grid container spacing={2}>
+          {EQUIPEMENTS_MANQUANTS.map((equipement, index) => (
+            <Grid item xs={12} sm={6} key={index}>
+              <Box
+                onClick={() => !disabled && handleEquipementManquantChange(equipement, !equipementsManquants[equipement])}
+                sx={{ cursor: disabled ? 'default' : 'pointer' }}
+              >
+                <Paper
+                  sx={{
+                    p: 1.5,
+                    bgcolor: equipementsManquants[equipement] ? '#fee2e2' : 'white',
+                    border: equipementsManquants[equipement] ? '2px solid #dc2626' : '1px solid #e2e8f0',
+                    transition: 'all 0.2s',
+                    '&:hover': !disabled ? {
+                      bgcolor: equipementsManquants[equipement] ? '#fecaca' : '#f8fafc',
+                      borderColor: '#dc2626'
+                    } : {}
+                  }}
+                  elevation={0}
+                >
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={equipementsManquants[equipement] || false}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          handleEquipementManquantChange(equipement, e.target.checked);
+                        }}
+                        disabled={disabled}
+                        sx={{
+                          color: '#94a3b8',
+                          '&.Mui-checked': {
+                            color: '#dc2626',
+                          },
+                          pointerEvents: 'auto',
+                        }}
+                      />
+                    }
+                    label={
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: equipementsManquants[equipement] ? '#1e293b' : '#64748b',
+                          fontWeight: equipementsManquants[equipement] ? 600 : 400,
+                          fontSize: '0.875rem'
+                        }}
+                      >
+                        {equipement}
+                      </Typography>
+                    }
+                    sx={{ width: '100%', m: 0, userSelect: 'none', pointerEvents: 'none' }}
+                  />
+                </Paper>
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
       </Paper>
 
       {/* Section Éléments de contrôle */}

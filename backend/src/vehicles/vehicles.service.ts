@@ -13,17 +13,48 @@ export class VehiclesService {
   ) { }
 
   async create(createVehicleDto: CreateVehicleDto, creePar?: string) {
-    const vehicle = await this.prisma.vehicle.create({
-      data: {
-        ...createVehicleDto,
-        creePar,
-      },
+    // ✅ TRANSACTION : Garantit que véhicule + workflow sont créés ensemble ou pas du tout
+    return this.prisma.$transaction(async (tx) => {
+      // Étape 1: Créer le véhicule
+      const vehicle = await tx.vehicle.create({
+        data: {
+          ...createVehicleDto,
+          immatriculation: createVehicleDto.immatriculation || 'AB-123-CD',
+          creePar,
+        },
+      });
+
+      // Étape 2: Créer le workflow associé
+      const workflow = await tx.workflow.create({
+        data: {
+          vehicleId: vehicle.id,
+        },
+      });
+
+      // Étape 3: Récupérer les définitions d'étapes
+      const etapeDefinitions = await tx.etapeDefinition.findMany({
+        orderBy: { ordre: 'asc' },
+      });
+
+      // Étape 4: Créer toutes les étapes du workflow
+      for (const etapeDef of etapeDefinitions) {
+        await tx.workflowEtape.create({
+          data: {
+            workflowId: workflow.id,
+            numeroEtape: etapeDef.numeroEtape,
+            nomEtape: etapeDef.nom,
+            description: etapeDef.description,
+            statut: 'EN_ATTENTE',
+            formulaire: etapeDef.champsFormulaire ?? {},
+          },
+        });
+      }
+
+      // Si une erreur survient dans les étapes ci-dessus,
+      // TOUT sera annulé (rollback automatique)
+      return vehicle;
     });
-
-    // Création automatique du workflow associé
-    await this.workflowsService.create({ vehicleId: vehicle.id });
-
-    return vehicle;
+    // Note: L'émission WebSocket sera faite dans le controller après succès
   }
 
   async search(query: string) {
