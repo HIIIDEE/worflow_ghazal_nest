@@ -315,81 +315,87 @@ let WorkflowsService = class WorkflowsService {
                 throw new common_1.BadRequestException(validation.reason || 'Impossible de démarrer cette étape');
             }
         }
-        const updateData = { ...updateEtapeDto };
-        if (updateData.technicienId !== undefined) {
-            const technicienId = updateData.technicienId;
-            delete updateData.technicienId;
-            if (technicienId && technicienId !== '') {
-                updateData.technicien = {
-                    connect: { id: technicienId },
-                };
+        const updatedEtape = await this.prisma.$transaction(async (tx) => {
+            const updateData = { ...updateEtapeDto };
+            if (updateData.technicienId !== undefined) {
+                const technicienId = updateData.technicienId;
+                delete updateData.technicienId;
+                if (technicienId && technicienId !== '') {
+                    updateData.technicien = {
+                        connect: { id: technicienId },
+                    };
+                }
+                else {
+                    updateData.technicien = {
+                        disconnect: true,
+                    };
+                }
             }
-            else {
-                updateData.technicien = {
-                    disconnect: true,
-                };
+            if (updateData.signatureGestionnaire === '') {
+                updateData.signatureGestionnaire = null;
             }
-        }
-        if (updateData.signatureGestionnaire === '') {
-            updateData.signatureGestionnaire = null;
-        }
-        if (updateData.signatureTechnicien === '') {
-            updateData.signatureTechnicien = null;
-        }
-        if (updateEtapeDto.statut === 'TERMINE' && userId) {
-            updateData.valideParUser = {
-                connect: { id: userId }
-            };
-            delete updateData.valideParId;
-        }
-        const updatedEtape = await this.prisma.workflowEtape.update({
-            where: { id: etape.id },
-            data: updateData,
-            include: {
-                valideParUser: {
-                    select: {
-                        id: true,
-                        email: true,
-                        nom: true,
-                        prenom: true,
+            if (updateData.signatureTechnicien === '') {
+                updateData.signatureTechnicien = null;
+            }
+            if (updateEtapeDto.statut === 'TERMINE' && userId) {
+                updateData.valideParUser = {
+                    connect: { id: userId }
+                };
+                delete updateData.valideParId;
+            }
+            const updated = await tx.workflowEtape.update({
+                where: { id: etape.id },
+                data: updateData,
+                include: {
+                    valideParUser: {
+                        select: {
+                            id: true,
+                            email: true,
+                            nom: true,
+                            prenom: true,
+                        },
                     },
                 },
-            },
-        });
-        if (updateEtapeDto.statut === 'EN_COURS' && etape.statut === 'EN_ATTENTE') {
-            await this.prisma.workflow.update({
-                where: { id: workflowId },
-                data: {
-                    etapeActuelle: numeroEtape,
-                    statut: 'EN_COURS'
-                }
             });
-        }
-        if (updateEtapeDto.statut === 'TERMINE') {
-            const nextEtapeNumber = numeroEtape + 1;
-            const nextEtape = await this.prisma.workflowEtape.findFirst({
-                where: { workflowId, numeroEtape: nextEtapeNumber }
-            });
-            if (nextEtape) {
-                await this.prisma.workflow.update({
-                    where: { id: workflowId },
-                    data: { etapeActuelle: nextEtapeNumber }
-                });
-            }
-            else {
-                await this.prisma.workflow.update({
+            if (updateEtapeDto.statut === 'EN_COURS' && etape.statut === 'EN_ATTENTE') {
+                await tx.workflow.update({
                     where: { id: workflowId },
                     data: {
-                        statut: 'TERMINE',
-                        dateFin: new Date()
+                        etapeActuelle: numeroEtape,
+                        statut: 'EN_COURS'
                     }
                 });
             }
-        }
+            if (updateEtapeDto.statut === 'TERMINE') {
+                const nextEtapeNumber = numeroEtape + 1;
+                const nextEtape = await tx.workflowEtape.findFirst({
+                    where: { workflowId, numeroEtape: nextEtapeNumber }
+                });
+                if (nextEtape) {
+                    await tx.workflow.update({
+                        where: { id: workflowId },
+                        data: { etapeActuelle: nextEtapeNumber }
+                    });
+                }
+                else {
+                    await tx.workflow.update({
+                        where: { id: workflowId },
+                        data: {
+                            statut: 'TERMINE',
+                            dateFin: new Date()
+                        }
+                    });
+                }
+            }
+            return updated;
+        });
         this.workflowsGateway.emitEtapeUpdated(workflowId, updatedEtape);
         return updatedEtape;
     }
-    async cancelWorkflow(id, raison, userId, userName) {
+    async cancelWorkflow(id, raison, userId, userName, userRole) {
+        if (userRole !== 'ADMIN') {
+            throw new common_1.ForbiddenException('Seuls les administrateurs peuvent annuler un workflow');
+        }
         const workflow = await this.prisma.workflow.findUnique({
             where: { id },
         });

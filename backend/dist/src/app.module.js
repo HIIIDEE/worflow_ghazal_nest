@@ -17,6 +17,7 @@ const users_module_1 = require("./users/users.module");
 const techniciens_module_1 = require("./techniciens/techniciens.module");
 const auth_module_1 = require("./auth/auth.module");
 const etape_definitions_module_1 = require("./etape-definitions/etape-definitions.module");
+const common_module_1 = require("./common/common.module");
 const cache_manager_1 = require("@nestjs/cache-manager");
 const throttler_1 = require("@nestjs/throttler");
 const core_1 = require("@nestjs/core");
@@ -26,6 +27,7 @@ exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            common_module_1.CommonModule,
             cache_manager_1.CacheModule.register({
                 isGlobal: true,
                 ttl: 60000,

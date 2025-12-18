@@ -27,32 +27,36 @@ async function bootstrap() {
   app.use(compression());
 
   // CORS configuration with environment variables
-  const frontendUrl = process.env.FRONTEND_URL || 'https://www.ghazal.dz/workflow';
-  const corsOrigins = process.env.NODE_ENV === 'production'
-    ? frontendUrl.split(',') // Support multiple origins in production
-    : [frontendUrl, 'https://www.ghazal.dz/workflow']; // Allow localhost in development
+  const frontendUrl =
+    process.env.FRONTEND_URL || 'https://www.ghazal.dz/workflow';
+  const corsOrigins =
+    process.env.NODE_ENV === 'production'
+      ? frontendUrl.split(',') // Support multiple origins in production
+      : [frontendUrl, 'https://www.ghazal.dz/workflow']; // Allow localhost in development
 
   app.enableCors({
     origin: [
-        'https://www.ghazal.dz', 
-        'https://ghazal.dz',
-	// Add the configured FRONTEND_URL to the allowed origins
-        'https://www.ghazal.dz/workflow',
-	'https://ghazal.dz/workflow',        
-	// Add localhost for dev if needed
-        'http://localhost:5173' 
-    ],    
+      'https://www.ghazal.dz',
+      'https://ghazal.dz',
+      // Add the configured FRONTEND_URL to the allowed origins
+      'https://www.ghazal.dz/workflow',
+      'https://ghazal.dz/workflow',
+      // Add localhost for dev if needed
+      'http://localhost:5173',
+    ],
     credentials: true,
   });
 
   // API prefix from environment
-  //const apiPrefix = process.env.API_PREFIX || 'apiworkflow';
-  //app.setGlobalPrefix(apiPrefix);
+  const apiPrefix = process.env.API_PREFIX || 'apiworkflow';
+  app.setGlobalPrefix(apiPrefix);
 
   // Swagger/OpenAPI documentation
   const config = new DocumentBuilder()
     .setTitle('WorkflowGhazal API')
-    .setDescription('API de gestion des workflows de transformation GPL - Ghazal GPL')
+    .setDescription(
+      'API de gestion des workflows de transformation GPL - Ghazal GPL',
+    )
     .setVersion('1.0')
     .addTag('auth', 'Authentification et autorisation')
     .addTag('vehicles', 'Gestion des véhicules')
@@ -80,7 +84,7 @@ async function bootstrap() {
     customCss: '.swagger-ui .topbar { display: none }',
   });
 
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 3010;
   await app.listen(port);
 
   console.log(`Application is running on: http://localhost:${port}`);

@@ -27,3 +27,12 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# Prisma
+prisma/migrations
+prisma/seed.ts
+
+
+# docker
+docker-compose.yml
+Dockerfile

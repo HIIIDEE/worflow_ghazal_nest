@@ -56,6 +56,9 @@ let PrismaService = class PrismaService {
     get historiqueModification() {
         return this.prisma.historiqueModification;
     }
+    get $transaction() {
+        return this.prisma.$transaction.bind(this.prisma);
+    }
 };
 exports.PrismaService = PrismaService;
 exports.PrismaService = PrismaService = __decorate([

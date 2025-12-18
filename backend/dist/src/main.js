@@ -33,10 +33,12 @@ async function bootstrap() {
             'https://ghazal.dz',
             'https://www.ghazal.dz/workflow',
             'https://ghazal.dz/workflow',
-            'http://localhost:5173'
+            'http://localhost:5173',
         ],
         credentials: true,
     });
+    const apiPrefix = process.env.API_PREFIX || 'apiworkflow';
+    app.setGlobalPrefix(apiPrefix);
     const config = new swagger_1.DocumentBuilder()
         .setTitle('WorkflowGhazal API')
         .setDescription('API de gestion des workflows de transformation GPL - Ghazal GPL')
@@ -62,7 +64,7 @@ async function bootstrap() {
         customfavIcon: 'https://nestjs.com/img/logo-small.svg',
         customCss: '.swagger-ui .topbar { display: none }',
     });
-    const port = process.env.PORT || 3000;
+    const port = process.env.PORT || 3010;
     await app.listen(port);
     console.log(`Application is running on: http://localhost:${port}`);
     console.log(`API Documentation: http://localhost:${port}/api/docs`);

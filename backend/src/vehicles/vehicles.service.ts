@@ -10,7 +10,7 @@ export class VehiclesService {
   constructor(
     private prisma: PrismaService,
     private workflowsService: WorkflowsService,
-  ) { }
+  ) {}
 
   async create(createVehicleDto: CreateVehicleDto, creePar?: string) {
     // ✅ TRANSACTION : Garantit que véhicule + workflow sont créés ensemble ou pas du tout
@@ -78,8 +78,8 @@ export class VehiclesService {
               where: { statut: { in: ['EN_COURS', 'TERMINE'] } },
               orderBy: { numeroEtape: 'desc' },
               take: 1, // Get the latest active step
-            }
-          }
+            },
+          },
         },
       },
     });

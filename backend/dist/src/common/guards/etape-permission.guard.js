@@ -13,13 +13,16 @@ exports.EtapePermissionGuard = void 0;
 const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const prisma_service_1 = require("../../prisma.service");
+const security_logger_service_1 = require("../logger/security-logger.service");
 const REQUIRED_PERMISSION_KEY = 'requiredPermission';
 let EtapePermissionGuard = class EtapePermissionGuard {
     reflector;
     prisma;
-    constructor(reflector, prisma) {
+    securityLogger;
+    constructor(reflector, prisma, securityLogger) {
         this.reflector = reflector;
         this.prisma = prisma;
+        this.securityLogger = securityLogger;
     }
     async canActivate(context) {
         const requiredPermission = this.reflector.get(REQUIRED_PERMISSION_KEY, context.getHandler());
@@ -37,7 +40,10 @@ let EtapePermissionGuard = class EtapePermissionGuard {
         }
         const hasPermission = await this.checkPermission(user.userId, numeroEtape, requiredPermission);
         if (!hasPermission) {
-            throw new common_1.ForbiddenException(`You don't have ${requiredPermission} permission for this step`);
+            const ip = request.ip || request.headers['x-forwarded-for'] || 'unknown';
+            const resource = `Etape ${numeroEtape}`;
+            this.securityLogger.logPermissionViolation(user.userId, user.email, user.role, requiredPermission, resource, ip);
+            throw new common_1.ForbiddenException(`Vous n'avez pas la permission ${requiredPermission} pour cette étape`);
         }
         return true;
     }
@@ -58,6 +64,7 @@ exports.EtapePermissionGuard = EtapePermissionGuard;
 exports.EtapePermissionGuard = EtapePermissionGuard = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [core_1.Reflector,
-        prisma_service_1.PrismaService])
+        prisma_service_1.PrismaService,
+        security_logger_service_1.SecurityLoggerService])
 ], EtapePermissionGuard);
 //# sourceMappingURL=etape-permission.guard.js.map

@@ -13,4 +13,5 @@ export declare class PrismaService implements OnModuleInit, OnModuleDestroy {
     get etapeDefinition(): import("@prisma/client").Prisma.EtapeDefinitionDelegate<import("@prisma/client/runtime/client").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     get etapePermission(): import("@prisma/client").Prisma.EtapePermissionDelegate<import("@prisma/client/runtime/client").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     get historiqueModification(): import("@prisma/client").Prisma.HistoriqueModificationDelegate<import("@prisma/client/runtime/client").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get $transaction(): any;
 }

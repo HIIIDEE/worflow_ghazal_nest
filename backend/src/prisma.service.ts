@@ -59,4 +59,8 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   get historiqueModification() {
     return this.prisma.historiqueModification;
   }
+
+  get $transaction() {
+    return this.prisma.$transaction.bind(this.prisma);
+  }
 }

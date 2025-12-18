@@ -167,33 +167,8 @@ export declare class WorkflowsService {
         annulePar: string | null;
     }>;
     private canStartEtape;
-    updateEtape(workflowId: string, numeroEtape: number, updateEtapeDto: UpdateEtapeDto, userId?: string, userRole?: string): Promise<{
-        valideParUser: {
-            id: string;
-            email: string;
-            nom: string;
-            prenom: string;
-        } | null;
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        numeroEtape: number;
-        description: string | null;
-        workflowId: string;
-        nomEtape: string;
-        statut: import("@prisma/client").$Enums.EtapeStatus;
-        formulaire: import("@prisma/client/runtime/client").JsonValue | null;
-        dateDebut: Date | null;
-        dateFin: Date | null;
-        validePar: string | null;
-        valideParId: string | null;
-        technicienId: string | null;
-        signatureGestionnaire: string | null;
-        signatureTechnicien: string | null;
-        commentaires: string | null;
-    }>;
-    cancelWorkflow(id: string, raison: string, userId: string, userName: string): Promise<{
+    updateEtape(workflowId: string, numeroEtape: number, updateEtapeDto: UpdateEtapeDto, userId?: string, userRole?: string): Promise<any>;
+    cancelWorkflow(id: string, raison: string, userId: string, userName: string, userRole: string): Promise<{
         vehicle: {
             id: string;
             createdAt: Date;

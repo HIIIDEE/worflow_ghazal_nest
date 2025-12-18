@@ -5,17 +5,7 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 export declare class VehiclesController {
     private readonly vehiclesService;
     constructor(vehiclesService: VehiclesService);
-    create(createVehicleDto: CreateVehicleDto, user: any): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        immatriculation: string;
-        marque: string;
-        modele: string;
-        annee: number;
-        numeroSerie: string;
-        creePar: string | null;
-    }>;
+    create(createVehicleDto: CreateVehicleDto, user: any): Promise<any>;
     search(q: string): Promise<({
         workflows: ({
             etapes: {

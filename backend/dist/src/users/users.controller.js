@@ -18,13 +18,21 @@ const swagger_1 = require("@nestjs/swagger");
 const users_service_1 = require("./users.service");
 const create_user_dto_1 = require("./dto/create-user.dto");
 const update_user_dto_1 = require("./dto/update-user.dto");
+const security_logger_service_1 = require("../common/logger/security-logger.service");
+const current_user_decorator_1 = require("../common/decorators/current-user.decorator");
+const client_info_decorator_1 = require("../common/decorators/client-info.decorator");
+const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
 let UsersController = class UsersController {
     usersService;
-    constructor(usersService) {
+    securityLogger;
+    constructor(usersService, securityLogger) {
         this.usersService = usersService;
+        this.securityLogger = securityLogger;
     }
-    create(createUserDto) {
-        return this.usersService.create(createUserDto);
+    async create(createUserDto, currentUser, clientInfo) {
+        const newUser = await this.usersService.create(createUserDto);
+        this.securityLogger.logUserCreated(newUser.id, newUser.email, currentUser?.userId || 'system', currentUser?.email || 'system', clientInfo.ip);
+        return newUser;
     }
     findAll() {
         return this.usersService.findAll();
@@ -32,11 +40,16 @@ let UsersController = class UsersController {
     findOne(id) {
         return this.usersService.findOne(id);
     }
-    update(id, updateUserDto) {
-        return this.usersService.update(id, updateUserDto);
+    async update(id, updateUserDto, currentUser, clientInfo) {
+        const updatedUser = await this.usersService.update(id, updateUserDto);
+        const changes = Object.keys(updateUserDto);
+        this.securityLogger.logUserUpdated(updatedUser.id, updatedUser.email, currentUser?.userId || 'system', currentUser?.email || 'system', clientInfo.ip, changes);
+        return updatedUser;
     }
-    remove(id) {
-        return this.usersService.remove(id);
+    async remove(id, currentUser, clientInfo) {
+        const userToDelete = await this.usersService.findOne(id);
+        await this.usersService.remove(id);
+        this.securityLogger.logUserDeleted(userToDelete.id, userToDelete.email, currentUser?.userId || 'system', currentUser?.email || 'system', clientInfo.ip);
     }
 };
 exports.UsersController = UsersController;
@@ -44,9 +57,11 @@ __decorate([
     (0, common_1.Post)(),
     (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __param(2, (0, client_info_decorator_1.ClientInfo)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto, Object, Object]),
+    __metadata("design:returntype", Promise)
 ], UsersController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
@@ -65,22 +80,28 @@ __decorate([
     (0, common_1.Put)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __param(3, (0, client_info_decorator_1.ClientInfo)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto, Object, Object]),
+    __metadata("design:returntype", Promise)
 ], UsersController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __param(2, (0, client_info_decorator_1.ClientInfo)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:returntype", Promise)
 ], UsersController.prototype, "remove", null);
 exports.UsersController = UsersController = __decorate([
     (0, swagger_1.ApiTags)('users'),
     (0, swagger_1.ApiBearerAuth)('JWT-auth'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('users'),
-    __metadata("design:paramtypes", [users_service_1.UsersService])
+    __metadata("design:paramtypes", [users_service_1.UsersService,
+        security_logger_service_1.SecurityLoggerService])
 ], UsersController);
 //# sourceMappingURL=users.controller.js.map

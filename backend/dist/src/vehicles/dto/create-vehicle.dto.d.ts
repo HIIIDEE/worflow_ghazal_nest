@@ -1,5 +1,5 @@
 export declare class CreateVehicleDto {
-    immatriculation: string;
+    immatriculation?: string;
     marque: string;
     modele: string;
     annee: number;

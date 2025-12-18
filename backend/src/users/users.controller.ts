@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -6,9 +17,11 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { SecurityLoggerService } from '../common/logger/security-logger.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ClientInfo } from '../common/decorators/client-info.decorator';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 @ApiTags('users')
 @ApiBearerAuth('JWT-auth')
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(
@@ -29,8 +42,8 @@ export class UsersController {
     this.securityLogger.logUserCreated(
       newUser.id,
       newUser.email,
-      currentUser.userId,
-      currentUser.email,
+      currentUser?.userId || 'system',
+      currentUser?.email || 'system',
       clientInfo.ip,
     );
 
@@ -61,8 +74,8 @@ export class UsersController {
     this.securityLogger.logUserUpdated(
       updatedUser.id,
       updatedUser.email,
-      currentUser.userId,
-      currentUser.email,
+      currentUser?.userId || 'system',
+      currentUser?.email || 'system',
       clientInfo.ip,
       changes,
     );
@@ -86,8 +99,8 @@ export class UsersController {
     this.securityLogger.logUserDeleted(
       userToDelete.id,
       userToDelete.email,
-      currentUser.userId,
-      currentUser.email,
+      currentUser?.userId || 'system',
+      currentUser?.email || 'system',
       clientInfo.ip,
     );
   }

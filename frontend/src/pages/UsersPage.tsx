@@ -1,37 +1,55 @@
-import { useState, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { usersApi } from '../features/users/services/users.api';
-import { Container, Box, CircularProgress, Alert, Snackbar, TextField, InputAdornment } from '@mui/material';
-import type { SelectChangeEvent } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import { useState, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { usersApi } from "../features/users/services/users.api";
+import {
+  Container,
+  Box,
+  CircularProgress,
+  Alert,
+  Snackbar,
+  TextField,
+  InputAdornment,
+} from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 
-import UsersHeader from '../features/users/components/UsersHeader';
-import UsersList from '../features/users/components/UsersList';
-import UserCreationDialog from '../features/users/components/UserCreationDialog';
-import UserEditDialog from '../features/users/components/UserEditDialog';
-import type { User } from '../features/users/types';
+import UsersHeader from "../features/users/components/UsersHeader";
+import UsersList from "../features/users/components/UsersList";
+import UserCreationDialog from "../features/users/components/UserCreationDialog";
+import UserEditDialog from "../features/users/components/UserEditDialog";
+import type { User } from "../features/users/types";
 
 export default function UsersPage() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+  const [searchQuery, setSearchQuery] = useState("");
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({
     open: false,
-    message: '',
-    severity: 'success',
+    message: "",
+    severity: "success",
   });
   const [newUser, setNewUser] = useState({
-    nom: '',
-    prenom: '',
-    email: '',
-    password: '',
-    role: 'GESTIONNAIRE' as 'ADMIN' | 'GESTIONNAIRE',
+    nom: "",
+    prenom: "",
+    email: "",
+    password: "",
+    role: "GESTIONNAIRE" as "ADMIN" | "GESTIONNAIRE",
   });
-  const [editingUser, setEditingUser] = useState<(Partial<User> & { password?: string }) | null>(null);
+  const [editingUser, setEditingUser] = useState<
+    (Partial<User> & { password?: string }) | null
+  >(null);
 
-  const { data: users, isLoading, error } = useQuery({
-    queryKey: ['users'],
+  const {
+    data: users,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["users"],
     queryFn: async () => {
       const response = await usersApi.getAll();
       return response.data;
@@ -41,42 +59,75 @@ export default function UsersPage() {
   const createUserMutation = useMutation({
     mutationFn: usersApi.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       setOpen(false);
-      setNewUser({ nom: '', prenom: '', email: '', password: '', role: 'GESTIONNAIRE' });
-      setSnackbar({ open: true, message: 'Utilisateur créé avec succès', severity: 'success' });
+      setNewUser({
+        nom: "",
+        prenom: "",
+        email: "",
+        password: "",
+        role: "GESTIONNAIRE",
+      });
+      setSnackbar({
+        open: true,
+        message: "Utilisateur créé avec succès",
+        severity: "success",
+      });
     },
     onError: (error) => {
-      console.error('Failed to create user:', error);
-      setSnackbar({ open: true, message: 'Erreur lors de la création de l\'utilisateur', severity: 'error' });
+      console.error("Failed to create user:", error);
+      setSnackbar({
+        open: true,
+        message: "Erreur lors de la création de l'utilisateur",
+        severity: "error",
+      });
     },
   });
 
   const updateUserMutation = useMutation({
-    mutationFn: async (data: { id: string; updates: Partial<User> & { password?: string } }) => {
+    mutationFn: async (data: {
+      id: string;
+      updates: Partial<User> & { password?: string };
+    }) => {
       return await usersApi.update(data.id, data.updates);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       setEditOpen(false);
       setEditingUser(null);
-      setSnackbar({ open: true, message: 'Utilisateur modifié avec succès', severity: 'success' });
+      setSnackbar({
+        open: true,
+        message: "Utilisateur modifié avec succès",
+        severity: "success",
+      });
     },
     onError: (error) => {
-      console.error('Failed to update user:', error);
-      setSnackbar({ open: true, message: 'Erreur lors de la modification de l\'utilisateur', severity: 'error' });
+      console.error("Failed to update user:", error);
+      setSnackbar({
+        open: true,
+        message: "Erreur lors de la modification de l'utilisateur",
+        severity: "error",
+      });
     },
   });
 
   const deleteUserMutation = useMutation({
     mutationFn: usersApi.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      setSnackbar({ open: true, message: 'Utilisateur supprimé avec succès', severity: 'success' });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      setSnackbar({
+        open: true,
+        message: "Utilisateur supprimé avec succès",
+        severity: "success",
+      });
     },
     onError: (error) => {
-      console.error('Failed to delete user:', error);
-      setSnackbar({ open: true, message: 'Erreur lors de la suppression de l\'utilisateur', severity: 'error' });
+      console.error("Failed to delete user:", error);
+      setSnackbar({
+        open: true,
+        message: "Erreur lors de la suppression de l'utilisateur",
+        severity: "error",
+      });
     },
   });
 
@@ -86,35 +137,50 @@ export default function UsersPage() {
     if (!searchQuery.trim()) return users;
 
     const query = searchQuery.toLowerCase();
-    return users.filter((user) =>
-      user.nom.toLowerCase().includes(query) ||
-      user.prenom.toLowerCase().includes(query) ||
-      user.email.toLowerCase().includes(query)
+    return users.filter(
+      (user) =>
+        user.nom.toLowerCase().includes(query) ||
+        user.prenom.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query)
     );
   }, [users, searchQuery]);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setNewUser({ ...newUser, [e.target.name]: e.target.value });
   };
 
   const handleRoleChange = (e: SelectChangeEvent) => {
-    setNewUser({ ...newUser, role: e.target.value as 'ADMIN' | 'GESTIONNAIRE' });
+    setNewUser({
+      ...newUser,
+      role: e.target.value as "ADMIN" | "GESTIONNAIRE",
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newUser.nom || !newUser.prenom || !newUser.email || !newUser.password) {
-      setSnackbar({ open: true, message: 'Veuillez remplir tous les champs obligatoires', severity: 'error' });
+    if (
+      !newUser.nom ||
+      !newUser.prenom ||
+      !newUser.email ||
+      !newUser.password
+    ) {
+      setSnackbar({
+        open: true,
+        message: "Veuillez remplir tous les champs obligatoires",
+        severity: "error",
+      });
       return;
     }
     createUserMutation.mutate(newUser);
   };
 
   const handleEdit = (user: User) => {
-    setEditingUser({ ...user, password: '' });
+    setEditingUser({ ...user, password: "" });
     setEditOpen(true);
   };
 
@@ -126,17 +192,26 @@ export default function UsersPage() {
 
   const handleEditRoleChange = (e: SelectChangeEvent) => {
     if (editingUser) {
-      setEditingUser({ ...editingUser, role: e.target.value as User['role'] });
+      setEditingUser({ ...editingUser, role: e.target.value as User["role"] });
     }
   };
 
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingUser?.id || !editingUser.nom || !editingUser.prenom || !editingUser.email) {
-      setSnackbar({ open: true, message: 'Veuillez remplir tous les champs obligatoires', severity: 'error' });
+    if (
+      !editingUser?.id ||
+      !editingUser.nom ||
+      !editingUser.prenom ||
+      !editingUser.email
+    ) {
+      setSnackbar({
+        open: true,
+        message: "Veuillez remplir tous les champs obligatoires",
+        severity: "error",
+      });
       return;
     }
-    const { id, ...updates } = editingUser;
+    const { id, createdAt, updatedAt, ...updates } = editingUser;
     // Remove password if empty
     if (!updates.password) {
       delete updates.password;
@@ -145,14 +220,25 @@ export default function UsersPage() {
   };
 
   const handleDelete = (user: User) => {
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.prenom} ${user.nom} ?`)) {
+    if (
+      window.confirm(
+        `Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.prenom} ${user.nom} ?`
+      )
+    ) {
       deleteUserMutation.mutate(user.id);
     }
   };
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "60vh",
+        }}
+      >
         <CircularProgress />
       </Box>
     );
@@ -169,7 +255,7 @@ export default function UsersPage() {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', py: 6 }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "#f8fafc", py: 6 }}>
       <Container maxWidth="lg">
         <UsersHeader onAddClick={handleOpen} />
 
@@ -182,21 +268,25 @@ export default function UsersPage() {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{ color: 'text.secondary' }} />
+                  <SearchIcon sx={{ color: "text.secondary" }} />
                 </InputAdornment>
               ),
             }}
             sx={{
-              bgcolor: 'white',
+              bgcolor: "white",
               borderRadius: 2,
-              '& .MuiOutlinedInput-root': {
+              "& .MuiOutlinedInput-root": {
                 borderRadius: 2,
               },
             }}
           />
         </Box>
 
-        <UsersList users={filteredUsers} onEdit={handleEdit} onDelete={handleDelete} />
+        <UsersList
+          users={filteredUsers}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
 
         <UserCreationDialog
           open={open}
@@ -223,7 +313,11 @@ export default function UsersPage() {
           autoHideDuration={6000}
           onClose={() => setSnackbar({ ...snackbar, open: false })}
         >
-          <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>
+          <Alert
+            onClose={() => setSnackbar({ ...snackbar, open: false })}
+            severity={snackbar.severity}
+            sx={{ width: "100%" }}
+          >
             {snackbar.message}
           </Alert>
         </Snackbar>

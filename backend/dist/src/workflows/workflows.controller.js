@@ -23,11 +23,15 @@ const cancel_workflow_dto_1 = require("./dto/cancel-workflow.dto");
 const pagination_dto_1 = require("../common/dto/pagination.dto");
 const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
 const current_user_decorator_1 = require("../common/decorators/current-user.decorator");
+const client_info_decorator_1 = require("../common/decorators/client-info.decorator");
+const security_logger_service_1 = require("../common/logger/security-logger.service");
 const cache_manager_1 = require("@nestjs/cache-manager");
 let WorkflowsController = class WorkflowsController {
     workflowsService;
-    constructor(workflowsService) {
+    securityLogger;
+    constructor(workflowsService, securityLogger) {
         this.workflowsService = workflowsService;
+        this.securityLogger = securityLogger;
     }
     create(createWorkflowDto) {
         return this.workflowsService.create(createWorkflowDto);
@@ -55,8 +59,12 @@ let WorkflowsController = class WorkflowsController {
         await this.workflowsService.validateEtapeUpdate(id, parseInt(numeroEtape), updateEtapeDto, user.userId, user.role);
         return this.workflowsService.updateEtape(id, parseInt(numeroEtape), updateEtapeDto, user.userId, user.role);
     }
-    cancelWorkflow(id, cancelWorkflowDto, user) {
-        return this.workflowsService.cancelWorkflow(id, cancelWorkflowDto.raison, user.userId, `${user.nom} ${user.prenom}`);
+    async cancelWorkflow(id, cancelWorkflowDto, user, clientInfo) {
+        const result = await this.workflowsService.cancelWorkflow(id, cancelWorkflowDto.raison, user.userId, `${user.nom} ${user.prenom}`, user.role);
+        if (result && result.vehicle) {
+            this.securityLogger.logWorkflowCancelled(result.id, result.vehicle.immatriculation, user.userId, user.email, cancelWorkflowDto.raison, clientInfo.ip);
+        }
+        return result;
     }
     remove(id) {
         return this.workflowsService.remove(id);
@@ -132,9 +140,10 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __param(3, (0, client_info_decorator_1.ClientInfo)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, cancel_workflow_dto_1.CancelWorkflowDto, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, cancel_workflow_dto_1.CancelWorkflowDto, Object, Object]),
+    __metadata("design:returntype", Promise)
 ], WorkflowsController.prototype, "cancelWorkflow", null);
 __decorate([
     (0, common_1.Delete)(':id'),
@@ -148,6 +157,7 @@ exports.WorkflowsController = WorkflowsController = __decorate([
     (0, swagger_1.ApiBearerAuth)('JWT-auth'),
     (0, common_1.Controller)('workflows'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __metadata("design:paramtypes", [workflows_service_1.WorkflowsService])
+    __metadata("design:paramtypes", [workflows_service_1.WorkflowsService,
+        security_logger_service_1.SecurityLoggerService])
 ], WorkflowsController);
 //# sourceMappingURL=workflows.controller.js.map

@@ -21,14 +21,36 @@ let VehiclesService = class VehiclesService {
         this.workflowsService = workflowsService;
     }
     async create(createVehicleDto, creePar) {
-        const vehicle = await this.prisma.vehicle.create({
-            data: {
-                ...createVehicleDto,
-                creePar,
-            },
+        return this.prisma.$transaction(async (tx) => {
+            const vehicle = await tx.vehicle.create({
+                data: {
+                    ...createVehicleDto,
+                    immatriculation: createVehicleDto.immatriculation || 'AB-123-CD',
+                    creePar,
+                },
+            });
+            const workflow = await tx.workflow.create({
+                data: {
+                    vehicleId: vehicle.id,
+                },
+            });
+            const etapeDefinitions = await tx.etapeDefinition.findMany({
+                orderBy: { ordre: 'asc' },
+            });
+            for (const etapeDef of etapeDefinitions) {
+                await tx.workflowEtape.create({
+                    data: {
+                        workflowId: workflow.id,
+                        numeroEtape: etapeDef.numeroEtape,
+                        nomEtape: etapeDef.nom,
+                        description: etapeDef.description,
+                        statut: 'EN_ATTENTE',
+                        formulaire: etapeDef.champsFormulaire ?? {},
+                    },
+                });
+            }
+            return vehicle;
         });
-        await this.workflowsService.create({ vehicleId: vehicle.id });
-        return vehicle;
     }
     async search(query) {
         if (!query || query.length < 2) {
@@ -50,8 +72,8 @@ let VehiclesService = class VehiclesService {
                             where: { statut: { in: ['EN_COURS', 'TERMINE'] } },
                             orderBy: { numeroEtape: 'desc' },
                             take: 1,
-                        }
-                    }
+                        },
+                    },
                 },
             },
         });

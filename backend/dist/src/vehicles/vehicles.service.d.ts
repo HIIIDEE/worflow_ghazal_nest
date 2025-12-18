@@ -7,17 +7,7 @@ export declare class VehiclesService {
     private prisma;
     private workflowsService;
     constructor(prisma: PrismaService, workflowsService: WorkflowsService);
-    create(createVehicleDto: CreateVehicleDto, creePar?: string): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        immatriculation: string;
-        marque: string;
-        modele: string;
-        annee: number;
-        numeroSerie: string;
-        creePar: string | null;
-    }>;
+    create(createVehicleDto: CreateVehicleDto, creePar?: string): Promise<any>;
     search(query: string): Promise<({
         workflows: ({
             etapes: {
