@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { useAuthStore } from '../stores/useAuthStore';
 
 interface WebSocketContextType {
     socket: Socket | null;
@@ -12,58 +13,73 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const [socket, setSocket] = useState<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
 
+    // Écouter les changements d'authentification
+    const { token, isAuthenticated } = useAuthStore();
+
     useEffect(() => {
-        // Connect to WebSocket server using environment variable
-//        const wsUrl = import.meta.env.VITE_WS_URL || 'https://www.ghazal.dz/apiworkflow';
-
-        // Get authentication token from localStorage
-        const token = localStorage.getItem('token');
-
-        // Don't connect if no token available
-        if (!token) {
+        // Ne se connecter que si l'utilisateur est authentifié et a un token
+        if (!isAuthenticated || !token) {
             console.log('⚠️ No authentication token available, skipping WebSocket connection');
+
+            // Déconnecter le socket existant si l'utilisateur se déconnecte
+            if (socket) {
+                console.log('🔌 Disconnecting WebSocket (user logged out)');
+                socket.disconnect();
+                setSocket(null);
+                setIsConnected(false);
+            }
             return;
         }
 
-        const socketInstance = io('https://www.ghazal.dz', {
-path: '/apiworkflow/socket.io',
-withCredentials: true,
-  autoConnect: true,
-                //path: '/socket.io',              // ✅ Ajouté
-		transports: ['websocket', 'polling'], // ✅ Modifié (était websocket seulement)
-    reconnectionDelayMax: 5000,      // ✅ Ajouté
-    timeout: 20000,                  // ✅ Ajouté
+        // Si déjà connecté, ne pas créer une nouvelle connexion
+        if (socket?.connected) {
+            console.log('✅ WebSocket already connected');
+            return;
+        }
 
-	    //transports: ['websocket'],
+        // Get WebSocket configuration from environment variables
+        const wsUrl = import.meta.env.VITE_WS_URL || 'http://localhost:3000';
+        const wsPath = import.meta.env.VITE_WS_PATH || '/socket.io';
+
+        console.log(`🔌 Connecting to WebSocket: ${wsUrl} (path: ${wsPath})`);
+
+        const socketInstance = io(wsUrl, {
+            path: wsPath,
+            withCredentials: true,
+            autoConnect: true,
+            transports: ['websocket', 'polling'],
             reconnection: true,
             reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
             reconnectionAttempts: 5,
+            timeout: 20000,
             auth: {
                 token: token, // Send JWT token for authentication
             },
         });
 
         socketInstance.on('connect', () => {
-            console.log('✅ WebSocket connected');
+            console.log('✅ WebSocket connected successfully');
             setIsConnected(true);
         });
 
-        socketInstance.on('disconnect', () => {
-            console.log('❌ WebSocket disconnected');
+        socketInstance.on('disconnect', (reason) => {
+            console.log('❌ WebSocket disconnected:', reason);
             setIsConnected(false);
         });
 
         socketInstance.on('connect_error', (error) => {
-            console.error('WebSocket connection error:', error);
+            console.error('❌ WebSocket connection error:', error.message);
         });
 
         setSocket(socketInstance);
 
-        // Cleanup on unmount
+        // Cleanup on unmount or when token changes
         return () => {
+            console.log('🔌 Disconnecting WebSocket (cleanup)');
             socketInstance.disconnect();
         };
-    }, []);
+    }, [token, isAuthenticated]); // Se reconnecter quand le token ou l'authentification change
 
     return (
         <WebSocketContext.Provider value={{ socket, isConnected }}>
