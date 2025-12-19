@@ -1,9 +1,9 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # Base de données PostgreSQL
   postgres:
-    image: postgres:16
+    image: postgres:latest
     container_name: ghazal_postgres_dev
     environment:
       POSTGRES_USER: postgres
@@ -12,11 +12,11 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data_dev:/var/lib/postgresql/data
+      - postgres_data_dev:/var/lib/postgresql
     networks:
       - ghazal_network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -41,14 +41,18 @@ services:
 
       # Configuration CORS
       CORS_ORIGIN: "http://localhost:5173"
+
+      # Configuration pour le polling (Windows + Docker)
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
     ports:
       - "3000:3000"
     volumes:
-      # Montage du code source pour le hot-reload
-      - ./backend/src:/usr/src/app/src
-      - ./backend/prisma:/usr/src/app/prisma
+      # Montage du code source complet pour le hot-reload
+      - ./backend:/usr/src/app
       # Volume anonyme pour node_modules (évite les conflits)
       - /usr/src/app/node_modules
+      - /usr/src/app/dist
     depends_on:
       postgres:
         condition: service_healthy
@@ -59,6 +63,7 @@ services:
         echo 'Attente de la base de données...' &&
         npx prisma generate &&
         npx prisma migrate deploy &&
+        npm run prisma:seed &&
         npm run start:dev
       "
 
@@ -69,18 +74,18 @@ services:
       dockerfile: Dockerfile.dev
     container_name: ghazal_frontend_dev
     environment:
-      VITE_API_URL: "http://localhost:3000"
+      VITE_API_URL: "http://localhost:3000/apiworkflow"
       VITE_WS_URL: "ws://localhost:3000"
+      # Configuration pour le polling (Windows + Docker)
+      CHOKIDAR_USEPOLLING: "true"
     ports:
       - "5173:5173"
     volumes:
-      # Montage du code source pour le hot-reload
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
-      - ./frontend/index.html:/app/index.html
-      - ./frontend/vite.config.ts:/app/vite.config.ts
+      # Montage du code source complet pour le hot-reload
+      - ./frontend:/app
       # Volume anonyme pour node_modules
       - /app/node_modules
+      - /app/dist
     depends_on:
       - backend
     networks:

@@ -5,4 +5,11 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: '/workflow/',   // 🔥 VERY IMPORTANT
+  server: {
+    watch: {
+      usePolling: true,  // Active le polling pour Docker sur Windows
+      interval: 1000,    // Vérifie les changements toutes les 1000ms
+    },
+    host: true,          // Écoute sur toutes les interfaces
+  },
 })

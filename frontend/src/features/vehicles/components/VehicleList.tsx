@@ -11,6 +11,13 @@ import {
   TablePagination,
   Tooltip,
   Typography,
+  Card,
+  CardContent,
+  Divider,
+  Stack,
+  Chip,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -18,6 +25,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import PersonIcon from '@mui/icons-material/Person';
 import type { Vehicle } from '../vehicleTypes';
 
 interface VehicleListProps {
@@ -29,6 +38,8 @@ interface VehicleListProps {
 export default function VehicleList({ vehicles, onEdit, onDelete }: VehicleListProps) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
@@ -41,6 +52,200 @@ export default function VehicleList({ vehicles, onEdit, onDelete }: VehicleListP
 
   const paginatedVehicles = vehicles?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
+  // Mobile/Tablet Card View
+  if (isMobile) {
+    return (
+      <Box>
+        {!paginatedVehicles || paginatedVehicles.length === 0 ? (
+          <Paper elevation={0} sx={{ borderRadius: 4, border: '1px solid #e2e8f0', p: 4, textAlign: 'center' }}>
+            <Typography variant="body1" color="text.secondary">
+              Aucun véhicule trouvé.
+            </Typography>
+          </Paper>
+        ) : (
+          <Stack spacing={2}>
+            {paginatedVehicles.map((vehicle) => {
+              const hasWorkflow = vehicle?.workflows && vehicle?.workflows?.length > 0;
+              const workflowId = hasWorkflow && vehicle?.workflows !== undefined ? vehicle?.workflows[0]?.id : null;
+
+              return (
+                <Card key={vehicle.id} elevation={0} sx={{ borderRadius: 3, border: '1px solid #e2e8f0' }}>
+                  <CardContent sx={{ p: 3 }}>
+                    {/* Header with vehicle info and icon */}
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 2 }}>
+                      <Box sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 2,
+                        bgcolor: '#fff7ed',
+                        color: '#d97706',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <DirectionsCarIcon />
+                      </Box>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography variant="h6" fontWeight="600" sx={{ color: '#1e293b', mb: 0.5 }}>
+                          {vehicle.marque} {vehicle.modele}
+                        </Typography>
+                        <Chip
+                          label={vehicle.immatriculation}
+                          size="small"
+                          sx={{
+                            fontFamily: 'monospace',
+                            fontWeight: 600,
+                            bgcolor: '#f1f5f9',
+                            color: '#475569'
+                          }}
+                        />
+                      </Box>
+                    </Box>
+
+                    <Divider sx={{ my: 2 }} />
+
+                    {/* Vehicle details */}
+                    <Stack spacing={1.5}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="body2" color="text.secondary">
+                          Année
+                        </Typography>
+                        <Typography variant="body2" fontWeight="600">
+                          {vehicle.annee}
+                        </Typography>
+                      </Box>
+
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="body2" color="text.secondary">
+                          N° Série (VIN)
+                        </Typography>
+                        <Typography variant="body2" fontWeight="500" sx={{ 
+                          fontFamily: 'monospace', 
+                          fontSize: '0.75rem',
+                          maxWidth: '60%',
+                          textAlign: 'right',
+                          wordBreak: 'break-all'
+                        }}>
+                          {vehicle.numeroSerie}
+                        </Typography>
+                      </Box>
+
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <CalendarTodayIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                          <Typography variant="body2" color="text.secondary">
+                            Enregistré le
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" fontWeight="500">
+                          {new Date(vehicle.createdAt).toLocaleDateString('fr-FR', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric'
+                          })}
+                        </Typography>
+                      </Box>
+
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <PersonIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                          <Typography variant="body2" color="text.secondary">
+                            Créé par
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" fontWeight="500">
+                          {vehicle.creePar || '-'}
+                        </Typography>
+                      </Box>
+                    </Stack>
+
+                    <Divider sx={{ my: 2 }} />
+
+                    {/* Actions */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box>
+                        {hasWorkflow && workflowId ? (
+                          <Tooltip title="Voir le workflow">
+                            <IconButton
+                              component={Link}
+                              to={`/workflows/${workflowId}`}
+                              size="medium"
+                              sx={{ 
+                                color: '#7c3aed',
+                                bgcolor: '#f5f3ff',
+                                '&:hover': { bgcolor: '#ede9fe' }
+                              }}
+                            >
+                              <AccountTreeIcon />
+                            </IconButton>
+                          </Tooltip>
+                        ) : (
+                          <Tooltip title="Aucun workflow">
+                            <span>
+                              <IconButton size="medium" disabled>
+                                <AccountTreeIcon />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        )}
+                      </Box>
+
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Tooltip title="Modifier">
+                          <IconButton
+                            size="medium"
+                            sx={{ 
+                              color: 'primary.main',
+                              bgcolor: '#eff6ff',
+                              '&:hover': { bgcolor: '#dbeafe' }
+                            }}
+                            onClick={() => onEdit?.(vehicle)}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Supprimer">
+                          <IconButton
+                            size="medium"
+                            sx={{ 
+                              color: 'error.main',
+                              bgcolor: '#fef2f2',
+                              '&:hover': { bgcolor: '#fee2e2' }
+                            }}
+                            onClick={() => onDelete?.(vehicle.id)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </Stack>
+        )}
+
+        {/* Pagination */}
+        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e2e8f0', mt: 2 }}>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25, 50]}
+            component="div"
+            count={vehicles?.length || 0}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Par page:"
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} sur ${count}`}
+          />
+        </Paper>
+      </Box>
+    );
+  }
+
+  // Desktop Table View
   return (
     <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 4, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
       <Table sx={{ minWidth: 650 }}>
