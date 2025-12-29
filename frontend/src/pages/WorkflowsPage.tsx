@@ -9,18 +9,21 @@ import WorkflowList from "../features/workflows/components/WorkflowList";
 import VehicleSelectionDialog from "../features/workflows/components/VehicleSelectionDialog";
 import WorkflowFiltersBar from "../features/workflows/components/WorkflowFiltersBar";
 import type { WorkflowFilters } from "../features/workflows/components/WorkflowFiltersBar";
+import VehicleScannerDialog from "../features/vehicles/components/VehicleScannerDialog";
 import type { Workflow } from "../features/workflows/types";
 import { useWorkflowSubscription } from "../hooks/useWorkflowSubscription";
 
 export default function WorkflowsPage() {
   const [searchParams] = useSearchParams();
   const [openSelectionDialog, setOpenSelectionDialog] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
   const [filters, setFilters] = useState<WorkflowFilters>({
     step: "",
     status: "",
     dateFrom: "",
     dateTo: "",
     vin: "",
+    restitution: "",
   });
 
   // Initialize filters from URL parameters
@@ -33,6 +36,7 @@ export default function WorkflowsPage() {
         ...prev,
         ...(stepParam && { step: stepParam }),
         ...(statusParam && { status: statusParam }),
+        ...(searchParams.get("restitution") && { restitution: searchParams.get("restitution")! }),
       }));
     }
   }, [searchParams]);
@@ -103,6 +107,14 @@ export default function WorkflowsPage() {
         }
       }
 
+      // Filter by Restitution
+      if (filters.restitution === 'true') {
+        const isRestitue = workflow.etapes?.find(e => e.numeroEtape === 1)?.sousStatutReception === 'RESTITUTION';
+        if (!isRestitue) {
+          return false;
+        }
+      }
+
       return true;
     });
   }, [workflows, filters]);
@@ -114,7 +126,15 @@ export default function WorkflowsPage() {
       dateFrom: "",
       dateTo: "",
       vin: "",
+      restitution: "",
     });
+  };
+
+  const handleScanSearch = (_err: unknown, result: any) => {
+    if (result) {
+      setFilters(prev => ({ ...prev, vin: result.text }));
+      setScannerOpen(false);
+    }
   };
 
   if (isLoading) {
@@ -151,6 +171,7 @@ export default function WorkflowsPage() {
           filters={filters}
           onFilterChange={setFilters}
           onClearFilters={handleClearFilters}
+          onScanClick={() => setScannerOpen(true)}
         />
 
         <WorkflowList workflows={filteredWorkflows} />
@@ -158,6 +179,12 @@ export default function WorkflowsPage() {
         <VehicleSelectionDialog
           open={openSelectionDialog}
           onClose={() => setOpenSelectionDialog(false)}
+        />
+
+        <VehicleScannerDialog
+          open={scannerOpen}
+          onClose={() => setScannerOpen(false)}
+          onScan={handleScanSearch}
         />
       </Container>
     </Box>

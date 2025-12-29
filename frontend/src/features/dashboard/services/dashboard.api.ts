@@ -6,6 +6,7 @@ export interface DashboardStatistics {
     inProgressWorkflows: number;
     cancelledWorkflows: number;
     waitingWorkflows: number;
+    restitutedWorkflows: number;
     vehiclesByStep: Record<number, number>;
     averageWorkflowTime: number | null; // in milliseconds
 }

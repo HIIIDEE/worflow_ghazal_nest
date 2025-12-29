@@ -37,6 +37,8 @@ export class WorkflowsService {
           description: etapeDef.description,
           statut: 'EN_ATTENTE', // Changed from conditional to always EN_ATTENTE
           formulaire: etapeDef.champsFormulaire ?? {},
+          // Initialiser l'étape 1 avec le sous-statut RECEPTION
+          sousStatutReception: etapeDef.numeroEtape === 1 ? 'RECEPTION' : null,
         },
       });
     }
@@ -444,6 +446,12 @@ export class WorkflowsService {
       if (updateData.signatureTechnicien === '') {
         updateData.signatureTechnicien = null;
       }
+      if (updateData.signatureClientReception === '') {
+        updateData.signatureClientReception = null;
+      }
+      if (updateData.signatureGestionnaireVerification === '') {
+        updateData.signatureGestionnaireVerification = null;
+      }
 
       // If completing the step, set valideParId via relation
       if (updateEtapeDto.statut === 'TERMINE' && userId) {
@@ -451,6 +459,33 @@ export class WorkflowsService {
           connect: { id: userId }
         };
         delete updateData.valideParId; // Ensure scalar field is not present
+      }
+
+      // Gestion spéciale pour l'étape 1 avec ses sous-statuts
+      if (numeroEtape === 1) {
+        // Initialiser le sous-statut à RECEPTION si null et qu'on démarre l'étape
+        if (updateEtapeDto.statut === 'EN_COURS' && etape.statut === 'EN_ATTENTE' && !etape.sousStatutReception) {
+          updateData.sousStatutReception = 'RECEPTION';
+        }
+
+        // Gestion des transitions de sous-statuts lors de la complétion
+        if (updateEtapeDto.statut === 'TERMINE') {
+          const currentSousStatut = etape.sousStatutReception;
+
+          if (currentSousStatut === 'RECEPTION') {
+            // Complétion de RECEPTION → passer à VERIFICATION
+            updateData.sousStatutReception = 'VERIFICATION';
+            updateData.dateReception = new Date();
+            updateData.statut = 'EN_COURS'; // Reste EN_COURS, pas TERMINE
+            delete updateData.dateFin; // Ne pas définir dateFin
+          } else if (currentSousStatut === 'VERIFICATION') {
+            // Complétion de VERIFICATION → terminer l'étape 1
+            updateData.dateVerification = new Date();
+            updateData.statut = 'TERMINE';
+            updateData.dateFin = new Date();
+            // sousStatutReception reste à VERIFICATION jusqu'à la restitution
+          }
+        }
       }
 
       // Étape 1: Mettre à jour l'étape
@@ -481,7 +516,9 @@ export class WorkflowsService {
       }
 
       // Étape 3: Update parent workflow if step is completed
-      if (updateEtapeDto.statut === 'TERMINE') {
+      // IMPORTANT: Vérifier updateData.statut (après modification) et non updateEtapeDto.statut (avant)
+      // Car pour l'étape 1, on peut recevoir TERMINE mais forcer EN_COURS en mode RECEPTION
+      if (updateData.statut === 'TERMINE') {
         const nextEtapeNumber = numeroEtape + 1;
 
         // Check if there is a next step
@@ -566,6 +603,57 @@ export class WorkflowsService {
     return updatedWorkflow;
   }
 
+  async restitution(
+    id: string,
+    signatureClientRestitution: string,
+    userId: string,
+  ) {
+    const workflow = await this.prisma.workflow.findUnique({
+      where: { id },
+      include: {
+        vehicle: true,
+        etapes: {
+          where: { numeroEtape: 1 },
+        },
+      },
+    });
+
+    if (!workflow) {
+      throw new BadRequestException('Workflow non trouvé');
+    }
+
+    if (workflow.statut !== 'TERMINE') {
+      throw new BadRequestException('Le workflow doit être terminé avant la restitution');
+    }
+
+    const etape1 = workflow.etapes[0];
+    if (!etape1) {
+      throw new BadRequestException('Étape 1 non trouvée');
+    }
+
+    if (etape1.signatureClientRestitution) {
+      throw new BadRequestException('La signature de restitution a déjà été enregistrée');
+    }
+
+    // Mettre à jour l'étape 1 avec le sous-statut RESTITUTION
+    const updatedEtape = await this.prisma.workflowEtape.update({
+      where: { id: etape1.id },
+      data: {
+        sousStatutReception: 'RESTITUTION',
+        signatureClientRestitution,
+        dateRestitution: new Date(),
+      },
+    });
+
+    // Récupérer le workflow complet mis à jour
+    const updatedWorkflow = await this.findOne(id);
+
+    // Emit WebSocket event for real-time updates
+    this.workflowsGateway.emitWorkflowUpdated(updatedWorkflow);
+
+    return updatedWorkflow;
+  }
+
   async remove(id: string) {
     await this.prisma.workflow.delete({
       where: { id },
@@ -590,7 +678,32 @@ export class WorkflowsService {
 
     const endDate = workflow.dateFin || new Date();
     const startDate = new Date(workflow.dateDebut);
-    return endDate.getTime() - startDate.getTime();
+    let totalDuration = endDate.getTime() - startDate.getTime();
+
+    // Soustraire la durée de l'étape 1 si elle existe
+    if (workflow.etapes && Array.isArray(workflow.etapes)) {
+      const step1 = workflow.etapes.find((e: any) => e.numeroEtape === 1);
+      if (step1) {
+        // Calculer la durée de l'étape 1
+        // Si l'étape 1 a une date de fin, utiliser cette date, sinon utiliser maintenant (si en cours)
+        // Mais logiquement, si le workflow est terminé, l'étape 1 l'est aussi.
+        // Si le workflow est en cours, et l'étape 1 est terminée, on soustrait sa durée.
+        // Si l'étape 1 est en cours, on soustrait (maintenant - début étape 1).
+
+        let step1Duration = 0;
+        if (step1.dateDebut) {
+          const s1End = step1.dateFin ? new Date(step1.dateFin) : new Date();
+          const s1Start = new Date(step1.dateDebut);
+          step1Duration = s1End.getTime() - s1Start.getTime();
+        }
+
+        if (step1Duration > 0) {
+          totalDuration -= step1Duration;
+        }
+      }
+    }
+
+    return Math.max(0, totalDuration); // Ensure no negative duration
   }
 
   // Helper method to calculate step duration in milliseconds
@@ -625,6 +738,14 @@ export class WorkflowsService {
       },
     });
 
+    // Count restituted vehicles (Step 1 with sousStatutReception = 'RESTITUTION')
+    const restitutedCount = await this.prisma.workflowEtape.count({
+      where: {
+        numeroEtape: 1,
+        sousStatutReception: 'RESTITUTION',
+      },
+    });
+
     // Group vehicles by current workflow step
     const vehiclesByStep: Record<number, number> = {};
     workflows.forEach((workflow) => {
@@ -638,6 +759,14 @@ export class WorkflowsService {
       select: {
         dateDebut: true,
         dateFin: true,
+        etapes: {
+          where: { numeroEtape: 1 },
+          select: {
+            numeroEtape: true,
+            dateDebut: true,
+            dateFin: true
+          }
+        }
       },
     });
 
@@ -666,6 +795,7 @@ export class WorkflowsService {
       inProgressWorkflows: inProgressCount,
       cancelledWorkflows: cancelledCount,
       waitingWorkflows: waitingCount,
+      restitutedWorkflows: restitutedCount,
       vehiclesByStep,
       averageWorkflowTime, // in milliseconds
     };

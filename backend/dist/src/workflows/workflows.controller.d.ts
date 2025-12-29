@@ -3,6 +3,7 @@ import { CreateWorkflowDto } from './dto/create-workflow.dto';
 import { UpdateWorkflowDto } from './dto/update-workflow.dto';
 import { UpdateEtapeDto } from './dto/update-etape.dto';
 import { CancelWorkflowDto } from './dto/cancel-workflow.dto';
+import { RestitutionWorkflowDto } from './dto/restitution-workflow.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { SecurityLoggerService } from '../common/logger/security-logger.service';
 export declare class WorkflowsController {
@@ -33,6 +34,7 @@ export declare class WorkflowsController {
             workflowId: string;
             nomEtape: string;
             statut: import("@prisma/client").$Enums.EtapeStatus;
+            sousStatutReception: import("@prisma/client").$Enums.SousStatutReception | null;
             formulaire: import("@prisma/client/runtime/client").JsonValue | null;
             dateDebut: Date | null;
             dateFin: Date | null;
@@ -41,6 +43,12 @@ export declare class WorkflowsController {
             technicienId: string | null;
             signatureGestionnaire: string | null;
             signatureTechnicien: string | null;
+            signatureClientReception: string | null;
+            signatureGestionnaireVerification: string | null;
+            signatureClientRestitution: string | null;
+            dateReception: Date | null;
+            dateVerification: Date | null;
+            dateRestitution: Date | null;
             commentaires: string | null;
         }[];
         vehicle: {
@@ -73,6 +81,7 @@ export declare class WorkflowsController {
         inProgressWorkflows: number;
         cancelledWorkflows: number;
         waitingWorkflows: number;
+        restitutedWorkflows: number;
         vehiclesByStep: Record<number, number>;
         averageWorkflowTime: number | null;
     }>;
@@ -146,5 +155,69 @@ export declare class WorkflowsController {
         dateAnnulation: Date | null;
         annulePar: string | null;
     }>;
+    restitution(id: string, restitutionDto: RestitutionWorkflowDto, user: any): Promise<{
+        duration: number | null;
+        etapes: {
+            duration: number | null;
+            technicien: {
+                id: string;
+                nom: string;
+                prenom: string;
+                specialite: string | null;
+            } | null;
+            valideParUser: {
+                id: string;
+                email: string;
+                nom: string;
+                prenom: string;
+            } | null;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            numeroEtape: number;
+            description: string | null;
+            workflowId: string;
+            nomEtape: string;
+            statut: import("@prisma/client").$Enums.EtapeStatus;
+            sousStatutReception: import("@prisma/client").$Enums.SousStatutReception | null;
+            formulaire: import("@prisma/client/runtime/client").JsonValue | null;
+            dateDebut: Date | null;
+            dateFin: Date | null;
+            validePar: string | null;
+            valideParId: string | null;
+            technicienId: string | null;
+            signatureGestionnaire: string | null;
+            signatureTechnicien: string | null;
+            signatureClientReception: string | null;
+            signatureGestionnaireVerification: string | null;
+            signatureClientRestitution: string | null;
+            dateReception: Date | null;
+            dateVerification: Date | null;
+            dateRestitution: Date | null;
+            commentaires: string | null;
+        }[];
+        vehicle: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            immatriculation: string;
+            marque: string;
+            modele: string;
+            annee: number;
+            numeroSerie: string;
+            creePar: string | null;
+        };
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        statut: import("@prisma/client").$Enums.WorkflowStatus;
+        dateDebut: Date;
+        dateFin: Date | null;
+        vehicleId: string;
+        etapeActuelle: number;
+        raisonAnnulation: string | null;
+        dateAnnulation: Date | null;
+        annulePar: string | null;
+    } | null>;
     remove(id: string): Promise<void>;
 }

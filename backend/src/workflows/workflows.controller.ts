@@ -5,6 +5,7 @@ import { CreateWorkflowDto } from './dto/create-workflow.dto';
 import { UpdateWorkflowDto } from './dto/update-workflow.dto';
 import { UpdateEtapeDto } from './dto/update-etape.dto';
 import { CancelWorkflowDto } from './dto/cancel-workflow.dto';
+import { RestitutionWorkflowDto } from './dto/restitution-workflow.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -128,6 +129,19 @@ export class WorkflowsController {
     }
 
     return result;
+  }
+
+  @Post(':id/restitution')
+  async restitution(
+    @Param('id') id: string,
+    @Body() restitutionDto: RestitutionWorkflowDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.workflowsService.restitution(
+      id,
+      restitutionDto.signatureClientRestitution,
+      user.userId,
+    );
   }
 
   @Delete(':id')

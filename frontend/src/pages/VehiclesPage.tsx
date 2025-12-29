@@ -11,10 +11,13 @@ import {
   InputAdornment,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
+import { IconButton, Tooltip } from "@mui/material";
 
 import VehiclesHeader from "../features/vehicles/components/VehiclesHeader";
 import VehicleList from "../features/vehicles/components/VehicleList";
 import VehicleCreationDialog from "../features/vehicles/components/VehicleCreationDialog";
+import VehicleScannerDialog from "../features/vehicles/components/VehicleScannerDialog";
 import DeleteConfirmDialog from "../features/vehicles/components/DeleteConfirmDialog";
 import type { Vehicle } from "../features/vehicles/vehicleTypes";
 
@@ -30,6 +33,7 @@ export default function VehiclesPage() {
   } | null>(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: "" });
   const [searchQuery, setSearchQuery] = useState("");
+  const [scannerOpen, setScannerOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     immatriculation: 'AB-123-CD',
@@ -174,6 +178,14 @@ export default function VehiclesPage() {
     setFormData((prev) => ({ ...prev, numeroSerie: text }));
   };
 
+  const handleSearchScan = (_err: unknown, result: any) => {
+    if (result) {
+      setSearchQuery(result.text);
+      setScannerOpen(false);
+      setSnackbar({ open: true, message: `Code scanné : ${result.text}` });
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editMode && editingVehicle) {
@@ -228,6 +240,15 @@ export default function VehiclesPage() {
                   <SearchIcon sx={{ color: "text.secondary" }} />
                 </InputAdornment>
               ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Tooltip title="Scanner un code-barres (VIN)">
+                    <IconButton onClick={() => setScannerOpen(true)} edge="end">
+                      <QrCodeScannerIcon sx={{ color: "text.secondary" }} />
+                    </IconButton>
+                  </Tooltip>
+                </InputAdornment>
+              ),
             }}
             sx={{
               bgcolor: "white",
@@ -264,6 +285,12 @@ export default function VehiclesPage() {
           onConfirm={handleConfirmDelete}
           vehicleName={vehicleToDelete?.name || ""}
           isPending={deleteVehicleMutation.isPending}
+        />
+
+        <VehicleScannerDialog
+          open={scannerOpen}
+          onClose={() => setScannerOpen(false)}
+          onScan={handleSearchScan}
         />
 
         <Snackbar

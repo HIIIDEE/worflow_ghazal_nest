@@ -8,6 +8,8 @@ export const workflowsApi = {
     update: (id: string, data: Partial<Workflow>) => axiosInstance.patch<Workflow>(`/workflows/${id}`, data),
     delete: (id: string) => axiosInstance.delete(`/workflows/${id}`),
     cancel: (id: string, raison: string) => axiosInstance.post<Workflow>(`/workflows/${id}/cancel`, { raison }),
+    restitution: (id: string, signatureClientRestitution: string) =>
+        axiosInstance.post<Workflow>(`/workflows/${id}/restitution`, { signatureClientRestitution }),
     getEtapes: (id: string) => axiosInstance.get<WorkflowEtape[]>(`/workflows/${id}/etapes`),
     updateEtape: (workflowId: string, numeroEtape: number, data: Partial<WorkflowEtape>) =>
         axiosInstance.patch<WorkflowEtape>(`/workflows/${workflowId}/etapes/${numeroEtape}`, data),

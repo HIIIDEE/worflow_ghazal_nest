@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import InfoIcon from '@mui/icons-material/Info';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 //import type { Vehicle } from '../../vehicles/types';
 import { getWorkflowDuration, getStatutColor, getStatutBg, getStatutLabel } from '../../../utils/workflowStatus';
 import type { Vehicle } from '../../vehicles/vehicleTypes';
@@ -14,9 +15,11 @@ interface WorkflowHeaderProps {
     raisonAnnulation?: string;
     dateAnnulation?: string;
     annulePar?: string;
+    signatureClientRestitution?: string;
+    onRestitution?: () => void;
 }
 
-export default function WorkflowHeader({ vehicle, statut, duration, raisonAnnulation, dateAnnulation, annulePar }: WorkflowHeaderProps) {
+export default function WorkflowHeader({ vehicle, statut, duration, raisonAnnulation, dateAnnulation, annulePar, signatureClientRestitution, onRestitution }: WorkflowHeaderProps) {
     return (
         <>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
@@ -46,16 +49,39 @@ export default function WorkflowHeader({ vehicle, statut, duration, raisonAnnula
                         )}
                     </Box>
                 </Box>
-                <Chip
-                    label={getStatutLabel(statut)}
-                    sx={{
-                        fontWeight: 600,
-                        px: 2,
-                        py: 3,
-                        bgcolor: getStatutBg(statut),
-                        color: getStatutColor(statut)
-                    }}
-                />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    {/* Bouton Signature de restitution */}
+                    {statut === 'TERMINE' && !signatureClientRestitution && onRestitution && (
+                        <Button
+                            variant="contained"
+                            color="success"
+                            startIcon={<CheckCircleIcon />}
+                            onClick={onRestitution}
+                            sx={{ textTransform: 'none', fontWeight: 600 }}
+                        >
+                            Signature de restitution
+                        </Button>
+                    )}
+                    {/* Afficher si déjà signée */}
+                    {statut === 'TERMINE' && signatureClientRestitution && (
+                        <Chip
+                            icon={<CheckCircleIcon />}
+                            label="Véhicule restitué"
+                            color="success"
+                            sx={{ fontWeight: 600, px: 2, py: 3 }}
+                        />
+                    )}
+                    <Chip
+                        label={getStatutLabel(statut)}
+                        sx={{
+                            fontWeight: 600,
+                            px: 2,
+                            py: 3,
+                            bgcolor: getStatutBg(statut),
+                            color: getStatutColor(statut)
+                        }}
+                    />
+                </Box>
             </Box>
 
             {statut === 'ANNULE' && raisonAnnulation && (

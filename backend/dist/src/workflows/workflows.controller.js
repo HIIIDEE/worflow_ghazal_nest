@@ -20,6 +20,7 @@ const create_workflow_dto_1 = require("./dto/create-workflow.dto");
 const update_workflow_dto_1 = require("./dto/update-workflow.dto");
 const update_etape_dto_1 = require("./dto/update-etape.dto");
 const cancel_workflow_dto_1 = require("./dto/cancel-workflow.dto");
+const restitution_workflow_dto_1 = require("./dto/restitution-workflow.dto");
 const pagination_dto_1 = require("../common/dto/pagination.dto");
 const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
 const current_user_decorator_1 = require("../common/decorators/current-user.decorator");
@@ -65,6 +66,9 @@ let WorkflowsController = class WorkflowsController {
             this.securityLogger.logWorkflowCancelled(result.id, result.vehicle.immatriculation, user.userId, user.email, cancelWorkflowDto.raison, clientInfo.ip);
         }
         return result;
+    }
+    async restitution(id, restitutionDto, user) {
+        return this.workflowsService.restitution(id, restitutionDto.signatureClientRestitution, user.userId);
     }
     remove(id) {
         return this.workflowsService.remove(id);
@@ -145,6 +149,15 @@ __decorate([
     __metadata("design:paramtypes", [String, cancel_workflow_dto_1.CancelWorkflowDto, Object, Object]),
     __metadata("design:returntype", Promise)
 ], WorkflowsController.prototype, "cancelWorkflow", null);
+__decorate([
+    (0, common_1.Post)(':id/restitution'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, restitution_workflow_dto_1.RestitutionWorkflowDto, Object]),
+    __metadata("design:returntype", Promise)
+], WorkflowsController.prototype, "restitution", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),

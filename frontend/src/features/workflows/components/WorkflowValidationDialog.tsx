@@ -92,15 +92,31 @@ export default function WorkflowValidationDialog({
             <DialogContent>
                 <Typography variant="subtitle1" gutterBottom sx={{ mt: 1, mb: 3 }}>
                     {selectedEtape?.nomEtape}
+                    {selectedEtape?.numeroEtape === 1 && selectedEtape?.sousStatutReception && (
+                        <Typography component="span" variant="subtitle2" sx={{ ml: 2, color: 'primary.main' }}>
+                            ({selectedEtape.sousStatutReception === 'RECEPTION' ? 'Réception' :
+                              selectedEtape.sousStatutReception === 'VERIFICATION' ? 'Vérification' : 'Restitution'})
+                        </Typography>
+                    )}
                 </Typography>
 
-                {selectedEtape?.numeroEtape === 1 && (
+                {/* Formulaire uniquement pour RECEPTION */}
+                {selectedEtape?.numeroEtape === 1 && selectedEtape?.sousStatutReception === 'RECEPTION' && (
                     <Box sx={{ mb: 3 }}>
                         <Etape1Form
                             formData={formData.formulaireData || {}}
                             onChange={handleEtape1Change}
                             disabled={!canEdit || isPending}
                         />
+                    </Box>
+                )}
+
+                {/* Message pour VERIFICATION */}
+                {selectedEtape?.numeroEtape === 1 && selectedEtape?.sousStatutReception === 'VERIFICATION' && (
+                    <Box sx={{ mb: 3, p: 2, bgcolor: '#f0f9ff', borderRadius: 2, border: '1px solid #0ea5e9' }}>
+                        <Typography variant="body2" sx={{ color: '#0c4a6e' }}>
+                            Le gestionnaire vérifie que toutes les informations de réception sont correctes avant de commencer les travaux.
+                        </Typography>
                     </Box>
                 )}
 
@@ -127,41 +143,84 @@ export default function WorkflowValidationDialog({
                     }}
                 />
 
-                <FormControl fullWidth sx={{ mt: 2 }} disabled={!canEdit || isPending}>
-                    <InputLabel>Technicien assigné</InputLabel>
-                    <Select
-                        value={formData.technicienId || ''}
-                        onChange={(e) => onChange('technicienId', e.target.value)}
-                        label="Technicien assigné"
-                    >
-                        <MenuItem value="">
-                            <em>Aucun technicien</em>
-                        </MenuItem>
-                        {techniciens?.map((tech) => (
-                            <MenuItem key={tech.id} value={tech.id}>
-                                {tech.prenom} {tech.nom} {tech.specialite ? `(${tech.specialite})` : ''}
+                {/* Pour les étapes autres que l'étape 1, afficher le technicien */}
+                {selectedEtape?.numeroEtape !== 1 && (
+                    <FormControl fullWidth sx={{ mt: 2 }} disabled={!canEdit || isPending}>
+                        <InputLabel>Technicien assigné</InputLabel>
+                        <Select
+                            value={formData.technicienId || ''}
+                            onChange={(e) => onChange('technicienId', e.target.value)}
+                            label="Technicien assigné"
+                        >
+                            <MenuItem value="">
+                                <em>Aucun technicien</em>
                             </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                            {techniciens?.map((tech) => (
+                                <MenuItem key={tech.id} value={tech.id}>
+                                    {tech.prenom} {tech.nom} {tech.specialite ? `(${tech.specialite})` : ''}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                )}
 
-                <Box sx={{ mt: 3 }}>
-                    <SignaturePad
-                        label="Signature Gestionnaire"
-                        value={formData.signatureGestionnaire || ''}
-                        onChange={(signature) => onChange('signatureGestionnaire', signature)}
-                        disabled={!canEdit || isPending}
-                    />
-                </Box>
+                {/* Étape 1 - RECEPTION : Formulaire + Signature Client + Signature Gestionnaire */}
+                {selectedEtape?.numeroEtape === 1 && selectedEtape?.sousStatutReception === 'RECEPTION' && (
+                    <>
+                        <Box sx={{ mt: 3 }}>
+                            <SignaturePad
+                                label="Signature du Client (à la réception)"
+                                value={formData.signatureClientReception || ''}
+                                onChange={(signature) => onChange('signatureClientReception', signature)}
+                                disabled={!canEdit || isPending}
+                            />
+                        </Box>
 
-                <Box sx={{ mt: 2 }}>
-                    <SignaturePad
-                        label="Signature Technicien"
-                        value={formData.signatureTechnicien || ''}
-                        onChange={(signature) => onChange('signatureTechnicien', signature)}
-                        disabled={!canEdit || isPending}
-                    />
-                </Box>
+                        <Box sx={{ mt: 2 }}>
+                            <SignaturePad
+                                label="Signature du Gestionnaire Ghazal"
+                                value={formData.signatureGestionnaire || ''}
+                                onChange={(signature) => onChange('signatureGestionnaire', signature)}
+                                disabled={!canEdit || isPending}
+                            />
+                        </Box>
+                    </>
+                )}
+
+                {/* Étape 1 - VERIFICATION : Signature Gestionnaire Vérification uniquement */}
+                {selectedEtape?.numeroEtape === 1 && selectedEtape?.sousStatutReception === 'VERIFICATION' && (
+                    <Box sx={{ mt: 3 }}>
+                        <SignaturePad
+                            label="Signature du Gestionnaire (Vérification)"
+                            value={formData.signatureGestionnaireVerification || ''}
+                            onChange={(signature) => onChange('signatureGestionnaireVerification', signature)}
+                            disabled={!canEdit || isPending}
+                        />
+                    </Box>
+                )}
+
+                {/* Autres étapes : Signature Gestionnaire + Signature Technicien */}
+                {selectedEtape?.numeroEtape !== 1 && (
+                    <>
+                        <Box sx={{ mt: 3 }}>
+                            <SignaturePad
+                                label="Signature Gestionnaire"
+                                value={formData.signatureGestionnaire || ''}
+                                onChange={(signature) => onChange('signatureGestionnaire', signature)}
+                                disabled={!canEdit || isPending}
+                            />
+                        </Box>
+
+                        <Box sx={{ mt: 2 }}>
+                            <SignaturePad
+                                label="Signature Technicien"
+                                value={formData.signatureTechnicien || ''}
+                                onChange={(signature) => onChange('signatureTechnicien', signature)}
+                                disabled={!canEdit || isPending}
+                            />
+                        </Box>
+                    </>
+                )}
 
                 <Divider sx={{ my: 3 }} />
 

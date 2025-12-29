@@ -140,7 +140,9 @@ export default function WorkflowList({ workflows }: WorkflowListProps) {
     return (
       <Stack spacing={2}>
         {paginatedWorkflows?.map((workflow) => {
-          const progress = (workflow.etapeActuelle / 10) * 100;
+          // Calculate progress based on completed steps (same as WorkflowProgress)
+          const completedSteps = workflow.etapes?.filter(e => e.statut === 'TERMINE').length ?? (workflow.etapeActuelle > 0 ? workflow.etapeActuelle - 1 : 0);
+          const progress = (completedSteps / 10) * 100;
           return (
             <Card key={workflow.id}>
               <CardContent sx={{ p: 2.5 }}>
@@ -184,6 +186,9 @@ export default function WorkflowList({ workflows }: WorkflowListProps) {
                     value={progress}
                     sx={{ borderRadius: 1, height: 6, bgcolor: 'action.hover' }}
                   />
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block', textAlign: 'right' }}>
+                    {completedSteps} / 10 complétées
+                  </Typography>
                 </Box>
 
                 <Divider sx={{ my: 1.5 }} />
@@ -301,6 +306,8 @@ export default function WorkflowList({ workflows }: WorkflowListProps) {
                 />
               </TableCell>
               <TableCell sx={{ fontWeight: 600, color: '#475569', py: 2 }}>Véhicule Cible</TableCell>
+              <TableCell sx={{ fontWeight: 600, color: '#475569', py: 2 }}>VIN</TableCell>
+              <TableCell sx={{ fontWeight: 600, color: '#475569', py: 2 }}>Restitution</TableCell>
               <TableCell sx={{ fontWeight: 600, color: '#475569', py: 2 }}>Progression</TableCell>
               <TableCell sx={{ fontWeight: 600, color: '#475569', py: 2 }}>Statut</TableCell>
               <TableCell sx={{ fontWeight: 600, color: '#475569', py: 2 }}>Démarré le</TableCell>
@@ -310,7 +317,9 @@ export default function WorkflowList({ workflows }: WorkflowListProps) {
           </TableHead>
           <TableBody>
             {paginatedWorkflows?.map((workflow) => {
-              const progress = (workflow.etapeActuelle / 10) * 100; // Assuming 10 steps max
+              // Calculate progress based on completed steps (same as WorkflowProgress)
+              const completedSteps = workflow.etapes?.filter(e => e.statut === 'TERMINE').length ?? (workflow.etapeActuelle > 0 ? workflow.etapeActuelle - 1 : 0);
+              const progress = (completedSteps / 10) * 100;
               const isItemSelected = isSelected(workflow.id);
               return (
                 <TableRow key={workflow.id} hover selected={isItemSelected} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
@@ -342,12 +351,34 @@ export default function WorkflowList({ workflows }: WorkflowListProps) {
                       </Box>
                     </Box>
                   </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" fontFamily="monospace" sx={{ bgcolor: '#f1f5f9', px: 1, py: 0.5, borderRadius: 1, display: 'inline-block' }}>
+                      {workflow.vehicle?.numeroSerie || 'N/A'}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    {(() => {
+                      const isRestitue = workflow.etapes?.find(e => e.numeroEtape === 1)?.sousStatutReception === 'RESTITUTION';
+                      return (
+                        <Chip
+                          label={isRestitue ? "Restitué" : "Non Restitué"}
+                          size="small"
+                          sx={{
+                            fontWeight: 600,
+                            bgcolor: isRestitue ? '#dcfce7' : '#f1f5f9',
+                            color: isRestitue ? '#166534' : '#64748b',
+                            borderRadius: 2
+                          }}
+                        />
+                      );
+                    })()}
+                  </TableCell>
                   <TableCell sx={{ width: '20%' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <LinearProgress variant="determinate" value={progress} sx={{ width: '100%', borderRadius: 1, height: 8 }} />
                       <Typography variant="caption" color="text.secondary">{Math.round(progress)}%</Typography>
                     </Box>
-                    <Typography variant="caption" color="text.secondary">Étape {workflow.etapeActuelle} / 10</Typography>
+                    <Typography variant="caption" color="text.secondary">{completedSteps} / 10 complétées</Typography>
                   </TableCell>
                   <TableCell>
                     {workflow.statut === 'ANNULE' && workflow.raisonAnnulation ? (

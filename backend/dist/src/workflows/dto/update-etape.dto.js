@@ -28,6 +28,9 @@ class UpdateEtapeDto {
     technicienId;
     signatureGestionnaire;
     signatureTechnicien;
+    signatureClientReception;
+    signatureGestionnaireVerification;
+    signatureClientRestitution;
     commentaires;
 }
 exports.UpdateEtapeDto = UpdateEtapeDto;
@@ -73,6 +76,21 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateEtapeDto.prototype, "signatureTechnicien", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateEtapeDto.prototype, "signatureClientReception", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateEtapeDto.prototype, "signatureGestionnaireVerification", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateEtapeDto.prototype, "signatureClientRestitution", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

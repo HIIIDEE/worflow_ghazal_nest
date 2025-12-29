@@ -21,7 +21,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import type { WorkflowEtape } from '../types';
 import { useCanViewEtape, useCanStartEtape, useCanValidateEtape, useCanEditEtape } from '../../../hooks/useEtapePermissions';
-import { generateStep1Pdf } from '../../../utils/pdfGenerator';
+import { generateStep1Pdf, generateStep1RestitutionPdf } from '../../../utils/pdfGenerator';
 import PrintIcon from '@mui/icons-material/Print';
 import { getStepDuration } from '../../../utils/workflowStatus';
 
@@ -30,6 +30,7 @@ import WorkflowStepForm from './WorkflowStepForm';
 interface WorkflowStepsProps {
     etapes?: WorkflowEtape[];
     vehicle?: any; // Add vehicle prop to get details for PDF
+    workflow?: any; // Add workflow prop to pass to PDF generator
     onStartEtape: (numeroEtape: number) => void;
     onEditStep: (etape: WorkflowEtape) => void;
     isMutationPending: boolean;
@@ -46,6 +47,7 @@ interface WorkflowStepsProps {
 export default function WorkflowSteps({
     etapes,
     vehicle,
+    workflow,
     onStartEtape,
     onEditStep,
     isMutationPending,
@@ -183,20 +185,42 @@ export default function WorkflowSteps({
                                 {!isSelected && (
                                     <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
                                         {/* PDF Download for Step 1 */}
-                                        {etape.numeroEtape === 1 && (etape.statut === 'TERMINE' || etape.statut === 'EN_COURS') && (
-                                            <Button
-                                                variant="outlined"
-                                                color="secondary"
-                                                size="small"
-                                                startIcon={<PrintIcon />}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    generateStep1Pdf(etape, vehicle);
-                                                }}
-                                                sx={{ textTransform: 'none' }}
-                                            >
-                                                Fiche Réception
-                                            </Button>
+                                        {etape.numeroEtape === 1 && (
+                                            <>
+                                                {/* Fiche de Réception - pour RECEPTION et VERIFICATION */}
+                                                {(etape.sousStatutReception === 'RECEPTION' || etape.sousStatutReception === 'VERIFICATION') && (
+                                                    <Button
+                                                        variant="outlined"
+                                                        color="primary"
+                                                        size="small"
+                                                        startIcon={<PrintIcon />}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            generateStep1Pdf(etape, vehicle);
+                                                        }}
+                                                        sx={{ textTransform: 'none' }}
+                                                    >
+                                                        Fiche Réception
+                                                    </Button>
+                                                )}
+
+                                                {/* Fiche de Restitution - pour RESTITUTION */}
+                                                {etape.sousStatutReception === 'RESTITUTION' && etape.signatureClientRestitution && (
+                                                    <Button
+                                                        variant="outlined"
+                                                        color="success"
+                                                        size="small"
+                                                        startIcon={<PrintIcon />}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            generateStep1RestitutionPdf(etape, vehicle);
+                                                        }}
+                                                        sx={{ textTransform: 'none' }}
+                                                    >
+                                                        Fiche Restitution
+                                                    </Button>
+                                                )}
+                                            </>
                                         )}
 
                                         {etape.statut === 'EN_ATTENTE' && useCanStartEtape(permissions, etape.numeroEtape, userRole) && (
@@ -269,6 +293,7 @@ export default function WorkflowSteps({
                                         isPending={isMutationPending}
                                         permissions={permissions}
                                         userRole={userRole}
+                                        vehicle={vehicle}
                                     />
                                 )}
                             </StepContent>

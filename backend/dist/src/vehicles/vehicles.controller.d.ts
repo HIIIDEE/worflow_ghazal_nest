@@ -17,6 +17,7 @@ export declare class VehiclesController {
                 workflowId: string;
                 nomEtape: string;
                 statut: import("@prisma/client").$Enums.EtapeStatus;
+                sousStatutReception: import("@prisma/client").$Enums.SousStatutReception | null;
                 formulaire: import("@prisma/client/runtime/client").JsonValue | null;
                 dateDebut: Date | null;
                 dateFin: Date | null;
@@ -25,6 +26,12 @@ export declare class VehiclesController {
                 technicienId: string | null;
                 signatureGestionnaire: string | null;
                 signatureTechnicien: string | null;
+                signatureClientReception: string | null;
+                signatureGestionnaireVerification: string | null;
+                signatureClientRestitution: string | null;
+                dateReception: Date | null;
+                dateVerification: Date | null;
+                dateRestitution: Date | null;
                 commentaires: string | null;
             }[];
         } & {
@@ -72,6 +79,7 @@ export declare class VehiclesController {
             workflowId: string;
             nomEtape: string;
             statut: import("@prisma/client").$Enums.EtapeStatus;
+            sousStatutReception: import("@prisma/client").$Enums.SousStatutReception | null;
             formulaire: import("@prisma/client/runtime/client").JsonValue | null;
             dateDebut: Date | null;
             dateFin: Date | null;
@@ -80,6 +88,12 @@ export declare class VehiclesController {
             technicienId: string | null;
             signatureGestionnaire: string | null;
             signatureTechnicien: string | null;
+            signatureClientReception: string | null;
+            signatureGestionnaireVerification: string | null;
+            signatureClientRestitution: string | null;
+            dateReception: Date | null;
+            dateVerification: Date | null;
+            dateRestitution: Date | null;
             commentaires: string | null;
         }[];
     } & {
@@ -107,6 +121,7 @@ export declare class VehiclesController {
                 workflowId: string;
                 nomEtape: string;
                 statut: import("@prisma/client").$Enums.EtapeStatus;
+                sousStatutReception: import("@prisma/client").$Enums.SousStatutReception | null;
                 formulaire: import("@prisma/client/runtime/client").JsonValue | null;
                 dateDebut: Date | null;
                 dateFin: Date | null;
@@ -115,6 +130,12 @@ export declare class VehiclesController {
                 technicienId: string | null;
                 signatureGestionnaire: string | null;
                 signatureTechnicien: string | null;
+                signatureClientReception: string | null;
+                signatureGestionnaireVerification: string | null;
+                signatureClientRestitution: string | null;
+                dateReception: Date | null;
+                dateVerification: Date | null;
+                dateRestitution: Date | null;
                 commentaires: string | null;
             }[];
         } & {

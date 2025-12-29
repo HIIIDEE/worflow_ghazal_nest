@@ -7,11 +7,11 @@ import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
+import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
 import { dashboardApi } from '../features/dashboard/services/dashboard.api';
 import StatCard from '../features/dashboard/components/StatCard';
-import VehiclesByStepChart from '../features/dashboard/components/VehiclesByStepChart';
-import { useWorkflowSubscription } from '../hooks/useWorkflowSubscription';
 import { formatDuration } from '../utils/formatDuration';
+import { useWorkflowSubscription } from '../hooks/useWorkflowSubscription';
 
 export default function DashboardPage() {
     const navigate = useNavigate();
@@ -146,15 +146,19 @@ export default function DashboardPage() {
                             onClick={() => navigate('/workflows?status=ANNULE')}
                         />
                     </Grid>
-                </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                        <StatCard
+                            title="Véhicules Restitués"
+                            value={statistics?.restitutedWorkflows || 0}
+                            icon={<AssignmentReturnIcon sx={{ fontSize: 28 }} />}
+                            color="#0891b2"
 
-                {/* Vehicles by Step Chart */}
-                <Grid container spacing={3}>
-                    <Grid size={{ xs: 12 }}>
-                        <VehiclesByStepChart vehiclesByStep={statistics?.vehiclesByStep || {}} />
+                            subtitle="Restitution signée"
+                            onClick={() => navigate('/workflows?restitution=true')}
+                        />
                     </Grid>
                 </Grid>
             </Container>
-        </Box>
+        </Box >
     );
 }

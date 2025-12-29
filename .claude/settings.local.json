@@ -21,7 +21,10 @@
       "Bash(taskkill //F //PID 25352)",
       "Bash(cat:*)",
       "Bash(node -e:*)",
-      "Bash(ls \"C:\\Users\\TogsO\\OneDrive\\Desktop\\Projet_Salim\\WorkFlowGhazal_nest\\worflow_ghazal_nest\\frontend\"\" | findstr \".env \")"
+      "Bash(ls \"C:\\Users\\TogsO\\OneDrive\\Desktop\\Projet_Salim\\WorkFlowGhazal_nest\\worflow_ghazal_nest\\frontend\"\" | findstr \".env \")",
+      "Bash(docker-compose:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker logs:*)"
     ]
   }
 }

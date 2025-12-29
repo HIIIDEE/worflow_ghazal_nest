@@ -7,5 +7,8 @@ export declare class UpdateEtapeDto {
     technicienId?: string;
     signatureGestionnaire?: string;
     signatureTechnicien?: string;
+    signatureClientReception?: string;
+    signatureGestionnaireVerification?: string;
+    signatureClientRestitution?: string;
     commentaires?: string;
 }

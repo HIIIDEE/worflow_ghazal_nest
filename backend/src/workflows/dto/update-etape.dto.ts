@@ -45,5 +45,17 @@ export class UpdateEtapeDto {
 
   @IsOptional()
   @IsString()
+  signatureClientReception?: string;
+
+  @IsOptional()
+  @IsString()
+  signatureGestionnaireVerification?: string;
+
+  @IsOptional()
+  @IsString()
+  signatureClientRestitution?: string;
+
+  @IsOptional()
+  @IsString()
   commentaires?: string;
 }

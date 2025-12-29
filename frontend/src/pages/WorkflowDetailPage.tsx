@@ -8,6 +8,7 @@ import { Container, Box, CircularProgress, Alert } from '@mui/material';
 import WorkflowHeader from '../features/workflows/components/WorkflowHeader';
 import WorkflowProgress from '../features/workflows/components/WorkflowProgress';
 import WorkflowSteps from '../features/workflows/components/WorkflowSteps';
+import WorkflowRestitutionDialog from '../features/workflows/components/WorkflowRestitutionDialog';
 import { useAuth } from '../stores/useAuthStore';
 import { useEtapePermissions } from '../hooks/useEtapePermissions';
 import { useWorkflowSubscription } from '../hooks/useWorkflowSubscription';
@@ -18,6 +19,7 @@ export default function WorkflowDetailPage() {
   const { user } = useAuth();
   const [selectedEtape, setSelectedEtape] = useState<WorkflowEtape | null>(null);
   const [formData, setFormData] = useState<any>({});
+  const [restitutionDialogOpen, setRestitutionDialogOpen] = useState(false);
 
   // Subscribe to WebSocket events for real-time updates
   useWorkflowSubscription(id);
@@ -44,6 +46,16 @@ export default function WorkflowDetailPage() {
     },
   });
 
+  const restitutionMutation = useMutation({
+    mutationFn: (signatureClientRestitution: string) =>
+      workflowsApi.restitution(id!, signatureClientRestitution),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workflow', id] });
+      queryClient.invalidateQueries({ queryKey: ['workflows'] });
+      setRestitutionDialogOpen(false);
+    },
+  });
+
   const handleEditStep = (etape: WorkflowEtape) => {
     setSelectedEtape(etape);
     setFormData({
@@ -52,6 +64,8 @@ export default function WorkflowDetailPage() {
       technicienId: (etape as any).technicienId || '',
       signatureGestionnaire: (etape as any).signatureGestionnaire || '',
       signatureTechnicien: (etape as any).signatureTechnicien || '',
+      signatureClientReception: (etape as any).signatureClientReception || '',
+      signatureGestionnaireVerification: (etape as any).signatureGestionnaireVerification || '',
       formulaireData: etape.formulaire || {},
     });
   };
@@ -74,18 +88,36 @@ export default function WorkflowDetailPage() {
   const handleCompleteEtape = () => {
     if (!selectedEtape) return;
 
+    const dataToSave: any = {
+      statut: 'TERMINE',
+      dateFin: new Date().toISOString(),
+      commentaires: formData.commentaires,
+      validePar: formData.validePar,
+    };
+
+    // Gestion spécifique pour l'étape 1 selon le sous-statut
+    if (selectedEtape.numeroEtape === 1) {
+      const sousStatut = selectedEtape.sousStatutReception || 'RECEPTION';
+      if (sousStatut === 'RECEPTION') {
+        // RECEPTION : formulaire + signatures client + gestionnaire
+        dataToSave.formulaire = formData.formulaireData || {};
+        dataToSave.signatureClientReception = formData.signatureClientReception || null;
+        dataToSave.signatureGestionnaire = formData.signatureGestionnaire || null;
+      } else if (sousStatut === 'VERIFICATION') {
+        // VERIFICATION : signature gestionnaire vérification uniquement
+        dataToSave.signatureGestionnaireVerification = formData.signatureGestionnaireVerification || null;
+      }
+    } else {
+      // Autres étapes : gestionnaire + technicien
+      dataToSave.technicienId = formData.technicienId || null;
+      dataToSave.signatureGestionnaire = formData.signatureGestionnaire || null;
+      dataToSave.signatureTechnicien = formData.signatureTechnicien || null;
+      dataToSave.formulaire = formData.formulaireData || {};
+    }
+
     updateEtapeMutation.mutate({
       numeroEtape: selectedEtape.numeroEtape,
-      data: {
-        statut: 'TERMINE',
-        dateFin: new Date().toISOString(),
-        commentaires: formData.commentaires,
-        validePar: formData.validePar,
-        technicienId: formData.technicienId || null,
-        signatureGestionnaire: formData.signatureGestionnaire || null,
-        signatureTechnicien: formData.signatureTechnicien || null,
-        formulaire: formData.formulaireData || {},
-      },
+      data: dataToSave,
     });
   };
 
@@ -121,6 +153,9 @@ export default function WorkflowDetailPage() {
     );
   }
 
+  // Récupérer l'étape 1 pour la signature de restitution
+  const etape1 = workflow.etapes?.find(e => e.numeroEtape === 1);
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', py: 6 }}>
       <Container maxWidth="lg">
@@ -131,6 +166,8 @@ export default function WorkflowDetailPage() {
           raisonAnnulation={workflow.raisonAnnulation}
           dateAnnulation={workflow.dateAnnulation}
           annulePar={workflow.annulePar}
+          signatureClientRestitution={etape1?.signatureClientRestitution}
+          onRestitution={() => setRestitutionDialogOpen(true)}
         />
 
         <WorkflowProgress etapes={workflow.etapes} />
@@ -138,6 +175,7 @@ export default function WorkflowDetailPage() {
         <WorkflowSteps
           etapes={workflow.etapes}
           vehicle={workflow.vehicle}
+          workflow={workflow}
           onStartEtape={handleStartEtape}
           onEditStep={handleEditStep}
           isMutationPending={updateEtapeMutation.isPending}
@@ -149,6 +187,15 @@ export default function WorkflowDetailPage() {
           onChange={handleFormChange}
           onSubmit={handleCompleteEtape}
           onCancel={handleCloseForm}
+        />
+
+        {/* Dialog de signature de restitution */}
+        <WorkflowRestitutionDialog
+          open={restitutionDialogOpen}
+          workflowId={id!}
+          onClose={() => setRestitutionDialogOpen(false)}
+          onSubmit={(signature) => restitutionMutation.mutate(signature)}
+          isPending={restitutionMutation.isPending}
         />
       </Container>
     </Box>

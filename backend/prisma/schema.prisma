@@ -83,26 +83,33 @@ model Workflow {
 }
 
 model WorkflowEtape {
-  id                    String      @id @default(uuid())
-  workflowId            String
-  numeroEtape           Int
-  nomEtape              String
-  description           String?
-  statut                EtapeStatus @default(EN_ATTENTE)
-  formulaire            Json?
-  dateDebut             DateTime?
-  dateFin               DateTime?
-  validePar             String?
-  valideParId           String?
-  technicienId          String?
-  signatureGestionnaire String?     @db.Text
-  signatureTechnicien   String?     @db.Text
-  commentaires          String?
-  createdAt             DateTime    @default(now())
-  updatedAt             DateTime    @updatedAt
-  workflow              Workflow    @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-  valideParUser         User?       @relation(fields: [valideParId], references: [id], onDelete: SetNull)
-  technicien            Technicien? @relation(fields: [technicienId], references: [id], onDelete: SetNull)
+  id                              String                 @id @default(uuid())
+  workflowId                      String
+  numeroEtape                     Int
+  nomEtape                        String
+  description                     String?
+  statut                          EtapeStatus            @default(EN_ATTENTE)
+  sousStatutReception             SousStatutReception?
+  formulaire                      Json?
+  dateDebut                       DateTime?
+  dateFin                         DateTime?
+  validePar                       String?
+  valideParId                     String?
+  technicienId                    String?
+  signatureGestionnaire           String?                @db.Text
+  signatureTechnicien             String?                @db.Text
+  signatureClientReception        String?                @db.Text
+  signatureGestionnaireVerification String?              @db.Text
+  signatureClientRestitution      String?                @db.Text
+  dateReception                   DateTime?
+  dateVerification                DateTime?
+  dateRestitution                 DateTime?
+  commentaires                    String?
+  createdAt                       DateTime               @default(now())
+  updatedAt                       DateTime               @updatedAt
+  workflow                        Workflow               @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  valideParUser                   User?                  @relation(fields: [valideParId], references: [id], onDelete: SetNull)
+  technicien                      Technicien?            @relation(fields: [technicienId], references: [id], onDelete: SetNull)
 
   @@unique([workflowId, numeroEtape])
   @@index([workflowId])
@@ -187,4 +194,10 @@ enum PermissionType {
   EDIT
   VALIDATE
   EDIT_COMPLETED
+}
+
+enum SousStatutReception {
+  RECEPTION
+  VERIFICATION
+  RESTITUTION
 }

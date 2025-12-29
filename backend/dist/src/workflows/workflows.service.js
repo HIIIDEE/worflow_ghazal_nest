@@ -39,6 +39,7 @@ let WorkflowsService = class WorkflowsService {
                     description: etapeDef.description,
                     statut: 'EN_ATTENTE',
                     formulaire: etapeDef.champsFormulaire ?? {},
+                    sousStatutReception: etapeDef.numeroEtape === 1 ? 'RECEPTION' : null,
                 },
             });
         }
@@ -337,11 +338,36 @@ let WorkflowsService = class WorkflowsService {
             if (updateData.signatureTechnicien === '') {
                 updateData.signatureTechnicien = null;
             }
+            if (updateData.signatureClientReception === '') {
+                updateData.signatureClientReception = null;
+            }
+            if (updateData.signatureGestionnaireVerification === '') {
+                updateData.signatureGestionnaireVerification = null;
+            }
             if (updateEtapeDto.statut === 'TERMINE' && userId) {
                 updateData.valideParUser = {
                     connect: { id: userId }
                 };
                 delete updateData.valideParId;
+            }
+            if (numeroEtape === 1) {
+                if (updateEtapeDto.statut === 'EN_COURS' && etape.statut === 'EN_ATTENTE' && !etape.sousStatutReception) {
+                    updateData.sousStatutReception = 'RECEPTION';
+                }
+                if (updateEtapeDto.statut === 'TERMINE') {
+                    const currentSousStatut = etape.sousStatutReception;
+                    if (currentSousStatut === 'RECEPTION') {
+                        updateData.sousStatutReception = 'VERIFICATION';
+                        updateData.dateReception = new Date();
+                        updateData.statut = 'EN_COURS';
+                        delete updateData.dateFin;
+                    }
+                    else if (currentSousStatut === 'VERIFICATION') {
+                        updateData.dateVerification = new Date();
+                        updateData.statut = 'TERMINE';
+                        updateData.dateFin = new Date();
+                    }
+                }
             }
             const updated = await tx.workflowEtape.update({
                 where: { id: etape.id },
@@ -366,7 +392,7 @@ let WorkflowsService = class WorkflowsService {
                     }
                 });
             }
-            if (updateEtapeDto.statut === 'TERMINE') {
+            if (updateData.statut === 'TERMINE') {
                 const nextEtapeNumber = numeroEtape + 1;
                 const nextEtape = await tx.workflowEtape.findFirst({
                     where: { workflowId, numeroEtape: nextEtapeNumber }
@@ -424,6 +450,41 @@ let WorkflowsService = class WorkflowsService {
         this.workflowsGateway.emitWorkflowUpdated(updatedWorkflow);
         return updatedWorkflow;
     }
+    async restitution(id, signatureClientRestitution, userId) {
+        const workflow = await this.prisma.workflow.findUnique({
+            where: { id },
+            include: {
+                vehicle: true,
+                etapes: {
+                    where: { numeroEtape: 1 },
+                },
+            },
+        });
+        if (!workflow) {
+            throw new common_1.BadRequestException('Workflow non trouvé');
+        }
+        if (workflow.statut !== 'TERMINE') {
+            throw new common_1.BadRequestException('Le workflow doit être terminé avant la restitution');
+        }
+        const etape1 = workflow.etapes[0];
+        if (!etape1) {
+            throw new common_1.BadRequestException('Étape 1 non trouvée');
+        }
+        if (etape1.signatureClientRestitution) {
+            throw new common_1.BadRequestException('La signature de restitution a déjà été enregistrée');
+        }
+        const updatedEtape = await this.prisma.workflowEtape.update({
+            where: { id: etape1.id },
+            data: {
+                sousStatutReception: 'RESTITUTION',
+                signatureClientRestitution,
+                dateRestitution: new Date(),
+            },
+        });
+        const updatedWorkflow = await this.findOne(id);
+        this.workflowsGateway.emitWorkflowUpdated(updatedWorkflow);
+        return updatedWorkflow;
+    }
     async remove(id) {
         await this.prisma.workflow.delete({
             where: { id },
@@ -443,7 +504,22 @@ let WorkflowsService = class WorkflowsService {
             return null;
         const endDate = workflow.dateFin || new Date();
         const startDate = new Date(workflow.dateDebut);
-        return endDate.getTime() - startDate.getTime();
+        let totalDuration = endDate.getTime() - startDate.getTime();
+        if (workflow.etapes && Array.isArray(workflow.etapes)) {
+            const step1 = workflow.etapes.find((e) => e.numeroEtape === 1);
+            if (step1) {
+                let step1Duration = 0;
+                if (step1.dateDebut) {
+                    const s1End = step1.dateFin ? new Date(step1.dateFin) : new Date();
+                    const s1Start = new Date(step1.dateDebut);
+                    step1Duration = s1End.getTime() - s1Start.getTime();
+                }
+                if (step1Duration > 0) {
+                    totalDuration -= step1Duration;
+                }
+            }
+        }
+        return Math.max(0, totalDuration);
     }
     calculateStepDuration(step) {
         if (!step.dateDebut)
@@ -469,6 +545,12 @@ let WorkflowsService = class WorkflowsService {
                 etapeActuelle: true,
             },
         });
+        const restitutedCount = await this.prisma.workflowEtape.count({
+            where: {
+                numeroEtape: 1,
+                sousStatutReception: 'RESTITUTION',
+            },
+        });
         const vehiclesByStep = {};
         workflows.forEach((workflow) => {
             const step = workflow.etapeActuelle;
@@ -479,6 +561,14 @@ let WorkflowsService = class WorkflowsService {
             select: {
                 dateDebut: true,
                 dateFin: true,
+                etapes: {
+                    where: { numeroEtape: 1 },
+                    select: {
+                        numeroEtape: true,
+                        dateDebut: true,
+                        dateFin: true
+                    }
+                }
             },
         });
         let averageWorkflowTime = null;
@@ -499,6 +589,7 @@ let WorkflowsService = class WorkflowsService {
             inProgressWorkflows: inProgressCount,
             cancelledWorkflows: cancelledCount,
             waitingWorkflows: waitingCount,
+            restitutedWorkflows: restitutedCount,
             vehiclesByStep,
             averageWorkflowTime,
         };

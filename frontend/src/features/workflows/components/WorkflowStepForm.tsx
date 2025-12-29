@@ -27,6 +27,8 @@ import Etape10Form from './forms/Etape10Form';
 import SignaturePad from './SignaturePad';
 import { useCanEditEtape } from '../../../hooks/useEtapePermissions';
 import { useAuth } from '../../../stores/useAuthStore';
+import { generateStep1Pdf, generateStep1RestitutionPdf } from '../../../utils/pdfGenerator';
+import PrintIcon from '@mui/icons-material/Print';
 
 interface WorkflowStepFormProps {
     etape: WorkflowEtape;
@@ -37,6 +39,7 @@ interface WorkflowStepFormProps {
     isPending: boolean;
     permissions?: { [key: number]: string[] };
     userRole?: string;
+    vehicle?: any;
 }
 
 export default function WorkflowStepForm({
@@ -48,6 +51,7 @@ export default function WorkflowStepForm({
     isPending,
     permissions,
     userRole,
+    vehicle,
 }: WorkflowStepFormProps) {
     const { user } = useAuth();
 
@@ -108,6 +112,11 @@ export default function WorkflowStepForm({
 
     const isFormValid = () => {
         if (etape.numeroEtape === 1) {
+            // Pour VERIFICATION, pas besoin de valider le formulaire
+            if (etape.sousStatutReception === 'VERIFICATION') {
+                return true;
+            }
+            // Pour RECEPTION (ou null/undefined), valider le formulaire
             const data = formData.formulaireData || {};
             const controles = data.controles || {};
             const allChecked = [
@@ -251,20 +260,115 @@ export default function WorkflowStepForm({
         return true;
     };
 
+    // Fonction pour obtenir le statut actuel de l'étape 1
+    const getSousStatutInfo = () => {
+        const sousStatut = etape.sousStatutReception || 'RECEPTION';
+        const statuts = [
+            { key: 'RECEPTION', label: 'Réception', color: '#2563eb', bgColor: '#dbeafe' },
+            { key: 'VERIFICATION', label: 'Vérification', color: '#0ea5e9', bgColor: '#e0f2fe' },
+            { key: 'RESTITUTION', label: 'Restitution', color: '#16a34a', bgColor: '#dcfce7' }
+        ];
+        const currentIndex = statuts.findIndex(s => s.key === sousStatut);
+        return { statuts, currentIndex };
+    };
+
     return (
         <Box sx={{ mt: 3, pt: 3, borderTop: '1px dashed #cbd5e1' }}>
             <Typography variant="subtitle1" fontWeight="bold" gutterBottom color="primary">
                 Validation de l'étape
             </Typography>
 
+            {/* Indicateur de progression pour l'étape 1 */}
+            {etape.numeroEtape === 1 && (
+                <Box sx={{ mb: 3, p: 2, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0' }}>
+                    <Typography variant="caption" fontWeight="bold" display="block" sx={{ mb: 2, color: '#64748b' }}>
+                        PROGRESSION DE LA RÉCEPTION
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {getSousStatutInfo().statuts.map((statut, index) => {
+                            const { currentIndex } = getSousStatutInfo();
+                            const isActive = index === currentIndex;
+                            const isCompleted = index < currentIndex;
+                            const isPending = index > currentIndex;
+
+                            return (
+                                <Box key={statut.key} sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            px: 2,
+                                            py: 1,
+                                            borderRadius: 2,
+                                            bgcolor: isActive ? statut.bgColor : isCompleted ? '#f0fdf4' : 'white',
+                                            border: `2px solid ${isActive ? statut.color : isCompleted ? '#16a34a' : '#e2e8f0'}`,
+                                            flex: 1,
+                                            position: 'relative'
+                                        }}
+                                    >
+                                        {/* Pastille numérotée */}
+                                        <Box
+                                            sx={{
+                                                width: 28,
+                                                height: 28,
+                                                borderRadius: '50%',
+                                                bgcolor: isActive ? statut.color : isCompleted ? '#16a34a' : '#cbd5e1',
+                                                color: 'white',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                fontWeight: 'bold',
+                                                fontSize: '0.875rem',
+                                                flexShrink: 0
+                                            }}
+                                        >
+                                            {isCompleted ? '✓' : index + 1}
+                                        </Box>
+                                        {/* Label */}
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                fontWeight: isActive ? 'bold' : 'normal',
+                                                color: isActive ? statut.color : isCompleted ? '#16a34a' : '#64748b',
+                                                fontSize: '0.875rem'
+                                            }}
+                                        >
+                                            {statut.label}
+                                        </Typography>
+                                    </Box>
+                                    {/* Connecteur entre les étapes */}
+                                    {index < getSousStatutInfo().statuts.length - 1 && (
+                                        <Box
+                                            sx={{
+                                                width: 24,
+                                                height: 2,
+                                                bgcolor: isCompleted ? '#16a34a' : '#e2e8f0',
+                                                mx: 0.5,
+                                                flexShrink: 0
+                                            }}
+                                        />
+                                    )}
+                                </Box>
+                            );
+                        })}
+                    </Box>
+                </Box>
+            )}
+
+            {/* Afficher le formulaire pour RECEPTION (éditable), VERIFICATION et RESTITUTION (lecture seule) */}
             {etape.numeroEtape === 1 && (
                 <Box sx={{ mb: 4 }}>
                     <Paper elevation={0} sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: 2, bgcolor: '#f8fafc' }}>
-                        <Typography variant="subtitle2" gutterBottom fontWeight="bold">Contrôles Requis</Typography>
+                        <Typography variant="subtitle2" gutterBottom fontWeight="bold">
+                            {etape.sousStatutReception === 'RESTITUTION'
+                                ? 'Informations de Réception (Lecture seule)'
+                                : 'Contrôles Requis'}
+                        </Typography>
                         <Etape1Form
-                            formData={formData.formulaireData || {}}
+                            formData={formData.formulaireData || etape.formulaire || {}}
                             onChange={handleEtape1Change}
-                            disabled={!canEdit || isPending}
+                            disabled={etape.sousStatutReception === 'RESTITUTION' || !canEdit || isPending}
                         />
                     </Paper>
                 </Box>
@@ -390,7 +494,7 @@ export default function WorkflowStepForm({
             <Stack spacing={3}>
                 <Box>
                     <Grid container spacing={2}>
-                        <Grid size={{ xs: 12, md: 6 }}>
+                        <Grid size={{ xs: 12, md: etape.numeroEtape === 1 ? 12 : 6 }}>
                             <TextField
                                 label="Validé par (Gestionnaire)"
                                 fullWidth
@@ -403,23 +507,26 @@ export default function WorkflowStepForm({
                                 }}
                             />
                         </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <FormControl fullWidth size="small" disabled={!canEdit || isPending}>
-                                <InputLabel>Technicien assigné</InputLabel>
-                                <Select
-                                    value={formData.technicienId || ''}
-                                    onChange={(e) => onChange('technicienId', e.target.value)}
-                                    label="Technicien assigné"
-                                >
-                                    <MenuItem value=""><em>Aucun technicien</em></MenuItem>
-                                    {techniciens?.map((tech) => (
-                                        <MenuItem key={tech.id} value={tech.id}>
-                                            {tech.prenom} {tech.nom} {tech.specialite ? `(${tech.specialite})` : ''}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Grid>
+                        {/* Pour les étapes autres que l'étape 1, afficher le technicien */}
+                        {etape.numeroEtape !== 1 && (
+                            <Grid size={{ xs: 12, md: 6 }}>
+                                <FormControl fullWidth size="small" disabled={!canEdit || isPending}>
+                                    <InputLabel>Technicien assigné</InputLabel>
+                                    <Select
+                                        value={formData.technicienId || ''}
+                                        onChange={(e) => onChange('technicienId', e.target.value)}
+                                        label="Technicien assigné"
+                                    >
+                                        <MenuItem value=""><em>Aucun technicien</em></MenuItem>
+                                        {techniciens?.map((tech) => (
+                                            <MenuItem key={tech.id} value={tech.id}>
+                                                {tech.prenom} {tech.nom} {tech.specialite ? `(${tech.specialite})` : ''}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                        )}
                     </Grid>
                 </Box>
 
@@ -428,24 +535,204 @@ export default function WorkflowStepForm({
                         <Typography variant="body2" gutterBottom sx={{ fontWeight: 'bold', color: 'text.secondary', mb: 2 }}>
                             SIGNATURES
                         </Typography>
-                        <Grid container spacing={4}>
-                            <Grid size={{ xs: 12, md: 6 }}>
-                                <SignaturePad
-                                    label="Signature Gestionnaire"
-                                    value={formData.signatureGestionnaire || ''}
-                                    onChange={(signature) => onChange('signatureGestionnaire', signature)}
-                                    disabled={!canEdit || isPending}
-                                />
+
+                        {/* Étape 1 - RECEPTION : Client + Gestionnaire */}
+                        {etape.numeroEtape === 1 && (!etape.sousStatutReception || etape.sousStatutReception === 'RECEPTION') && (
+                            <Grid container spacing={4}>
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                    <SignaturePad
+                                        label="Signature du Client (à la réception)"
+                                        value={formData.signatureClientReception || ''}
+                                        onChange={(signature) => onChange('signatureClientReception', signature)}
+                                        disabled={!canEdit || isPending}
+                                    />
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                    <SignaturePad
+                                        label="Signature du Gestionnaire Ghazal"
+                                        value={formData.signatureGestionnaire || ''}
+                                        onChange={(signature) => onChange('signatureGestionnaire', signature)}
+                                        disabled={!canEdit || isPending}
+                                    />
+                                </Grid>
                             </Grid>
-                            <Grid size={{ xs: 12, md: 6 }}>
-                                <SignaturePad
-                                    label="Signature Technicien"
-                                    value={formData.signatureTechnicien || ''}
-                                    onChange={(signature) => onChange('signatureTechnicien', signature)}
-                                    disabled={!canEdit || isPending}
-                                />
+                        )}
+
+                        {/* Étape 1 - VERIFICATION : Afficher signatures RECEPTION + nouvelle signature VERIFICATION */}
+                        {etape.numeroEtape === 1 && etape.sousStatutReception === 'VERIFICATION' && (
+                            <>
+                                <Box sx={{ mb: 3, p: 2, bgcolor: '#f0f9ff', borderRadius: 2, border: '1px solid #0ea5e9' }}>
+                                    <Typography variant="body2" sx={{ color: '#0c4a6e' }}>
+                                        Le gestionnaire vérifie que toutes les informations de réception sont correctes avant de commencer les travaux.
+                                    </Typography>
+                                </Box>
+
+                                {/* Afficher les signatures de la RECEPTION en lecture seule */}
+                                <Box sx={{ mb: 3, p: 2, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0' }}>
+                                    <Typography variant="caption" fontWeight="bold" display="block" sx={{ mb: 2, color: '#64748b' }}>
+                                        SIGNATURES DE LA RÉCEPTION
+                                    </Typography>
+                                    <Grid container spacing={4}>
+                                        <Grid size={{ xs: 12, md: 6 }}>
+                                            <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+                                                Signature du Client (à la réception)
+                                            </Typography>
+                                            {etape.signatureClientReception ? (
+                                                <Box sx={{ border: '1px solid #e2e8f0', borderRadius: 1, p: 1, bgcolor: 'white' }}>
+                                                    <img src={etape.signatureClientReception} alt="Signature Client" style={{ maxHeight: 80, maxWidth: '100%' }} />
+                                                </Box>
+                                            ) : (
+                                                <Typography variant="caption" fontStyle="italic" color="text.secondary">Non signé</Typography>
+                                            )}
+                                        </Grid>
+                                        <Grid size={{ xs: 12, md: 6 }}>
+                                            <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+                                                Signature du Gestionnaire Ghazal
+                                            </Typography>
+                                            {etape.signatureGestionnaire ? (
+                                                <Box sx={{ border: '1px solid #e2e8f0', borderRadius: 1, p: 1, bgcolor: 'white' }}>
+                                                    <img src={etape.signatureGestionnaire} alt="Signature Gestionnaire" style={{ maxHeight: 80, maxWidth: '100%' }} />
+                                                </Box>
+                                            ) : (
+                                                <Typography variant="caption" fontStyle="italic" color="text.secondary">Non signé</Typography>
+                                            )}
+                                        </Grid>
+                                    </Grid>
+                                </Box>
+
+                                {/* Nouvelle signature de VERIFICATION */}
+                                <Grid container spacing={4}>
+                                    <Grid size={{ xs: 12 }}>
+                                        <SignaturePad
+                                            label="Signature du Gestionnaire (Vérification)"
+                                            value={formData.signatureGestionnaireVerification || ''}
+                                            onChange={(signature) => onChange('signatureGestionnaireVerification', signature)}
+                                            disabled={!canEdit || isPending}
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </>
+                        )}
+
+                        {/* Étape 1 - RESTITUTION : Afficher toutes les signatures en lecture seule */}
+                        {etape.numeroEtape === 1 && etape.sousStatutReception === 'RESTITUTION' && (
+                            <Box>
+                                <Box sx={{ mb: 3, p: 2, bgcolor: '#f0fdf4', borderRadius: 2, border: '1px solid #16a34a' }}>
+                                    <Typography variant="body2" sx={{ color: '#166534', fontWeight: 600 }}>
+                                        ✓ Le workflow est terminé. Le véhicule est prêt pour la restitution au client.
+                                    </Typography>
+                                </Box>
+
+                                {/* SIGNATURES DE LA RÉCEPTION */}
+                                <Box sx={{ mb: 3, p: 2, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0' }}>
+                                    <Typography variant="caption" fontWeight="bold" display="block" sx={{ mb: 2, color: '#64748b' }}>
+                                        SIGNATURES DE LA RÉCEPTION
+                                    </Typography>
+                                    <Grid container spacing={4}>
+                                        <Grid size={{ xs: 12, md: 6 }}>
+                                            <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+                                                Signature du Client (à la réception)
+                                            </Typography>
+                                            {etape.signatureClientReception ? (
+                                                <Box sx={{ border: '1px solid #e2e8f0', borderRadius: 1, p: 1, bgcolor: 'white' }}>
+                                                    <img src={etape.signatureClientReception} alt="Signature Client" style={{ maxHeight: 80, maxWidth: '100%' }} />
+                                                </Box>
+                                            ) : (
+                                                <Typography variant="caption" fontStyle="italic" color="text.secondary">Non signé</Typography>
+                                            )}
+                                        </Grid>
+                                        <Grid size={{ xs: 12, md: 6 }}>
+                                            <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+                                                Signature du Gestionnaire Ghazal
+                                            </Typography>
+                                            {etape.signatureGestionnaire ? (
+                                                <Box sx={{ border: '1px solid #e2e8f0', borderRadius: 1, p: 1, bgcolor: 'white' }}>
+                                                    <img src={etape.signatureGestionnaire} alt="Signature Gestionnaire" style={{ maxHeight: 80, maxWidth: '100%' }} />
+                                                </Box>
+                                            ) : (
+                                                <Typography variant="caption" fontStyle="italic" color="text.secondary">Non signé</Typography>
+                                            )}
+                                        </Grid>
+                                    </Grid>
+                                </Box>
+
+                                {/* SIGNATURE DE LA VÉRIFICATION */}
+                                <Box sx={{ mb: 3, p: 2, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0' }}>
+                                    <Typography variant="caption" fontWeight="bold" display="block" sx={{ mb: 2, color: '#64748b' }}>
+                                        SIGNATURE DE LA VÉRIFICATION
+                                    </Typography>
+                                    <Grid container spacing={4}>
+                                        <Grid size={{ xs: 12, md: 6 }}>
+                                            <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+                                                Signature du Gestionnaire (Vérification)
+                                            </Typography>
+                                            {etape.signatureGestionnaireVerification ? (
+                                                <Box sx={{ border: '1px solid #e2e8f0', borderRadius: 1, p: 1, bgcolor: 'white' }}>
+                                                    <img src={etape.signatureGestionnaireVerification} alt="Signature Vérification" style={{ maxHeight: 80, maxWidth: '100%' }} />
+                                                </Box>
+                                            ) : (
+                                                <Typography variant="caption" fontStyle="italic" color="text.secondary">Non signé</Typography>
+                                            )}
+                                        </Grid>
+                                    </Grid>
+                                </Box>
+
+                                {/* SIGNATURE DE LA RESTITUTION */}
+                                {etape.signatureClientRestitution && (
+                                    <Box sx={{ mb: 3, p: 2, bgcolor: '#f0fdf4', borderRadius: 2, border: '2px solid #16a34a' }}>
+                                        <Typography variant="caption" fontWeight="bold" display="block" sx={{ mb: 2, color: '#16a34a' }}>
+                                            ✓ SIGNATURE DE LA RESTITUTION
+                                        </Typography>
+                                        <Grid container spacing={4}>
+                                            <Grid size={{ xs: 12, md: 6 }}>
+                                                <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+                                                    Signature du Client (à la restitution)
+                                                </Typography>
+                                                <Box sx={{ border: '2px solid #16a34a', borderRadius: 1, p: 1, bgcolor: 'white' }}>
+                                                    <img src={etape.signatureClientRestitution} alt="Signature Restitution" style={{ maxHeight: 80, maxWidth: '100%' }} />
+                                                </Box>
+                                            </Grid>
+                                            <Grid size={{ xs: 12, md: 6 }}>
+                                                <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+                                                    Date de restitution
+                                                </Typography>
+                                                <Typography variant="body2" fontWeight="600">
+                                                    {etape.dateRestitution ? new Date(etape.dateRestitution).toLocaleDateString('fr-FR', {
+                                                        day: 'numeric',
+                                                        month: 'long',
+                                                        year: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    }) : '-'}
+                                                </Typography>
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
+                                )}
+                            </Box>
+                        )}
+
+                        {/* Autres étapes : Gestionnaire + Technicien */}
+                        {etape.numeroEtape !== 1 && (
+                            <Grid container spacing={4}>
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                    <SignaturePad
+                                        label="Signature Gestionnaire"
+                                        value={formData.signatureGestionnaire || ''}
+                                        onChange={(signature) => onChange('signatureGestionnaire', signature)}
+                                        disabled={!canEdit || isPending}
+                                    />
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                    <SignaturePad
+                                        label="Signature Technicien"
+                                        value={formData.signatureTechnicien || ''}
+                                        onChange={(signature) => onChange('signatureTechnicien', signature)}
+                                        disabled={!canEdit || isPending}
+                                    />
+                                </Grid>
                             </Grid>
-                        </Grid>
+                        )}
                     </Paper>
                 </Box>
 
@@ -463,23 +750,75 @@ export default function WorkflowStepForm({
                     />
                 </Box>
 
-                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-                    <Button
-                        onClick={onCancel}
-                        variant="outlined"
-                        color="inherit"
-                    >
-                        Annuler
-                    </Button>
-                    <Button
-                        onClick={onSubmit}
-                        variant="contained"
-                        startIcon={<SaveIcon />}
-                        color={etape.statut === 'TERMINE' ? 'primary' : 'success'}
-                        disabled={!canEdit || isPending || !isFormValid()}
-                    >
-                        {isPending ? 'Enregistrement...' : 'Valider et Terminer'}
-                    </Button>
+                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', alignItems: 'center' }}>
+                    {/* Boutons PDF pour l'étape 1 */}
+                    {etape.numeroEtape === 1 && vehicle && (
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                            {/* Fiche de Réception - pour RECEPTION et VERIFICATION */}
+                            {(etape.sousStatutReception === 'RECEPTION' || etape.sousStatutReception === 'VERIFICATION') && (
+                                <Button
+                                    variant="outlined"
+                                    color="primary"
+                                    startIcon={<PrintIcon />}
+                                    onClick={() => generateStep1Pdf(etape, vehicle)}
+                                    sx={{ textTransform: 'none' }}
+                                >
+                                    Fiche Réception
+                                </Button>
+                            )}
+
+                            {/* Fiche de Restitution - pour RESTITUTION */}
+                            {etape.sousStatutReception === 'RESTITUTION' && etape.signatureClientRestitution && (
+                                <Button
+                                    variant="outlined"
+                                    color="success"
+                                    startIcon={<PrintIcon />}
+                                    onClick={() => generateStep1RestitutionPdf(etape, vehicle)}
+                                    sx={{ textTransform: 'none' }}
+                                >
+                                    Fiche Restitution
+                                </Button>
+                            )}
+                        </Box>
+                    )}
+
+                    {/* Spacer si pas de bouton PDF */}
+                    {!(etape.numeroEtape === 1 && vehicle) && (
+                        <Box />
+                    )}
+
+                    {/* Masquer les boutons Valider/Annuler pour RESTITUTION (consultation seulement) */}
+                    {!(etape.numeroEtape === 1 && etape.sousStatutReception === 'RESTITUTION') && (
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                            <Button
+                                onClick={onCancel}
+                                variant="outlined"
+                                color="inherit"
+                            >
+                                Annuler
+                            </Button>
+                            <Button
+                                onClick={onSubmit}
+                                variant="contained"
+                                startIcon={<SaveIcon />}
+                                color={etape.statut === 'TERMINE' ? 'primary' : 'success'}
+                                disabled={!canEdit || isPending || !isFormValid()}
+                            >
+                                {isPending ? 'Enregistrement...' : 'Valider et Terminer'}
+                            </Button>
+                        </Box>
+                    )}
+
+                    {/* Bouton Fermer pour RESTITUTION */}
+                    {etape.numeroEtape === 1 && etape.sousStatutReception === 'RESTITUTION' && (
+                        <Button
+                            onClick={onCancel}
+                            variant="outlined"
+                            color="inherit"
+                        >
+                            Fermer
+                        </Button>
+                    )}
                 </Box>
             </Stack>
         </Box>
