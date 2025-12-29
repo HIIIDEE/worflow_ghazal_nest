@@ -15,9 +15,6 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    # 🔥 REMOVE THE BIND VOLUME MAPPING (.-:/usr/src/app)
-    #    This is crucial if you want to run the compiled 'dist' files
-    #    The volume mapping below is only for node_modules optimization 
     volumes:
       - /usr/src/app/node_modules
     ports:
@@ -25,18 +22,31 @@ services:
     depends_on:
       - postgres_db_ghazal_workflow
     environment:
-      PORT: 3000  # 🔥 ADD THIS - tells app to listen on 3000
+      # Server Configuration
+      PORT: 3000
+      NODE_ENV: production
+
+      # Database Configuration
       DATABASE_HOST: postgres_db_ghazal_workflow
       DATABASE_PORT: 5432
       DATABASE_USER: postgres
       DATABASE_PASSWORD: your_password
       DATABASE_NAME: workflow
-      NODE_ENV: production
+
+      # API Configuration
       API_PREFIX: apiworkflow
+
+      # CORS Configuration (NO SPACES around commas)
+      CORS_ORIGINS: https://www.ghazal.dz,https://ghazal.dz,http://localhost:5173
       FRONTEND_URL: https://www.ghazal.dz
-      WS_PATH: /apiworkflow/socket.io  # 🔥 Ajoutez ceci
-      CORS_ORIGINS: https://www.ghazal.dz,https://ghazal.dz  # 🔥 Ajoutez ceci
+
+      # WebSocket Configuration
+      WS_PATH: /apiworkflow/socket.io
+      
+      # JWT Configuration
       JWT_SECRET: your_super_secret_jwt_key_here
+      JWT_EXPIRES_IN: 24h
+
     command: npm run start:prod
     restart: always
 

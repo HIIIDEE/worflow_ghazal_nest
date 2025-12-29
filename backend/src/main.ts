@@ -26,48 +26,38 @@ async function bootstrap() {
   // Enable GZIP compression for all responses
   app.use(compression());
 
+  // ========================================
+  // CORS CONFIGURATION WITH ENV VARIABLES
+  // ========================================
+  const corsOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim())
+    : ['http://localhost:5173'];
 
-// CORS configuration with environment variables
-const frontendUrl = process.env.FRONTEND_URL || 'https://www.ghazal.dz';
-
-// Extract just the origin (remove any path)
-const extractOrigin = (url: string) => {
-  try {
-    const parsed = new URL(url);
-    return `${parsed.protocol}//${parsed.host}`;
-  } catch {
-    return url;
-  }
-};
-
-
-const corsOrigins = process.env.NODE_ENV === 'production'
-  ? frontendUrl.split(',').map(extractOrigin)
-  : [extractOrigin(frontendUrl), 'http://localhost:5173'];
+  console.log('🌐 CORS Origins:', corsOrigins);
 
   // CORS configuration
   app.enableCors({
-      origin: [
-    'https://www.ghazal.dz',
-    'https://ghazal.dz',
-    
-        
-    'http://localhost:5173',
-  ],
+    origin: corsOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-    // API prefix from environment
-  const apiPrefix = process.env.API_PREFIX || 'apiworkflow';
+  // ========================================
+  // API PREFIX FROM ENVIRONMENT
+  // ========================================
+  const apiPrefix = process.env.API_PREFIX || 'api';
   app.setGlobalPrefix(apiPrefix);
+  console.log(`🔗 API Prefix: /${apiPrefix}`);
 
-  // Swagger/OpenAPI documentation
-    // Swagger/OpenAPI documentation
+  // ========================================
+  // SWAGGER OPENAPI DOCUMENTATION
+  // ========================================
   const config = new DocumentBuilder()
     .setTitle('WorkflowGhazal API')
-    .setDescription('API de gestion des workflows de transformation GPL - Ghazal GPL')
+    .setDescription(
+      'API de gestion des workflows de transformation GPL - Ghazal GPL',
+    )
     .setVersion('1.0')
     .addTag('auth', 'Authentification et autorisation')
     .addTag('vehicles', 'Gestion des véhicules')
@@ -89,17 +79,27 @@ const corsOrigins = process.env.NODE_ENV === 'production'
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document, {
+  SwaggerModule.setup(`${apiPrefix}/docs`, app, document, {
     customSiteTitle: 'WorkflowGhazal API Documentation',
     customfavIcon: 'https://nestjs.com/img/logo-small.svg',
     customCss: '.swagger-ui .topbar { display: none }',
   });
 
+  // ========================================
+  // PORT CONFIGURATION
+  // ========================================
   const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
 
-  console.log(`Application is running on: http://localhost:${port}`);
-  console.log(`API Documentation: http://localhost:${port}/api/docs`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log('========================================');
+  console.log(`✅ Application is running on: http://localhost:${port}`);
+  console.log(
+    `📚 API Documentation: http://localhost:${port}/${apiPrefix}/docs`,
+  );
+  console.log(
+    `🔌 WebSocket is running on: http://localhost:${port}/${process.env.WS_PATH || '/socket.io'}`,
+  );
+  console.log(`  📲 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log('========================================');
 }
 bootstrap();
