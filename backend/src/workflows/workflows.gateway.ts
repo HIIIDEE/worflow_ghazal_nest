@@ -10,11 +10,12 @@ import { JwtService } from '@nestjs/jwt';
 
 @WebSocketGateway({
     cors: {
-        origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:5173'],
-        credentials: true,
+ origin: ['https://www.ghazal.dz', 'https://ghazal.dz', 'http://localhost:5173'],       
+ credentials: true,
     },
-    path: process.env.WS_PATH || '/socket.io',
-    transports: ['websocket', 'polling'],
+    //path: process.env.WS_PATH || '/socket.io',
+path: '/apiworkflow/socket.io',    
+transports: ['websocket', 'polling'],
 })
 export class WorkflowsGateway
     implements OnGatewayConnection, OnGatewayDisconnect {

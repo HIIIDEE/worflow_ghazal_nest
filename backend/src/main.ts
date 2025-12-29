@@ -26,37 +26,48 @@ async function bootstrap() {
   // Enable GZIP compression for all responses
   app.use(compression());
 
-  // CORS configuration with environment variables
-  const frontendUrl =
-    process.env.FRONTEND_URL || 'https://www.ghazal.dz/workflow';
-  const corsOrigins =
-    process.env.NODE_ENV === 'production'
-      ? frontendUrl.split(',') // Support multiple origins in production
-      : [frontendUrl, 'https://www.ghazal.dz/workflow']; // Allow localhost in development
 
+// CORS configuration with environment variables
+const frontendUrl = process.env.FRONTEND_URL || 'https://www.ghazal.dz';
+
+// Extract just the origin (remove any path)
+const extractOrigin = (url: string) => {
+  try {
+    const parsed = new URL(url);
+    return `${parsed.protocol}//${parsed.host}`;
+  } catch {
+    return url;
+  }
+};
+
+
+const corsOrigins = process.env.NODE_ENV === 'production'
+  ? frontendUrl.split(',').map(extractOrigin)
+  : [extractOrigin(frontendUrl), 'http://localhost:5173'];
+
+  // CORS configuration
   app.enableCors({
-    origin: [
-      'https://www.ghazal.dz',
-      'https://ghazal.dz',
-      // Add the configured FRONTEND_URL to the allowed origins
-      'https://www.ghazal.dz/workflow',
-      'https://ghazal.dz/workflow',
-      // Add localhost for dev if needed
-      'http://localhost:5173',
-    ],
+      origin: [
+    'https://www.ghazal.dz',
+    'https://ghazal.dz',
+    
+        
+    'http://localhost:5173',
+  ],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  // API prefix from environment
+    // API prefix from environment
   const apiPrefix = process.env.API_PREFIX || 'apiworkflow';
   app.setGlobalPrefix(apiPrefix);
 
   // Swagger/OpenAPI documentation
+    // Swagger/OpenAPI documentation
   const config = new DocumentBuilder()
     .setTitle('WorkflowGhazal API')
-    .setDescription(
-      'API de gestion des workflows de transformation GPL - Ghazal GPL',
-    )
+    .setDescription('API de gestion des workflows de transformation GPL - Ghazal GPL')
     .setVersion('1.0')
     .addTag('auth', 'Authentification et autorisation')
     .addTag('vehicles', 'Gestion des véhicules')
@@ -84,12 +95,11 @@ async function bootstrap() {
     customCss: '.swagger-ui .topbar { display: none }',
   });
 
-  const port = process.env.PORT || 3010;
-  await app.listen(port);
+  const port = process.env.PORT || 3000;
+  await app.listen(port, '0.0.0.0');
 
   console.log(`Application is running on: http://localhost:${port}`);
   console.log(`API Documentation: http://localhost:${port}/api/docs`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`CORS enabled for: ${corsOrigins.join(', ')}`);
 }
 bootstrap();

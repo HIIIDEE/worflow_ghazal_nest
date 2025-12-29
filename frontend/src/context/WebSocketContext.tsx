@@ -37,11 +37,11 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             return;
         }
 
-        // Get WebSocket configuration from environment variables
-        const wsUrl = import.meta.env.VITE_WS_URL || 'http://localhost:3000';
-        const wsPath = import.meta.env.VITE_WS_PATH || '/socket.io';
+       const wsUrl = import.meta.env.VITE_WS_URL || 'https://www.ghazal.dz';
+const wsPath = import.meta.env.VITE_WS_PATH || '/apiworkflow/socket.io';
 
-        console.log(`🔌 Connecting to WebSocket: ${wsUrl} (path: ${wsPath})`);
+console.log(`🔌 Connecting to WebSocket: ${wsUrl} (path: ${wsPath})`);
+console.log(`🔑 Using token: ${token ? 'Present' : 'Missing'}`);
 
         const socketInstance = io(wsUrl, {
             path: wsPath,
