@@ -40,7 +40,7 @@ model Technicien {
 
 model Vehicle {
   id              String     @id @default(uuid())
-  immatriculation String     @unique
+  immatriculation String
   marque          String
   modele          String
   annee           Int
@@ -54,7 +54,8 @@ model Vehicle {
   @@index([modele])
   @@index([annee])
   @@index([createdAt])
-  @@index([immatriculation, numeroSerie])
+  @@index([immatriculation])
+  @@index([numeroSerie])
   @@map("vehicles")
 }
 

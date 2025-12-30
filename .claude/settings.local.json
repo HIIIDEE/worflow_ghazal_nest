@@ -24,7 +24,8 @@
       "Bash(ls \"C:\\Users\\TogsO\\OneDrive\\Desktop\\Projet_Salim\\WorkFlowGhazal_nest\\worflow_ghazal_nest\\frontend\"\" | findstr \".env \")",
       "Bash(docker-compose:*)",
       "Bash(docker exec:*)",
-      "Bash(docker logs:*)"
+      "Bash(docker logs:*)",
+      "Bash(rm:*)"
     ]
   }
 }

@@ -94,8 +94,8 @@ export default function WorkflowSteps({
                 Étapes du Workflow
             </Typography>
 
-            <Stepper orientation="vertical" nonLinear activeStep={etapes?.findIndex(e => e.statut === 'EN_COURS')}>
-                {visibleEtapes.map((etape) => {
+            <Stepper orientation="vertical" nonLinear>
+                {visibleEtapes.map((etape, index) => {
                     const isSelected = selectedEtape?.id === etape.id;
 
                     return (
@@ -228,11 +228,7 @@ export default function WorkflowSteps({
                                                 variant="contained"
                                                 size="small"
                                                 startIcon={<PlayCircleOutlineIcon />}
-                                                onClick={() => {
-                                                    onStartEtape(etape.numeroEtape);
-                                                    // Ouvrir automatiquement le formulaire après avoir démarré
-                                                    setTimeout(() => onEditStep(etape), 100);
-                                                }}
+                                                onClick={() => onStartEtape(etape.numeroEtape)}
                                                 disabled={isMutationPending}
                                                 sx={{ textTransform: 'none' }}
                                             >

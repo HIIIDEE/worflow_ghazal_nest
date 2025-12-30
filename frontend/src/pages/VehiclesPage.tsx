@@ -7,18 +7,15 @@ import {
   CircularProgress,
   Alert,
   Snackbar,
-  TextField,
-  InputAdornment,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
-import { IconButton, Tooltip } from "@mui/material";
 
 import VehiclesHeader from "../features/vehicles/components/VehiclesHeader";
 import VehicleList from "../features/vehicles/components/VehicleList";
 import VehicleCreationDialog from "../features/vehicles/components/VehicleCreationDialog";
 import VehicleScannerDialog from "../features/vehicles/components/VehicleScannerDialog";
 import DeleteConfirmDialog from "../features/vehicles/components/DeleteConfirmDialog";
+import VehicleFiltersBar from "../features/vehicles/components/VehicleFiltersBar";
+import type { VehicleFilters } from "../features/vehicles/components/VehicleFiltersBar";
 import type { Vehicle } from "../features/vehicles/vehicleTypes";
 
 export default function VehiclesPage() {
@@ -32,8 +29,15 @@ export default function VehiclesPage() {
     name: string;
   } | null>(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: "" });
-  const [searchQuery, setSearchQuery] = useState("");
   const [scannerOpen, setScannerOpen] = useState(false);
+  const [filters, setFilters] = useState<VehicleFilters>({
+    search: "",
+    marque: "",
+    anneeFrom: "",
+    anneeTo: "",
+    dateFrom: "",
+    dateTo: "",
+  });
 
   const [formData, setFormData] = useState({
     immatriculation: 'AB-123-CD',
@@ -105,20 +109,63 @@ export default function VehiclesPage() {
     },
   });
 
-  // Filter vehicles based on search query
+  // Get unique marques for filter dropdown
+  const uniqueMarques = useMemo(() => {
+    if (!vehicles) return [];
+    const marques = vehicles.map(v => v.marque);
+    return Array.from(new Set(marques)).sort();
+  }, [vehicles]);
+
+  // Filter vehicles based on all filters
   const filteredVehicles = useMemo(() => {
     if (!vehicles) return [];
-    if (!searchQuery.trim()) return vehicles;
 
-    const query = searchQuery.toLowerCase();
-    return vehicles.filter(
-      (vehicle) =>
-        vehicle.immatriculation.toLowerCase().includes(query) ||
-        vehicle.marque.toLowerCase().includes(query) ||
-        vehicle.modele.toLowerCase().includes(query) ||
-        vehicle.numeroSerie.toLowerCase().includes(query)
-    );
-  }, [vehicles, searchQuery]);
+    return vehicles.filter((vehicle) => {
+      // Filter by search query
+      if (filters.search) {
+        const query = filters.search.toLowerCase();
+        const matchesSearch =
+          vehicle.immatriculation.toLowerCase().includes(query) ||
+          vehicle.marque.toLowerCase().includes(query) ||
+          vehicle.modele.toLowerCase().includes(query) ||
+          vehicle.numeroSerie.toLowerCase().includes(query);
+
+        if (!matchesSearch) return false;
+      }
+
+      // Filter by marque
+      if (filters.marque && vehicle.marque !== filters.marque) {
+        return false;
+      }
+
+      // Filter by année range
+      if (filters.anneeFrom) {
+        const anneeFrom = parseInt(filters.anneeFrom);
+        if (vehicle.annee < anneeFrom) return false;
+      }
+
+      if (filters.anneeTo) {
+        const anneeTo = parseInt(filters.anneeTo);
+        if (vehicle.annee > anneeTo) return false;
+      }
+
+      // Filter by date range
+      if (filters.dateFrom) {
+        const vehicleDate = new Date(vehicle.createdAt);
+        const filterDate = new Date(filters.dateFrom);
+        if (vehicleDate < filterDate) return false;
+      }
+
+      if (filters.dateTo) {
+        const vehicleDate = new Date(vehicle.createdAt);
+        const filterDate = new Date(filters.dateTo);
+        filterDate.setHours(23, 59, 59, 999);
+        if (vehicleDate > filterDate) return false;
+      }
+
+      return true;
+    });
+  }, [vehicles, filters]);
 
   const handleOpen = () => setOpen(true);
 
@@ -180,10 +227,21 @@ export default function VehiclesPage() {
 
   const handleSearchScan = (_err: unknown, result: any) => {
     if (result) {
-      setSearchQuery(result.text);
+      setFilters(prev => ({ ...prev, search: result.text }));
       setScannerOpen(false);
       setSnackbar({ open: true, message: `Code scanné : ${result.text}` });
     }
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      search: "",
+      marque: "",
+      anneeFrom: "",
+      anneeTo: "",
+      dateFrom: "",
+      dateTo: "",
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -225,40 +283,16 @@ export default function VehiclesPage() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f8fafc", py: 6 }}>
-      <Container maxWidth="lg">
+      <Container maxWidth="xl">
         <VehiclesHeader onAddClick={handleOpen} />
 
-        <Box sx={{ mb: 3 }}>
-          <TextField
-            fullWidth
-            placeholder="Rechercher par immatriculation, marque, modèle ou VIN..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon sx={{ color: "text.secondary" }} />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <Tooltip title="Scanner un code-barres (VIN)">
-                    <IconButton onClick={() => setScannerOpen(true)} edge="end">
-                      <QrCodeScannerIcon sx={{ color: "text.secondary" }} />
-                    </IconButton>
-                  </Tooltip>
-                </InputAdornment>
-              ),
-            }}
-            sx={{
-              bgcolor: "white",
-              borderRadius: 2,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-              },
-            }}
-          />
-        </Box>
+        <VehicleFiltersBar
+          filters={filters}
+          onFilterChange={setFilters}
+          onClearFilters={handleClearFilters}
+          onScanClick={() => setScannerOpen(true)}
+          marques={uniqueMarques}
+        />
 
         <VehicleList
           vehicles={filteredVehicles}

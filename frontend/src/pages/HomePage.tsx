@@ -1,4 +1,4 @@
-import { Container, Typography, Card, CardActionArea, Box, Grid, Paper, Avatar } from '@mui/material';
+import { Container, Typography, Card, CardActionArea, Box, Grid, Avatar } from '@mui/material';
 import { Link } from 'react-router-dom';
 import PeopleIcon from '@mui/icons-material/People';
 import EngineeringIcon from '@mui/icons-material/Engineering';
@@ -117,32 +117,6 @@ export default function HomePage() {
             />
           )}
         </Grid>
-
-        <Paper sx={{ mt: 6, p: 4, borderRadius: 4, bgcolor: '#ffffff', border: '1px solid #e2e8f0' }} elevation={0}>
-          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: '#1e293b' }}>
-            Aperçu rapide
-          </Typography>
-          <Grid container spacing={4} sx={{ mt: 1 }}>
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Box sx={{ p: 2, bgcolor: '#f1f5f9', borderRadius: 2 }}>
-                <Typography variant="subtitle2" color="text.secondary">Workflows en cours</Typography>
-                <Typography variant="h4" fontWeight="bold" color="primary">--</Typography>
-              </Box>
-            </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Box sx={{ p: 2, bgcolor: '#f1f5f9', borderRadius: 2 }}>
-                <Typography variant="subtitle2" color="text.secondary">Véhicules enregistrés</Typography>
-                <Typography variant="h4" fontWeight="bold" sx={{ color: '#059669' }}>--</Typography>
-              </Box>
-            </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Box sx={{ p: 2, bgcolor: '#f1f5f9', borderRadius: 2 }}>
-                <Typography variant="subtitle2" color="text.secondary">Techniciens actifs</Typography>
-                <Typography variant="h4" fontWeight="bold" sx={{ color: '#d97706' }}>--</Typography>
-              </Box>
-            </Grid>
-          </Grid>
-        </Paper>
       </Container>
     </Box>
   );

@@ -16,6 +16,8 @@ export default function SignaturePad({ label, value, onChange, disabled }: Signa
   const sigCanvas = useRef<SignatureCanvas>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 500, height: 150 });
+  const isDrawingRef = useRef(false);
+  const lastValueRef = useRef<string>('');
 
   // Handle Resize to fix offset issue
   useEffect(() => {
@@ -23,14 +25,6 @@ export default function SignaturePad({ label, value, onChange, disabled }: Signa
       if (containerRef.current) {
         const width = containerRef.current.offsetWidth;
         setCanvasSize({ width, height: 150 });
-
-        // Preserve data on resize if exists
-        if (sigCanvas.current && value) {
-          // Small timeout to allow canvas to resize before redrawing
-          setTimeout(() => {
-            sigCanvas.current?.fromDataURL(value);
-          }, 0);
-        }
       }
     };
 
@@ -38,27 +32,37 @@ export default function SignaturePad({ label, value, onChange, disabled }: Signa
     updateCanvasSize(); // Initial call
 
     return () => window.removeEventListener('resize', updateCanvasSize);
-  }, [value]);
+  }, []);
 
+  // Re-draw signature when value or canvas size changes
   useEffect(() => {
-    if (value && sigCanvas.current) {
-      sigCanvas.current.fromDataURL(value);
+    // Only redraw if value changed externally (not from local drawing)
+    if (value && sigCanvas.current && value !== lastValueRef.current && !isDrawingRef.current) {
+      setTimeout(() => {
+        sigCanvas.current?.fromDataURL(value);
+        lastValueRef.current = value;
+      }, 0);
     }
-  }, [value, canvasSize]); // Re-draw when value OR size changes
+  }, [value, canvasSize]);
 
   const handleClear = () => {
     if (sigCanvas.current) {
       sigCanvas.current.clear();
+      lastValueRef.current = '';
       onChange('');
     }
   };
 
   const handleEnd = () => {
     if (sigCanvas.current && !sigCanvas.current.isEmpty()) {
-      // Get the trimmed URL (or full canvas)
-      // Note: for responsive canvas, it's often better to just getDataURL() or trim()
+      isDrawingRef.current = true;
       const dataUrl = sigCanvas.current.toDataURL('image/png');
+      lastValueRef.current = dataUrl;
       onChange(dataUrl);
+      // Reset flag after a small delay
+      setTimeout(() => {
+        isDrawingRef.current = false;
+      }, 100);
     }
   };
 

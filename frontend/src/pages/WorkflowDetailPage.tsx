@@ -37,12 +37,24 @@ export default function WorkflowDetailPage() {
   const { data: permissions, isLoading: isLoadingPermissions } = useEtapePermissions(id);
 
   const updateEtapeMutation = useMutation({
-    mutationFn: ({ numeroEtape, data }: { numeroEtape: number; data: any }) =>
+    mutationFn: ({ numeroEtape, data, isStarting }: { numeroEtape: number; data: any; isStarting?: boolean }) =>
       workflowsApi.updateEtape(id!, numeroEtape, data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['workflow', id] });
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
-      handleCloseForm();
+
+      // Si on vient de démarrer une étape, ouvrir le formulaire après invalidation
+      if (variables.isStarting) {
+        // Attendre que les données soient rafraîchies
+        setTimeout(() => {
+          const etape = workflow?.etapes?.find(e => e.numeroEtape === variables.numeroEtape);
+          if (etape) {
+            handleEditStep(etape);
+          }
+        }, 200);
+      } else {
+        handleCloseForm();
+      }
     },
   });
 
@@ -82,6 +94,7 @@ export default function WorkflowDetailPage() {
         statut: 'EN_COURS',
         dateDebut: new Date().toISOString(),
       },
+      isStarting: true,
     });
   };
 
