@@ -289,7 +289,6 @@ export default function WorkflowStepForm({
                             const { currentIndex } = getSousStatutInfo();
                             const isActive = index === currentIndex;
                             const isCompleted = index < currentIndex;
-                            const isPending = index > currentIndex;
 
                             return (
                                 <Box key={statut.key} sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>

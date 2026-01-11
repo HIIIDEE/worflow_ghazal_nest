@@ -37,7 +37,7 @@ export default function WorkflowDetailPage() {
   const { data: permissions, isLoading: isLoadingPermissions } = useEtapePermissions(id);
 
   const updateEtapeMutation = useMutation({
-    mutationFn: ({ numeroEtape, data, isStarting }: { numeroEtape: number; data: any; isStarting?: boolean }) =>
+    mutationFn: ({ numeroEtape, data, isStarting: _isStarting }: { numeroEtape: number; data: any; isStarting?: boolean }) =>
       workflowsApi.updateEtape(id!, numeroEtape, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['workflow', id] });

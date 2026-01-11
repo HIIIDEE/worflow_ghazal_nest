@@ -47,7 +47,7 @@ interface WorkflowStepsProps {
 export default function WorkflowSteps({
     etapes,
     vehicle,
-    workflow,
+    workflow: _workflow,
     onStartEtape,
     onEditStep,
     isMutationPending,
@@ -95,7 +95,7 @@ export default function WorkflowSteps({
             </Typography>
 
             <Stepper orientation="vertical" nonLinear>
-                {visibleEtapes.map((etape, index) => {
+                {visibleEtapes.map((etape, _index) => {
                     const isSelected = selectedEtape?.id === etape.id;
 
                     return (

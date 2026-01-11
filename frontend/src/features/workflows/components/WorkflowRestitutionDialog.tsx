@@ -22,7 +22,7 @@ interface WorkflowRestitutionDialogProps {
 
 export default function WorkflowRestitutionDialog({
     open,
-    workflowId,
+    workflowId: _workflowId,
     onClose,
     onSubmit,
     isPending,
