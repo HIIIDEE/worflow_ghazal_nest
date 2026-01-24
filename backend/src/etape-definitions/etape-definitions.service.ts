@@ -60,10 +60,18 @@ export class EtapeDefinitionsService {
       throw new Error('Etape definition not found');
     }
 
-    // Delete existing permissions for this etape
-    await this.prisma.etapePermission.deleteMany({
-      where: { etapeDefinitionId: etapeDef.id },
-    });
+    // Identify unique users in the new permissions list
+    const affectedUserIds = [...new Set(permissions.map(p => p.userId))];
+
+    // Delete existing permissions ONLY for the users being updated
+    if (affectedUserIds.length > 0) {
+      await this.prisma.etapePermission.deleteMany({
+        where: {
+          etapeDefinitionId: etapeDef.id,
+          userId: { in: affectedUserIds }, // ← Supprime uniquement les permissions des utilisateurs concernés
+        },
+      });
+    }
 
     // Create new permissions
     if (permissions.length > 0) {

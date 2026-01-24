@@ -10,28 +10,54 @@ export class UsersService {
   constructor(private prisma: PrismaService) { }
 
   async create(createUserDto: CreateUserDto) {
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: createUserDto.email }
-    });
-
-    if (existingUser) {
-      throw new ConflictException('Un utilisateur avec cet email existe déjà');
+    // Validation : doit avoir soit (email + password) soit (code)
+    if (!createUserDto.email && !createUserDto.code) {
+      throw new ConflictException('Vous devez fournir soit un email et mot de passe, soit un code');
     }
 
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    // Vérifier l'unicité de l'email si fourni
+    if (createUserDto.email) {
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email: createUserDto.email }
+      });
+
+      if (existingUser) {
+        throw new ConflictException('Un utilisateur avec cet email existe déjà');
+      }
+    }
+
+    // Vérifier l'unicité du code si fourni
+    if (createUserDto.code) {
+      const existingUser = await this.prisma.user.findUnique({
+        where: { code: createUserDto.code }
+      });
+
+      if (existingUser) {
+        throw new ConflictException('Un utilisateur avec ce code existe déjà');
+      }
+    }
+
+    // Hasher le mot de passe s'il est fourni
+    const dataToCreate: any = {
+      ...createUserDto,
+      role: createUserDto.role || UserRole.GESTIONNAIRE,
+    };
+
+    if (createUserDto.password) {
+      dataToCreate.password = await bcrypt.hash(createUserDto.password, 10);
+    }
 
     return this.prisma.user.create({
-      data: {
-        ...createUserDto,
-        password: hashedPassword,
-        role: createUserDto.role || UserRole.GESTIONNAIRE,
-      },
+      data: dataToCreate,
       select: {
         id: true,
         email: true,
+        code: true,
         nom: true,
         prenom: true,
         role: true,
+        telephone: true,
+        specialite: true,
         isActive: true,
         createdAt: true,
         updatedAt: true,
@@ -44,9 +70,12 @@ export class UsersService {
       select: {
         id: true,
         email: true,
+        code: true,
         nom: true,
         prenom: true,
         role: true,
+        telephone: true,
+        specialite: true,
         isActive: true,
         createdAt: true,
         updatedAt: true,
@@ -60,9 +89,12 @@ export class UsersService {
       select: {
         id: true,
         email: true,
+        code: true,
         nom: true,
         prenom: true,
         role: true,
+        telephone: true,
+        specialite: true,
         isActive: true,
         createdAt: true,
         updatedAt: true,
@@ -82,9 +114,12 @@ export class UsersService {
       select: {
         id: true,
         email: true,
+        code: true,
         nom: true,
         prenom: true,
         role: true,
+        telephone: true,
+        specialite: true,
         isActive: true,
         createdAt: true,
         updatedAt: true,
@@ -95,6 +130,12 @@ export class UsersService {
   async findByEmailWithPassword(email: string) {
     return this.prisma.user.findUnique({
       where: { email }
+    });
+  }
+
+  async findByCode(code: string) {
+    return this.prisma.user.findUnique({
+      where: { code }
     });
   }
 
@@ -123,9 +164,12 @@ export class UsersService {
       select: {
         id: true,
         email: true,
+        code: true,
         nom: true,
         prenom: true,
         role: true,
+        telephone: true,
+        specialite: true,
         isActive: true,
         createdAt: true,
         updatedAt: true,
@@ -141,13 +185,67 @@ export class UsersService {
       select: {
         id: true,
         email: true,
+        code: true,
         nom: true,
         prenom: true,
         role: true,
+        telephone: true,
+        specialite: true,
         isActive: true,
         createdAt: true,
         updatedAt: true,
       }
+    });
+  }
+
+  // Récupérer tous les techniciens et contrôleurs
+  async findTechnicians() {
+    return this.prisma.user.findMany({
+      where: {
+        role: {
+          in: [UserRole.TECHNICIEN, UserRole.CONTROLEUR],
+        },
+      },
+      select: {
+        id: true,
+        email: true,
+        code: true,
+        nom: true,
+        prenom: true,
+        role: true,
+        telephone: true,
+        specialite: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: [{ nom: 'asc' }, { prenom: 'asc' }],
+    });
+  }
+
+  // Récupérer uniquement les techniciens/contrôleurs actifs
+  async findActiveTechnicians() {
+    return this.prisma.user.findMany({
+      where: {
+        role: {
+          in: [UserRole.TECHNICIEN, UserRole.CONTROLEUR],
+        },
+        isActive: true,
+      },
+      select: {
+        id: true,
+        email: true,
+        code: true,
+        nom: true,
+        prenom: true,
+        role: true,
+        telephone: true,
+        specialite: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: [{ nom: 'asc' }, { prenom: 'asc' }],
     });
   }
 }

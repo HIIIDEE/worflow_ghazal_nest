@@ -1,8 +1,8 @@
 import { Box, Typography, Checkbox, FormControlLabel, Paper, Grid } from '@mui/material';
-import WaterDropIcon from '@mui/icons-material/WaterDrop';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
-interface Etape9FormProps {
+interface Etape6FormProps {
     formData: {
         controles?: { [key: string]: boolean };
     };
@@ -11,15 +11,15 @@ interface Etape9FormProps {
 }
 
 const CONTROLES = [
-    'Remplissage',
-    'Poly vanne',
-    'Cuivre Ø 8',
-    'Cuivre Ø 6',
-    'Branchement détendeur',
-    'Électrovanne gaz',
+    "Date de validité de l'extincteur",
+    "Fixation de l'extincteur",
+    'Remontage le tapis coffre',
+    'Fixation garniture coffre',
+    'Remise en place de la roue de secours',
+    'Montage plaque GPL',
 ];
 
-export default function Etape9Form({ formData, onChange, disabled = false }: Etape9FormProps) {
+export default function Etape6Form({ formData, onChange, disabled = false }: Etape6FormProps) {
     const controles = formData?.controles || {};
 
     const handleControleChange = (controle: string, checked: boolean) => {
@@ -36,7 +36,7 @@ export default function Etape9Form({ formData, onChange, disabled = false }: Eta
             <Paper sx={{ p: 3, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }} elevation={0}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <WaterDropIcon sx={{ mr: 1, color: '#2563eb' }} />
+                        <AutoFixHighIcon sx={{ mr: 1, color: '#2563eb' }} />
                         <Typography variant="h6" fontWeight="bold" sx={{ color: '#1e293b' }}>
                             Points de contrôle
                         </Typography>
@@ -47,7 +47,7 @@ export default function Etape9Form({ formData, onChange, disabled = false }: Eta
                 </Box>
 
                 <Typography variant="body2" sx={{ mb: 3, color: '#64748b' }}>
-                    Vérifiez l'étanchéité de chaque point
+                    Vérifiez chaque point de contrôle lors de la finition
                 </Typography>
 
                 <Grid container spacing={1.5}>
@@ -94,7 +94,8 @@ export default function Etape9Form({ formData, onChange, disabled = false }: Eta
                                                 variant="body2"
                                                 sx={{
                                                     color: controles[controle] ? '#1e293b' : '#64748b',
-                                                    fontWeight: controles[controle] ? 600 : 400
+                                                    fontWeight: controles[controle] ? 600 : 400,
+                                                    userSelect: 'none',
                                                 }}
                                             >
                                                 {controle}
@@ -121,7 +122,7 @@ export default function Etape9Form({ formData, onChange, disabled = false }: Eta
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <CheckCircleOutlineIcon sx={{ mr: 1, color: '#059669' }} />
                             <Typography variant="body2" sx={{ color: '#059669', fontWeight: 600 }}>
-                                Tous les tests d'étanchéité ont été effectués
+                                Tous les points de contrôle ont été vérifiés
                             </Typography>
                         </Box>
                     </Box>

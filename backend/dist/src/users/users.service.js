@@ -53,25 +53,43 @@ let UsersService = class UsersService {
         this.prisma = prisma;
     }
     async create(createUserDto) {
-        const existingUser = await this.prisma.user.findUnique({
-            where: { email: createUserDto.email }
-        });
-        if (existingUser) {
-            throw new common_1.ConflictException('Un utilisateur avec cet email existe déjà');
+        if (!createUserDto.email && !createUserDto.code) {
+            throw new common_1.ConflictException('Vous devez fournir soit un email et mot de passe, soit un code');
         }
-        const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+        if (createUserDto.email) {
+            const existingUser = await this.prisma.user.findUnique({
+                where: { email: createUserDto.email }
+            });
+            if (existingUser) {
+                throw new common_1.ConflictException('Un utilisateur avec cet email existe déjà');
+            }
+        }
+        if (createUserDto.code) {
+            const existingUser = await this.prisma.user.findUnique({
+                where: { code: createUserDto.code }
+            });
+            if (existingUser) {
+                throw new common_1.ConflictException('Un utilisateur avec ce code existe déjà');
+            }
+        }
+        const dataToCreate = {
+            ...createUserDto,
+            role: createUserDto.role || client_1.UserRole.GESTIONNAIRE,
+        };
+        if (createUserDto.password) {
+            dataToCreate.password = await bcrypt.hash(createUserDto.password, 10);
+        }
         return this.prisma.user.create({
-            data: {
-                ...createUserDto,
-                password: hashedPassword,
-                role: createUserDto.role || client_1.UserRole.GESTIONNAIRE,
-            },
+            data: dataToCreate,
             select: {
                 id: true,
                 email: true,
+                code: true,
                 nom: true,
                 prenom: true,
                 role: true,
+                telephone: true,
+                specialite: true,
                 isActive: true,
                 createdAt: true,
                 updatedAt: true,
@@ -83,9 +101,12 @@ let UsersService = class UsersService {
             select: {
                 id: true,
                 email: true,
+                code: true,
                 nom: true,
                 prenom: true,
                 role: true,
+                telephone: true,
+                specialite: true,
                 isActive: true,
                 createdAt: true,
                 updatedAt: true,
@@ -98,9 +119,12 @@ let UsersService = class UsersService {
             select: {
                 id: true,
                 email: true,
+                code: true,
                 nom: true,
                 prenom: true,
                 role: true,
+                telephone: true,
+                specialite: true,
                 isActive: true,
                 createdAt: true,
                 updatedAt: true,
@@ -117,9 +141,12 @@ let UsersService = class UsersService {
             select: {
                 id: true,
                 email: true,
+                code: true,
                 nom: true,
                 prenom: true,
                 role: true,
+                telephone: true,
+                specialite: true,
                 isActive: true,
                 createdAt: true,
                 updatedAt: true,
@@ -129,6 +156,11 @@ let UsersService = class UsersService {
     async findByEmailWithPassword(email) {
         return this.prisma.user.findUnique({
             where: { email }
+        });
+    }
+    async findByCode(code) {
+        return this.prisma.user.findUnique({
+            where: { code }
         });
     }
     async update(id, updateUserDto) {
@@ -151,9 +183,12 @@ let UsersService = class UsersService {
             select: {
                 id: true,
                 email: true,
+                code: true,
                 nom: true,
                 prenom: true,
                 role: true,
+                telephone: true,
+                specialite: true,
                 isActive: true,
                 createdAt: true,
                 updatedAt: true,
@@ -167,13 +202,63 @@ let UsersService = class UsersService {
             select: {
                 id: true,
                 email: true,
+                code: true,
                 nom: true,
                 prenom: true,
                 role: true,
+                telephone: true,
+                specialite: true,
                 isActive: true,
                 createdAt: true,
                 updatedAt: true,
             }
+        });
+    }
+    async findTechnicians() {
+        return this.prisma.user.findMany({
+            where: {
+                role: {
+                    in: [client_1.UserRole.TECHNICIEN, client_1.UserRole.CONTROLEUR],
+                },
+            },
+            select: {
+                id: true,
+                email: true,
+                code: true,
+                nom: true,
+                prenom: true,
+                role: true,
+                telephone: true,
+                specialite: true,
+                isActive: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+            orderBy: [{ nom: 'asc' }, { prenom: 'asc' }],
+        });
+    }
+    async findActiveTechnicians() {
+        return this.prisma.user.findMany({
+            where: {
+                role: {
+                    in: [client_1.UserRole.TECHNICIEN, client_1.UserRole.CONTROLEUR],
+                },
+                isActive: true,
+            },
+            select: {
+                id: true,
+                email: true,
+                code: true,
+                nom: true,
+                prenom: true,
+                role: true,
+                telephone: true,
+                specialite: true,
+                isActive: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+            orderBy: [{ nom: 'asc' }, { prenom: 'asc' }],
         });
     }
 };

@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import type { WorkflowEtape } from '../types';
-import { techniciensApi } from '../../techniciens/services/techniciens.api';
+import { axiosInstance } from '../../../lib/axios';
 import Etape1Form from './forms/Etape1Form';
 //import Etape2Form from './forms/Etape2Form';
 import SignaturePad from './SignaturePad';
@@ -59,7 +59,7 @@ export default function WorkflowValidationDialog({
     const { data: techniciens } = useQuery({
         queryKey: ['techniciens-active'],
         queryFn: async () => {
-            const response = await techniciensApi.getAllActive();
+            const response = await axiosInstance.get('/users/technicians/active');
             return response.data;
         },
     });
@@ -69,7 +69,11 @@ export default function WorkflowValidationDialog({
     };
 
     const isFormValid = () => {
+        // Étape 1 - RECEPTION: Formulaire requis
         if (selectedEtape?.numeroEtape === 1) {
+            if (selectedEtape?.sousStatutReception === 'VERIFICATION') {
+                return true; // Pas de validation de formulaire pour VERIFICATION
+            }
             const data = formData.formulaireData || {};
             const controles = data.controles || {};
             const allChecked = [
@@ -81,6 +85,18 @@ export default function WorkflowValidationDialog({
             ].every(c => controles[c] === true);
             return allChecked && data.kilometrage && data.kilometrage > 0;
         }
+
+        // Étapes 2-5 - CONTROLE_TECHNICIEN: Signature Technicien uniquement
+        if ([2, 3, 4, 5].includes(selectedEtape?.numeroEtape || 0)) {
+            if (selectedEtape?.sousStatutTechnique === 'CONTROLE_TECHNICIEN') {
+                return !!formData.signatureTechnicien;
+            }
+            // CONTROLE_INTEROPERATION: Signature Contrôleur uniquement
+            if (selectedEtape?.sousStatutTechnique === 'CONTROLE_INTEROPERATION') {
+                return !!formData.signatureControleur;
+            }
+        }
+
         return true;
     };
 
@@ -148,14 +164,14 @@ export default function WorkflowValidationDialog({
                     <FormControl fullWidth sx={{ mt: 2 }} disabled={!canEdit || isPending}>
                         <InputLabel>Technicien assigné</InputLabel>
                         <Select
-                            value={formData.technicienId || ''}
-                            onChange={(e) => onChange('technicienId', e.target.value)}
+                            value={formData.assignedUserId || ''}
+                            onChange={(e) => onChange('assignedUserId', e.target.value)}
                             label="Technicien assigné"
                         >
                             <MenuItem value="">
                                 <em>Aucun technicien</em>
                             </MenuItem>
-                            {techniciens?.map((tech) => (
+                            {techniciens?.map((tech: any) => (
                                 <MenuItem key={tech.id} value={tech.id}>
                                     {tech.prenom} {tech.nom} {tech.specialite ? `(${tech.specialite})` : ''}
                                 </MenuItem>
@@ -199,8 +215,84 @@ export default function WorkflowValidationDialog({
                     </Box>
                 )}
 
-                {/* Autres étapes : Signature Gestionnaire + Signature Technicien */}
-                {selectedEtape?.numeroEtape !== 1 && (
+                {/* ====== ÉTAPES 2-5: CONTROLE_TECHNICIEN ====== */}
+                {[2, 3, 4, 5].includes(selectedEtape?.numeroEtape || 0) &&
+                 selectedEtape?.sousStatutTechnique === 'CONTROLE_TECHNICIEN' && (
+                    <>
+                        <Box sx={{ mb: 3, p: 2, bgcolor: '#f0f9ff', borderRadius: 2, border: '1px solid #0ea5e9' }}>
+                            <Typography variant="body2" sx={{ color: '#0c4a6e', fontWeight: 600 }}>
+                                Phase 1: Contrôle Technicien
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: '#64748b' }}>
+                                Le technicien effectue les vérifications et signe.
+                            </Typography>
+                        </Box>
+
+                        <Divider sx={{ my: 3 }} />
+
+                        <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', color: '#1e293b' }}>
+                            Signature Requise
+                        </Typography>
+
+                        <Box sx={{ mt: 2 }}>
+                            <SignaturePad
+                                label="Signature du Technicien"
+                                value={formData.signatureTechnicien || ''}
+                                onChange={(signature) => onChange('signatureTechnicien', signature)}
+                                disabled={!canEdit || isPending}
+                            />
+                        </Box>
+                    </>
+                )}
+
+                {/* ====== ÉTAPES 2-5: CONTROLE_INTEROPERATION ====== */}
+                {[2, 3, 4, 5].includes(selectedEtape?.numeroEtape || 0) &&
+                 selectedEtape?.sousStatutTechnique === 'CONTROLE_INTEROPERATION' && (
+                    <>
+                        <Box sx={{ mb: 3, p: 2, bgcolor: '#f0fdf4', borderRadius: 2, border: '1px solid #16a34a' }}>
+                            <Typography variant="body2" sx={{ color: '#14532d', fontWeight: 600 }}>
+                                Phase 2: Contrôle Interopération
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: '#64748b' }}>
+                                Le contrôleur vérifie le travail effectué par le technicien et valide l'étape.
+                            </Typography>
+                        </Box>
+
+                        {/* Afficher la signature précédente en lecture seule */}
+                        <Box sx={{ mb: 3, p: 2, bgcolor: '#f8fafc', borderRadius: 2 }}>
+                            <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                                Contrôle Technicien (Complété)
+                            </Typography>
+                            <Box sx={{ mt: 1 }}>
+                                {selectedEtape?.signatureTechnicien && (
+                                    <Box>
+                                        <Typography variant="caption" sx={{ color: '#64748b' }}>Signature Technicien ✓</Typography>
+                                        <Box component="img" src={selectedEtape.signatureTechnicien}
+                                             sx={{ maxWidth: 200, border: '1px solid #e2e8f0', borderRadius: 1 }} />
+                                    </Box>
+                                )}
+                            </Box>
+                        </Box>
+
+                        <Divider sx={{ my: 3 }} />
+
+                        <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', color: '#1e293b' }}>
+                            Signature Contrôleur Requise
+                        </Typography>
+
+                        <Box sx={{ mt: 2 }}>
+                            <SignaturePad
+                                label="Signature du Contrôleur"
+                                value={formData.signatureControleur || ''}
+                                onChange={(signature) => onChange('signatureControleur', signature)}
+                                disabled={!canEdit || isPending}
+                            />
+                        </Box>
+                    </>
+                )}
+
+                {/* Autres étapes (6+) : Signature Gestionnaire + Signature Technicien */}
+                {selectedEtape?.numeroEtape !== undefined && selectedEtape.numeroEtape > 5 && (
                     <>
                         <Box sx={{ mt: 3 }}>
                             <SignaturePad

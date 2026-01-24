@@ -35,9 +35,6 @@ let PrismaService = class PrismaService {
     get user() {
         return this.prisma.user;
     }
-    get technicien() {
-        return this.prisma.technicien;
-    }
     get vehicle() {
         return this.prisma.vehicle;
     }

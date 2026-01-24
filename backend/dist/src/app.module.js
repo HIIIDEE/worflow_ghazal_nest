@@ -14,7 +14,6 @@ const vehicles_module_1 = require("./vehicles/vehicles.module");
 const workflows_module_1 = require("./workflows/workflows.module");
 const prisma_service_1 = require("./prisma.service");
 const users_module_1 = require("./users/users.module");
-const techniciens_module_1 = require("./techniciens/techniciens.module");
 const auth_module_1 = require("./auth/auth.module");
 const etape_definitions_module_1 = require("./etape-definitions/etape-definitions.module");
 const common_module_1 = require("./common/common.module");
@@ -49,7 +48,6 @@ exports.AppModule = AppModule = __decorate([
             vehicles_module_1.VehiclesModule,
             workflows_module_1.WorkflowsModule,
             users_module_1.UsersModule,
-            techniciens_module_1.TechniciensModule,
             auth_module_1.AuthModule,
             etape_definitions_module_1.EtapeDefinitionsModule,
         ],

@@ -62,6 +62,7 @@ services:
         echo 'Attente de la base de données...' &&
         npx prisma generate &&
         npx prisma db push &&
+        npx prisma db seed &&
         npm run start:dev
       "
 

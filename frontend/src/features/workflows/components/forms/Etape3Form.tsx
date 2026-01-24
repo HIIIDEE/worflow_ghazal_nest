@@ -1,5 +1,5 @@
 import { Box, Typography, Checkbox, FormControlLabel, Paper, Grid } from '@mui/material';
-import SettingsIcon from '@mui/icons-material/Settings';
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
 interface Etape3FormProps {
@@ -11,16 +11,13 @@ interface Etape3FormProps {
 }
 
 const CONTROLES = [
-    'Couple de serrage support Détendeur',
-    'Branchement entrée eau détendeur',
-    'Branchement sortie eau détendeur',
-    'Branchement sortie Gaz détendeur',
-    'Raccordement « T » eau',
-    'Serrages colliers',
-    'Déménage tapis coffre',
     'Perçage trou de fixation du réservoir',
     "Application de l'antirouille",
-    'Perçage trou de fixation bouchon de remplissage',
+    'Perçage trou de fixation remplissage',
+    'Fixation support de remplissage',
+    'Fixation remplissage',
+    'Raccordement cuivre Ø8 à la prise de remplissage',
+    'Serrage Raccordement 14 ± 1Nm',
 ];
 
 export default function Etape3Form({ formData, onChange, disabled = false }: Etape3FormProps) {
@@ -36,13 +33,12 @@ export default function Etape3Form({ formData, onChange, disabled = false }: Eta
 
     return (
         <Box>
-            {/* Section Points de contrôle */}
             <Paper sx={{ p: 3, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }} elevation={0}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <SettingsIcon sx={{ mr: 1, color: '#2563eb' }} />
+                        <DirectionsCarIcon sx={{ mr: 1, color: '#dc2626' }} />
                         <Typography variant="h6" fontWeight="bold" sx={{ color: '#1e293b' }}>
-                            Points de contrôle
+                            Partie Arrière - Fixation Réservoir
                         </Typography>
                     </Box>
                     <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 600 }}>
@@ -51,7 +47,7 @@ export default function Etape3Form({ formData, onChange, disabled = false }: Eta
                 </Box>
 
                 <Typography variant="body2" sx={{ mb: 3, color: '#64748b' }}>
-                    Vérifiez chaque point de contrôle lors de la fixation du réservoir
+                    Vérifiez chaque point lors de la fixation du réservoir à l'arrière
                 </Typography>
 
                 <Grid container spacing={1.5}>
@@ -64,13 +60,13 @@ export default function Etape3Form({ formData, onChange, disabled = false }: Eta
                                 <Paper
                                     sx={{
                                         p: 2,
-                                        bgcolor: controles[controle] ? '#eff6ff' : 'white',
-                                        border: controles[controle] ? '2px solid #2563eb' : '1px solid #e2e8f0',
+                                        bgcolor: controles[controle] ? '#fee2e2' : 'white',
+                                        border: controles[controle] ? '2px solid #dc2626' : '1px solid #e2e8f0',
                                         transition: 'all 0.2s',
                                         height: '100%',
                                         '&:hover': !disabled ? {
-                                            borderColor: '#2563eb',
-                                            boxShadow: '0 2px 8px rgba(37, 99, 235, 0.1)',
+                                            borderColor: '#dc2626',
+                                            boxShadow: '0 2px 8px rgba(220, 38, 38, 0.1)',
                                         } : {},
                                     }}
                                     elevation={0}
@@ -87,7 +83,7 @@ export default function Etape3Form({ formData, onChange, disabled = false }: Eta
                                                 sx={{
                                                     color: '#94a3b8',
                                                     '&.Mui-checked': {
-                                                        color: '#2563eb',
+                                                        color: '#dc2626',
                                                     },
                                                     pointerEvents: 'auto',
                                                 }}
@@ -125,7 +121,7 @@ export default function Etape3Form({ formData, onChange, disabled = false }: Eta
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <CheckCircleOutlineIcon sx={{ mr: 1, color: '#059669' }} />
                             <Typography variant="body2" sx={{ color: '#059669', fontWeight: 600 }}>
-                                Tous les points de contrôle ont été vérifiés
+                                Toutes les opérations de la partie arrière ont été effectuées
                             </Typography>
                         </Box>
                     </Box>

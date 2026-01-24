@@ -10,7 +10,7 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -41,7 +41,7 @@ export class UsersController {
     // Log user creation
     this.securityLogger.logUserCreated(
       newUser.id,
-      newUser.email,
+      newUser.email || `User-${newUser.id}`,
       currentUser?.userId || 'system',
       currentUser?.email || 'system',
       clientInfo.ip,
@@ -53,6 +53,18 @@ export class UsersController {
   @Get()
   findAll() {
     return this.usersService.findAll();
+  }
+
+  @Get('technicians')
+  @ApiOperation({ summary: 'Get all technicians and controllers' })
+  getTechnicians() {
+    return this.usersService.findTechnicians();
+  }
+
+  @Get('technicians/active')
+  @ApiOperation({ summary: 'Get active technicians and controllers' })
+  getActiveTechnicians() {
+    return this.usersService.findActiveTechnicians();
   }
 
   @Get(':id')
@@ -73,7 +85,7 @@ export class UsersController {
     const changes = Object.keys(updateUserDto);
     this.securityLogger.logUserUpdated(
       updatedUser.id,
-      updatedUser.email,
+      updatedUser.email || `User-${updatedUser.id}`,
       currentUser?.userId || 'system',
       currentUser?.email || 'system',
       clientInfo.ip,
@@ -98,7 +110,7 @@ export class UsersController {
     // Log user deletion
     this.securityLogger.logUserDeleted(
       userToDelete.id,
-      userToDelete.email,
+      userToDelete.email || `User-${userToDelete.id}`,
       currentUser?.userId || 'system',
       currentUser?.email || 'system',
       clientInfo.ip,

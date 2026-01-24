@@ -40,4 +40,34 @@ export class AuthController {
 
         return this.authService.login(user);
     }
+
+    @Post('login/code')
+    async loginByCode(
+        @Body() req: { code: string },
+        @ClientInfo() clientInfo: { ip: string; userAgent: string },
+    ) {
+        // Validate user by code
+        const user = await this.authService.validateUserByCode(req.code);
+
+        if (!user) {
+            // Log failed login attempt
+            this.securityLogger.logLoginFailed(
+                `Code: ${req.code}`,
+                clientInfo.ip,
+                clientInfo.userAgent,
+                'Invalid code',
+            );
+            throw new UnauthorizedException('Code incorrect ou non autorisé');
+        }
+
+        // Log successful login
+        this.securityLogger.logLoginSuccess(
+            user.email || `Code: ${req.code}`,
+            user.id,
+            clientInfo.ip,
+            clientInfo.userAgent,
+        );
+
+        return this.authService.login(user);
+    }
 }

@@ -73,12 +73,13 @@ export class WorkflowsService {
                 email: true,
               },
             },
-            technicien: {
+            assignedUser: {
               select: {
                 id: true,
                 nom: true,
                 prenom: true,
                 specialite: true,
+                telephone: true,
               },
             },
           },
@@ -134,12 +135,13 @@ export class WorkflowsService {
                 email: true,
               },
             },
-            technicien: {
+            assignedUser: {
               select: {
                 id: true,
                 nom: true,
                 prenom: true,
                 specialite: true,
+                telephone: true,
               },
             },
           },
@@ -421,19 +423,19 @@ export class WorkflowsService {
       // Prepare update data with proper Prisma relation syntax
       const updateData: any = { ...updateEtapeDto };
 
-      // Handle technicien relation
-      if (updateData.technicienId !== undefined) {
-        const technicienId = updateData.technicienId;
-        delete updateData.technicienId; // Remove the field to avoid "Unknown argument" error
+      // Handle assignedUser relation
+      if (updateData.assignedUserId !== undefined) {
+        const assignedUserId = updateData.assignedUserId;
+        delete updateData.assignedUserId; // Remove the field to avoid "Unknown argument" error
 
-        if (technicienId && technicienId !== '') {
-          // Connect to technicien
-          updateData.technicien = {
-            connect: { id: technicienId },
+        if (assignedUserId && assignedUserId !== '') {
+          // Connect to assignedUser
+          updateData.assignedUser = {
+            connect: { id: assignedUserId },
           };
         } else {
-          // Disconnect from technicien
-          updateData.technicien = {
+          // Disconnect from assignedUser
+          updateData.assignedUser = {
             disconnect: true,
           };
         }
@@ -445,6 +447,9 @@ export class WorkflowsService {
       }
       if (updateData.signatureTechnicien === '') {
         updateData.signatureTechnicien = null;
+      }
+      if (updateData.signatureControleur === '') {
+        updateData.signatureControleur = null;
       }
       if (updateData.signatureClientReception === '') {
         updateData.signatureClientReception = null;
@@ -461,29 +466,82 @@ export class WorkflowsService {
         delete updateData.valideParId; // Ensure scalar field is not present
       }
 
-      // Gestion spéciale pour l'étape 1 avec ses sous-statuts
-      if (numeroEtape === 1) {
-        // Initialiser le sous-statut à RECEPTION si null et qu'on démarre l'étape
-        if (updateEtapeDto.statut === 'EN_COURS' && etape.statut === 'EN_ATTENTE' && !etape.sousStatutReception) {
+      // Initialiser le sous-statut au démarrage de l'étape
+      if (updateEtapeDto.statut === 'EN_COURS' && etape.statut === 'EN_ATTENTE') {
+        if (etape.numeroEtape === 1 && !etape.sousStatutReception) {
           updateData.sousStatutReception = 'RECEPTION';
         }
+        // Initialiser les étapes 2-11 avec CONTROLE_TECHNICIEN
+        else if ([2, 3, 4, 5, 6, 7, 8, 9, 10, 11].includes(etape.numeroEtape) && !etape.sousStatutTechnique) {
+          updateData.sousStatutTechnique = 'CONTROLE_TECHNICIEN';
+        }
+      }
 
-        // Gestion des transitions de sous-statuts lors de la complétion
-        if (updateEtapeDto.statut === 'TERMINE') {
+      // Gérer les transitions de sous-statuts lors de la complétion (TERMINE)
+      if (updateEtapeDto.statut === 'TERMINE') {
+        // ====== ÉTAPE 1: Gestion RECEPTION/VERIFICATION (existant) ======
+        if (etape.numeroEtape === 1) {
           const currentSousStatut = etape.sousStatutReception;
 
           if (currentSousStatut === 'RECEPTION') {
-            // Complétion de RECEPTION → passer à VERIFICATION
+            // Transition RECEPTION → VERIFICATION
             updateData.sousStatutReception = 'VERIFICATION';
             updateData.dateReception = new Date();
-            updateData.statut = 'EN_COURS'; // Reste EN_COURS, pas TERMINE
-            delete updateData.dateFin; // Ne pas définir dateFin
-          } else if (currentSousStatut === 'VERIFICATION') {
-            // Complétion de VERIFICATION → terminer l'étape 1
+            updateData.statut = 'EN_COURS'; // Rester EN_COURS
+            delete updateData.dateFin;
+          }
+          else if (currentSousStatut === 'VERIFICATION') {
+            // VERIFICATION terminée → Étape TERMINE
             updateData.dateVerification = new Date();
             updateData.statut = 'TERMINE';
             updateData.dateFin = new Date();
-            // sousStatutReception reste à VERIFICATION jusqu'à la restitution
+          }
+        }
+
+        // ====== ÉTAPES 2-11: Gestion CONTROLE_TECHNICIEN/CONTROLE_INTEROPERATION ======
+        else if ([2, 3, 4, 5, 6, 7, 8, 9, 10, 11].includes(etape.numeroEtape)) {
+          const currentSousStatut = etape.sousStatutTechnique;
+
+          if (currentSousStatut === 'CONTROLE_TECHNICIEN') {
+            // Validation du rôle: Seuls les TECHNICIEN peuvent valider cette phase
+            if (userRole !== 'ADMIN' && userRole !== 'TECHNICIEN') {
+              throw new ForbiddenException(
+                'Seuls les techniciens peuvent valider le contrôle technicien'
+              );
+            }
+
+            // Validation: Signature Technicien requise
+            if (!updateData.signatureTechnicien) {
+              throw new BadRequestException(
+                'La signature du technicien est requise pour terminer le contrôle technicien'
+              );
+            }
+
+            // Transition CONTROLE_TECHNICIEN → CONTROLE_INTEROPERATION
+            updateData.sousStatutTechnique = 'CONTROLE_INTEROPERATION';
+            updateData.dateControleTechnicien = new Date();
+            updateData.statut = 'EN_COURS'; // Rester EN_COURS
+            delete updateData.dateFin;
+          }
+          else if (currentSousStatut === 'CONTROLE_INTEROPERATION') {
+            // Validation du rôle: Seuls les CONTROLEUR peuvent valider cette phase
+            if (userRole !== 'ADMIN' && userRole !== 'CONTROLEUR') {
+              throw new ForbiddenException(
+                'Seuls les contrôleurs peuvent valider le contrôle interopération'
+              );
+            }
+
+            // Validation: Signature Contrôleur requise
+            if (!updateData.signatureControleur) {
+              throw new BadRequestException(
+                'La signature du contrôleur est requise pour terminer le contrôle interopération'
+              );
+            }
+
+            // CONTROLE_INTEROPERATION terminé → Étape TERMINE
+            updateData.dateControleInterop = new Date();
+            updateData.statut = 'TERMINE';
+            updateData.dateFin = new Date();
           }
         }
       }

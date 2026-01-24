@@ -7,7 +7,7 @@ export declare class EtapeDefinitionsController {
         permissions: ({
             user: {
                 id: string;
-                email: string;
+                email: string | null;
                 nom: string;
                 prenom: string;
                 role: import("@prisma/client").$Enums.UserRole;
@@ -35,7 +35,7 @@ export declare class EtapeDefinitionsController {
         permissions: ({
             user: {
                 id: string;
-                email: string;
+                email: string | null;
                 nom: string;
                 prenom: string;
                 role: import("@prisma/client").$Enums.UserRole;
@@ -63,7 +63,7 @@ export declare class EtapeDefinitionsController {
         permissions: ({
             user: {
                 id: string;
-                email: string;
+                email: string | null;
                 nom: string;
                 prenom: string;
                 role: import("@prisma/client").$Enums.UserRole;

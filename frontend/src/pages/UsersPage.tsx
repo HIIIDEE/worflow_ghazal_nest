@@ -38,7 +38,10 @@ export default function UsersPage() {
     prenom: "",
     email: "",
     password: "",
-    role: "GESTIONNAIRE" as "ADMIN" | "GESTIONNAIRE",
+    code: "",
+    role: "GESTIONNAIRE" as "ADMIN" | "GESTIONNAIRE" | "TECHNICIEN" | "CONTROLEUR",
+    telephone: "",
+    specialite: "",
   });
   const [editingUser, setEditingUser] = useState<
     (Partial<User> & { password?: string }) | null
@@ -66,7 +69,10 @@ export default function UsersPage() {
         prenom: "",
         email: "",
         password: "",
+        code: "",
         role: "GESTIONNAIRE",
+        telephone: "",
+        specialite: "",
       });
       setSnackbar({
         open: true,
@@ -141,7 +147,7 @@ export default function UsersPage() {
       (user) =>
         user.nom.toLowerCase().includes(query) ||
         user.prenom.toLowerCase().includes(query) ||
-        user.email.toLowerCase().includes(query)
+        (user.email?.toLowerCase().includes(query) ?? false)
     );
   }, [users, searchQuery]);
 
@@ -157,7 +163,7 @@ export default function UsersPage() {
   const handleRoleChange = (e: SelectChangeEvent) => {
     setNewUser({
       ...newUser,
-      role: e.target.value as "ADMIN" | "GESTIONNAIRE",
+      role: e.target.value as "ADMIN" | "GESTIONNAIRE" | "TECHNICIEN" | "CONTROLEUR",
     });
   };
 

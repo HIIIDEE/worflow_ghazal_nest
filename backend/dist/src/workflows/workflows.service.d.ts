@@ -12,17 +12,18 @@ export declare class WorkflowsService {
         duration: number | null;
         etapes: {
             duration: number | null;
-            technicien: {
-                id: string;
-                nom: string;
-                prenom: string;
-                specialite: string | null;
-            } | null;
             valideParUser: {
                 id: string;
-                email: string;
+                email: string | null;
                 nom: string;
                 prenom: string;
+            } | null;
+            assignedUser: {
+                id: string;
+                nom: string;
+                prenom: string;
+                telephone: string | null;
+                specialite: string | null;
             } | null;
             id: string;
             createdAt: Date;
@@ -33,20 +34,24 @@ export declare class WorkflowsService {
             nomEtape: string;
             statut: import("@prisma/client").$Enums.EtapeStatus;
             sousStatutReception: import("@prisma/client").$Enums.SousStatutReception | null;
+            sousStatutTechnique: import("@prisma/client").$Enums.SousStatutTechnique | null;
             formulaire: import("@prisma/client/runtime/client").JsonValue | null;
             dateDebut: Date | null;
             dateFin: Date | null;
             validePar: string | null;
             valideParId: string | null;
-            technicienId: string | null;
+            assignedUserId: string | null;
             signatureGestionnaire: string | null;
             signatureTechnicien: string | null;
+            signatureControleur: string | null;
             signatureClientReception: string | null;
             signatureGestionnaireVerification: string | null;
             signatureClientRestitution: string | null;
             dateReception: Date | null;
             dateVerification: Date | null;
             dateRestitution: Date | null;
+            dateControleTechnicien: Date | null;
+            dateControleInterop: Date | null;
             commentaires: string | null;
         }[];
         vehicle: {
@@ -77,17 +82,18 @@ export declare class WorkflowsService {
         duration: number | null;
         etapes: {
             duration: number | null;
-            technicien: {
-                id: string;
-                nom: string;
-                prenom: string;
-                specialite: string | null;
-            } | null;
             valideParUser: {
                 id: string;
-                email: string;
+                email: string | null;
                 nom: string;
                 prenom: string;
+            } | null;
+            assignedUser: {
+                id: string;
+                nom: string;
+                prenom: string;
+                telephone: string | null;
+                specialite: string | null;
             } | null;
             id: string;
             createdAt: Date;
@@ -98,20 +104,24 @@ export declare class WorkflowsService {
             nomEtape: string;
             statut: import("@prisma/client").$Enums.EtapeStatus;
             sousStatutReception: import("@prisma/client").$Enums.SousStatutReception | null;
+            sousStatutTechnique: import("@prisma/client").$Enums.SousStatutTechnique | null;
             formulaire: import("@prisma/client/runtime/client").JsonValue | null;
             dateDebut: Date | null;
             dateFin: Date | null;
             validePar: string | null;
             valideParId: string | null;
-            technicienId: string | null;
+            assignedUserId: string | null;
             signatureGestionnaire: string | null;
             signatureTechnicien: string | null;
+            signatureControleur: string | null;
             signatureClientReception: string | null;
             signatureGestionnaireVerification: string | null;
             signatureClientRestitution: string | null;
             dateReception: Date | null;
             dateVerification: Date | null;
             dateRestitution: Date | null;
+            dateControleTechnicien: Date | null;
+            dateControleInterop: Date | null;
             commentaires: string | null;
         }[];
         vehicle: {
@@ -211,17 +221,18 @@ export declare class WorkflowsService {
         duration: number | null;
         etapes: {
             duration: number | null;
-            technicien: {
-                id: string;
-                nom: string;
-                prenom: string;
-                specialite: string | null;
-            } | null;
             valideParUser: {
                 id: string;
-                email: string;
+                email: string | null;
                 nom: string;
                 prenom: string;
+            } | null;
+            assignedUser: {
+                id: string;
+                nom: string;
+                prenom: string;
+                telephone: string | null;
+                specialite: string | null;
             } | null;
             id: string;
             createdAt: Date;
@@ -232,20 +243,24 @@ export declare class WorkflowsService {
             nomEtape: string;
             statut: import("@prisma/client").$Enums.EtapeStatus;
             sousStatutReception: import("@prisma/client").$Enums.SousStatutReception | null;
+            sousStatutTechnique: import("@prisma/client").$Enums.SousStatutTechnique | null;
             formulaire: import("@prisma/client/runtime/client").JsonValue | null;
             dateDebut: Date | null;
             dateFin: Date | null;
             validePar: string | null;
             valideParId: string | null;
-            technicienId: string | null;
+            assignedUserId: string | null;
             signatureGestionnaire: string | null;
             signatureTechnicien: string | null;
+            signatureControleur: string | null;
             signatureClientReception: string | null;
             signatureGestionnaireVerification: string | null;
             signatureClientRestitution: string | null;
             dateReception: Date | null;
             dateVerification: Date | null;
             dateRestitution: Date | null;
+            dateControleTechnicien: Date | null;
+            dateControleInterop: Date | null;
             commentaires: string | null;
         }[];
         vehicle: {
@@ -282,20 +297,24 @@ export declare class WorkflowsService {
         nomEtape: string;
         statut: import("@prisma/client").$Enums.EtapeStatus;
         sousStatutReception: import("@prisma/client").$Enums.SousStatutReception | null;
+        sousStatutTechnique: import("@prisma/client").$Enums.SousStatutTechnique | null;
         formulaire: import("@prisma/client/runtime/client").JsonValue | null;
         dateDebut: Date | null;
         dateFin: Date | null;
         validePar: string | null;
         valideParId: string | null;
-        technicienId: string | null;
+        assignedUserId: string | null;
         signatureGestionnaire: string | null;
         signatureTechnicien: string | null;
+        signatureControleur: string | null;
         signatureClientReception: string | null;
         signatureGestionnaireVerification: string | null;
         signatureClientRestitution: string | null;
         dateReception: Date | null;
         dateVerification: Date | null;
         dateRestitution: Date | null;
+        dateControleTechnicien: Date | null;
+        dateControleInterop: Date | null;
         commentaires: string | null;
     }[]>;
     private calculateWorkflowDuration;

@@ -23,7 +23,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import PeopleIcon from '@mui/icons-material/People';
-import EngineeringIcon from '@mui/icons-material/Engineering';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
@@ -36,9 +35,8 @@ const MENU_ITEMS = [
     { text: 'Accueil', icon: DashboardIcon, path: '/', roles: ['ADMIN'] },
     { text: 'Statistiques', icon: BarChartIcon, path: '/dashboard', roles: ['ADMIN'] },
     { text: 'Utilisateurs', icon: PeopleIcon, path: '/users', roles: ['ADMIN'] },
-    { text: 'Techniciens', icon: EngineeringIcon, path: '/techniciens', roles: ['ADMIN'] },
-    { text: 'Véhicules', icon: DirectionsCarIcon, path: '/vehicles', roles: ['ADMIN', 'GESTIONNAIRE'] },
-    { text: 'Workflows', icon: AccountTreeIcon, path: '/workflows', roles: ['ADMIN', 'GESTIONNAIRE'] },
+    { text: 'Véhicules', icon: DirectionsCarIcon, path: '/vehicles', roles: ['ADMIN', 'GESTIONNAIRE', 'TECHNICIEN', 'CONTROLEUR'] },
+    { text: 'Workflows', icon: AccountTreeIcon, path: '/workflows', roles: ['ADMIN', 'GESTIONNAIRE', 'TECHNICIEN', 'CONTROLEUR'] },
 ];
 
 export default function MainLayout() {

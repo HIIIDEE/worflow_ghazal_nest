@@ -9,33 +9,22 @@ datasource db {
 
 model User {
   id                     String              @id @default(uuid())
-  email                  String              @unique
-  password               String
+  email                  String?             @unique
+  password               String?
+  code                   String?             @unique
   nom                    String
   prenom                 String
   role                   UserRole            @default(GESTIONNAIRE)
+  telephone              String?
+  specialite             String?
   isActive               Boolean             @default(true)
   createdAt              DateTime            @default(now())
   updatedAt              DateTime            @updatedAt
   etapePermissions       EtapePermission[]
-  workflowEtapesValidees WorkflowEtape[]
+  workflowEtapesValidees WorkflowEtape[]     @relation("ValidatedBy")
+  workflowEtapesAssigned WorkflowEtape[]     @relation("AssignedTo")
 
   @@map("users")
-}
-
-model Technicien {
-  id             String          @id @default(uuid())
-  nom            String
-  prenom         String
-  telephone      String?
-  email          String?
-  specialite     String?
-  isActive       Boolean         @default(true)
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  workflowEtapes WorkflowEtape[]
-
-  @@map("techniciens")
 }
 
 model Vehicle {
@@ -91,33 +80,37 @@ model WorkflowEtape {
   description                     String?
   statut                          EtapeStatus            @default(EN_ATTENTE)
   sousStatutReception             SousStatutReception?
+  sousStatutTechnique             SousStatutTechnique?
   formulaire                      Json?
   dateDebut                       DateTime?
   dateFin                         DateTime?
   validePar                       String?
   valideParId                     String?
-  technicienId                    String?
+  assignedUserId                  String?
   signatureGestionnaire           String?                @db.Text
   signatureTechnicien             String?                @db.Text
+  signatureControleur             String?                @db.Text
   signatureClientReception        String?                @db.Text
   signatureGestionnaireVerification String?              @db.Text
   signatureClientRestitution      String?                @db.Text
   dateReception                   DateTime?
   dateVerification                DateTime?
   dateRestitution                 DateTime?
+  dateControleTechnicien          DateTime?
+  dateControleInterop             DateTime?
   commentaires                    String?
   createdAt                       DateTime               @default(now())
   updatedAt                       DateTime               @updatedAt
   workflow                        Workflow               @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-  valideParUser                   User?                  @relation(fields: [valideParId], references: [id], onDelete: SetNull)
-  technicien                      Technicien?            @relation(fields: [technicienId], references: [id], onDelete: SetNull)
+  valideParUser                   User?                  @relation("ValidatedBy", fields: [valideParId], references: [id], onDelete: SetNull)
+  assignedUser                    User?                  @relation("AssignedTo", fields: [assignedUserId], references: [id], onDelete: SetNull)
 
   @@unique([workflowId, numeroEtape])
   @@index([workflowId])
   @@index([statut])
   @@index([numeroEtape])
   @@index([valideParId])
-  @@index([technicienId])
+  @@index([assignedUserId])
   @@map("workflow_etapes")
 }
 
@@ -173,6 +166,8 @@ model HistoriqueModification {
 enum UserRole {
   ADMIN
   GESTIONNAIRE
+  TECHNICIEN
+  CONTROLEUR
 }
 
 enum WorkflowStatus {
@@ -201,4 +196,9 @@ enum SousStatutReception {
   RECEPTION
   VERIFICATION
   RESTITUTION
+}
+
+enum SousStatutTechnique {
+  CONTROLE_TECHNICIEN
+  CONTROLE_INTEROPERATION
 }

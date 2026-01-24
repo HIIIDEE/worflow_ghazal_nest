@@ -64,9 +64,15 @@ let EtapeDefinitionsService = class EtapeDefinitionsService {
         if (!etapeDef) {
             throw new Error('Etape definition not found');
         }
-        await this.prisma.etapePermission.deleteMany({
-            where: { etapeDefinitionId: etapeDef.id },
-        });
+        const affectedUserIds = [...new Set(permissions.map(p => p.userId))];
+        if (affectedUserIds.length > 0) {
+            await this.prisma.etapePermission.deleteMany({
+                where: {
+                    etapeDefinitionId: etapeDef.id,
+                    userId: { in: affectedUserIds },
+                },
+            });
+        }
         if (permissions.length > 0) {
             await this.prisma.etapePermission.createMany({
                 data: permissions.map((p) => ({

@@ -16,31 +16,49 @@ const client_1 = require("@prisma/client");
 class CreateUserDto {
     email;
     password;
+    code;
     nom;
     prenom;
     role;
+    telephone;
+    specialite;
 }
 exports.CreateUserDto = CreateUserDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Email de l\'utilisateur',
+        description: 'Email de l\'utilisateur (requis pour ADMIN/GESTIONNAIRE ou si pas de code)',
         example: 'user@ghazal.com',
+        required: false,
     }),
+    (0, class_validator_1.ValidateIf)(o => !o.code || o.email),
     (0, class_validator_1.IsEmail)({}, { message: 'L\'email doit être valide' }),
-    (0, class_validator_1.IsNotEmpty)({ message: 'L\'email est obligatoire' }),
+    (0, class_validator_1.IsNotEmpty)({ message: 'L\'email est obligatoire si aucun code n\'est fourni' }),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "email", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Mot de passe de l\'utilisateur',
+        description: 'Mot de passe de l\'utilisateur (requis si email fourni)',
         example: 'Password123!',
         minLength: 6,
+        required: false,
     }),
+    (0, class_validator_1.ValidateIf)(o => o.email),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)({ message: 'Le mot de passe est obligatoire' }),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Le mot de passe est obligatoire si email fourni' }),
     (0, class_validator_1.MinLength)(6, { message: 'Le mot de passe doit contenir au moins 6 caractères' }),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "password", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Code à 3 chiffres pour connexion (requis pour TECHNICIEN/CONTROLEUR si pas d\'email)',
+        example: '101',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(/^\d{3}$/, { message: 'Le code doit être composé de 3 chiffres' }),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "code", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'Nom de famille de l\'utilisateur',
@@ -67,7 +85,27 @@ __decorate([
         required: false,
     }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(client_1.UserRole, { message: 'Le rôle doit être ADMIN ou GESTIONNAIRE' }),
+    (0, class_validator_1.IsEnum)(client_1.UserRole, { message: 'Le rôle doit être ADMIN, GESTIONNAIRE, TECHNICIEN ou CONTROLEUR' }),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "role", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Numéro de téléphone de l\'utilisateur',
+        example: '+213 555 12 34 56',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "telephone", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Spécialité de l\'utilisateur (pour TECHNICIEN/CONTROLEUR)',
+        example: 'Installation GPL',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "specialite", void 0);
 //# sourceMappingURL=create-user.dto.js.map

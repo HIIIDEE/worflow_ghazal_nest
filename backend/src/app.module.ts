@@ -5,7 +5,6 @@ import { VehiclesModule } from './vehicles/vehicles.module';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { PrismaService } from './prisma.service';
 import { UsersModule } from './users/users.module';
-import { TechniciensModule } from './techniciens/techniciens.module';
 import { AuthModule } from './auth/auth.module';
 import { EtapeDefinitionsModule } from './etape-definitions/etape-definitions.module';
 import { CommonModule } from './common/common.module';
@@ -40,7 +39,6 @@ import { APP_GUARD } from '@nestjs/core';
     VehiclesModule,
     WorkflowsModule,
     UsersModule,
-    TechniciensModule,
     AuthModule,
     EtapeDefinitionsModule,
   ],

@@ -15,6 +15,8 @@ const DEMONTAGES = [
     'Démontage roue de secours',
     'Démontage des vis garde-boue avant',
     'Démontage filtre à air',
+    'Démontage garniture du coffre',
+    'Retrait du tapis coffre',
 ];
 
 export default function Etape2Form({ formData, onChange, disabled = false }: Etape2FormProps) {

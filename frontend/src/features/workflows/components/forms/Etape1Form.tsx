@@ -14,6 +14,7 @@ import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import CarInspectionAnnotator, {
   type Annotation,
 } from "./CarInspectionAnnotator";
+import { useTabletStyles } from "../../../../hooks/useTabletMode";
 
 interface Etape1FormProps {
   formData: {
@@ -61,6 +62,9 @@ export default function Etape1Form({
   const equipementsManquants = formData?.equipementsManquants || {};
   const kilometrage = formData?.kilometrage || "";
 
+  // Mode tablette pour optimiser l'UI tactile
+  const tabletStyles = useTabletStyles();
+
   const handleAnnotationsChange = (newAnnotations: Annotation[]) => {
     onChange({ ...formData, annotations: newAnnotations });
   };
@@ -89,17 +93,30 @@ export default function Etape1Form({
     <Box>
       {/* Section Inspection Visuelle */}
       <Paper
-        sx={{ p: 3, mb: 3, bgcolor: "#f8fafc", border: "1px solid #e2e8f0" }}
+        sx={{
+          p: tabletStyles.containerPadding,
+          mb: tabletStyles.spacing,
+          bgcolor: "#f8fafc",
+          border: "1px solid #e2e8f0",
+          borderRadius: tabletStyles.borderRadius
+        }}
         elevation={0}
       >
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-          <ImageSearchIcon sx={{ mr: 1, color: "#2563eb" }} />
-          <Typography variant="h6" fontWeight="bold" sx={{ color: "#1e293b" }}>
+        <Box sx={{ display: "flex", alignItems: "center", mb: tabletStyles.spacing }}>
+          <ImageSearchIcon sx={{ mr: 1, color: "#2563eb", fontSize: tabletStyles.isTablet ? 28 : 24 }} />
+          <Typography
+            variant="h6"
+            fontWeight="bold"
+            sx={{ color: "#1e293b", fontSize: tabletStyles.isTablet ? '1.3rem' : '1.25rem' }}
+          >
             Inspection visuelle du véhicule
           </Typography>
         </Box>
 
-        <Typography variant="body2" sx={{ mb: 3, color: "#64748b" }}>
+        <Typography
+          variant="body2"
+          sx={{ mb: tabletStyles.spacing, color: "#64748b", fontSize: tabletStyles.fontSize }}
+        >
           Documentez les anomalies visuelles détectées lors de la réception du
           véhicule
         </Typography>
@@ -113,17 +130,30 @@ export default function Etape1Form({
 
       {/* Section Équipements manquants */}
       <Paper
-        sx={{ p: 3, mb: 3, bgcolor: "#fff8f1", border: "1px solid #fb923c" }}
+        sx={{
+          p: tabletStyles.containerPadding,
+          mb: tabletStyles.spacing,
+          bgcolor: "#fff8f1",
+          border: "1px solid #fb923c",
+          borderRadius: tabletStyles.borderRadius
+        }}
         elevation={0}
       >
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-          <WarningAmberIcon sx={{ mr: 1, color: "#ea580c" }} />
-          <Typography variant="h6" fontWeight="bold" sx={{ color: "#1e293b" }}>
+        <Box sx={{ display: "flex", alignItems: "center", mb: tabletStyles.spacing }}>
+          <WarningAmberIcon sx={{ mr: 1, color: "#ea580c", fontSize: tabletStyles.isTablet ? 28 : 24 }} />
+          <Typography
+            variant="h6"
+            fontWeight="bold"
+            sx={{ color: "#1e293b", fontSize: tabletStyles.isTablet ? '1.3rem' : '1.25rem' }}
+          >
             Équipements manquants à la réception
           </Typography>
         </Box>
 
-        <Typography variant="body2" sx={{ mb: 3, color: "#64748b" }}>
+        <Typography
+          variant="body2"
+          sx={{ mb: tabletStyles.spacing, color: "#64748b", fontSize: tabletStyles.fontSize }}
+        >
           Mettre une croix (X) sur l'équipement et caractéristiques MANQUANTS à
           la réception
         </Typography>
@@ -149,7 +179,8 @@ export default function Etape1Form({
               >
                 <Paper
                   sx={{
-                    p: 1.5,
+                    p: tabletStyles.isTablet ? 2.5 : 1.5,
+                    minHeight: tabletStyles.isTablet ? tabletStyles.touchTargetSize : 'auto',
                     bgcolor: equipementsManquants[equipement]
                       ? "#fee2e2"
                       : "white",
@@ -186,6 +217,7 @@ export default function Etape1Form({
                             color: "#dc2626",
                           },
                           pointerEvents: "auto",
+                          transform: `scale(${tabletStyles.checkboxScale})`,
                         }}
                       />
                     }
@@ -199,7 +231,7 @@ export default function Etape1Form({
                           fontWeight: equipementsManquants[equipement]
                             ? 600
                             : 400,
-                          fontSize: "0.875rem",
+                          fontSize: tabletStyles.isTablet ? '1rem' : '0.875rem',
                         }}
                       >
                         {equipement}
@@ -221,17 +253,30 @@ export default function Etape1Form({
 
       {/* Section Éléments de contrôle */}
       <Paper
-        sx={{ p: 3, mb: 3, bgcolor: "#f8fafc", border: "1px solid #e2e8f0" }}
+        sx={{
+          p: tabletStyles.containerPadding,
+          mb: tabletStyles.spacing,
+          bgcolor: "#f8fafc",
+          border: "1px solid #e2e8f0",
+          borderRadius: tabletStyles.borderRadius
+        }}
         elevation={0}
       >
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-          <CheckCircleOutlineIcon sx={{ mr: 1, color: "#2563eb" }} />
-          <Typography variant="h6" fontWeight="bold" sx={{ color: "#1e293b" }}>
+        <Box sx={{ display: "flex", alignItems: "center", mb: tabletStyles.spacing }}>
+          <CheckCircleOutlineIcon sx={{ mr: 1, color: "#2563eb", fontSize: tabletStyles.isTablet ? 28 : 24 }} />
+          <Typography
+            variant="h6"
+            fontWeight="bold"
+            sx={{ color: "#1e293b", fontSize: tabletStyles.isTablet ? '1.3rem' : '1.25rem' }}
+          >
             Éléments de contrôle
           </Typography>
         </Box>
 
-        <Typography variant="body2" sx={{ mb: 3, color: "#64748b" }}>
+        <Typography
+          variant="body2"
+          sx={{ mb: tabletStyles.spacing, color: "#64748b", fontSize: tabletStyles.fontSize }}
+        >
           Cochez tous les éléments vérifiés lors de la réception du véhicule
         </Typography>
 
@@ -247,7 +292,8 @@ export default function Etape1Form({
               <Paper
                 key={index}
                 sx={{
-                  p: 2,
+                  p: tabletStyles.isTablet ? 2.5 : 2,
+                  minHeight: tabletStyles.isTablet ? tabletStyles.touchTargetSize : 'auto',
                   bgcolor: controles[controle] ? "#eff6ff" : "white",
                   border: controles[controle]
                     ? "2px solid #2563eb"
@@ -278,6 +324,7 @@ export default function Etape1Form({
                           color: "#2563eb",
                         },
                         pointerEvents: "auto",
+                        transform: `scale(${tabletStyles.checkboxScale})`,
                       }}
                     />
                   }
@@ -287,6 +334,7 @@ export default function Etape1Form({
                       sx={{
                         color: controles[controle] ? "#1e293b" : "#64748b",
                         fontWeight: controles[controle] ? 600 : 400,
+                        fontSize: tabletStyles.isTablet ? '1rem' : '0.875rem',
                       }}
                     >
                       {controle}
@@ -324,17 +372,27 @@ export default function Etape1Form({
         )}
       </Paper>
 
-      <Paper sx={{ p: 3, border: "1px solid #e2e8f0" }} elevation={0}>
+      <Paper
+        sx={{
+          p: tabletStyles.containerPadding,
+          border: "1px solid #e2e8f0",
+          borderRadius: tabletStyles.borderRadius
+        }}
+        elevation={0}
+      >
         <Typography
           variant="h6"
           fontWeight="bold"
           gutterBottom
-          sx={{ color: "#1e293b" }}
+          sx={{ color: "#1e293b", fontSize: tabletStyles.isTablet ? '1.3rem' : '1.25rem' }}
         >
           Kilométrage du véhicule
         </Typography>
 
-        <Typography variant="body2" sx={{ mb: 3, color: "#64748b" }}>
+        <Typography
+          variant="body2"
+          sx={{ mb: tabletStyles.spacing, color: "#64748b", fontSize: tabletStyles.fontSize }}
+        >
           Saisissez le kilométrage actuel du véhicule
         </Typography>
 
@@ -346,9 +404,15 @@ export default function Etape1Form({
           onChange={(e) => handleKilometrageChange(e.target.value)}
           disabled={disabled}
           required
-          inputProps={{ min: 0 }}
+          inputProps={{
+            min: 0,
+            inputMode: 'numeric',
+            pattern: '[0-9]*'
+          }}
           sx={{
             "& .MuiOutlinedInput-root": {
+              fontSize: tabletStyles.isTablet ? '1.2rem' : '1rem',
+              minHeight: tabletStyles.isTablet ? tabletStyles.touchTargetSize : 'auto',
               "& fieldset": {
                 borderColor: "#e2e8f0",
               },
@@ -358,6 +422,9 @@ export default function Etape1Form({
               "&.Mui-focused fieldset": {
                 borderColor: "#2563eb",
               },
+            },
+            "& .MuiInputLabel-root": {
+              fontSize: tabletStyles.isTablet ? '1.1rem' : '1rem',
             },
           }}
         />

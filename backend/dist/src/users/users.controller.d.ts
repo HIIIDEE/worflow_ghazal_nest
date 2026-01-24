@@ -11,30 +11,65 @@ export declare class UsersController {
         userAgent: string;
     }): Promise<{
         id: string;
-        email: string;
+        email: string | null;
+        code: string | null;
         nom: string;
         prenom: string;
         role: import("@prisma/client").$Enums.UserRole;
+        telephone: string | null;
+        specialite: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
     }>;
     findAll(): Promise<{
         id: string;
-        email: string;
+        email: string | null;
+        code: string | null;
         nom: string;
         prenom: string;
         role: import("@prisma/client").$Enums.UserRole;
+        telephone: string | null;
+        specialite: string | null;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }[]>;
+    getTechnicians(): Promise<{
+        id: string;
+        email: string | null;
+        code: string | null;
+        nom: string;
+        prenom: string;
+        role: import("@prisma/client").$Enums.UserRole;
+        telephone: string | null;
+        specialite: string | null;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }[]>;
+    getActiveTechnicians(): Promise<{
+        id: string;
+        email: string | null;
+        code: string | null;
+        nom: string;
+        prenom: string;
+        role: import("@prisma/client").$Enums.UserRole;
+        telephone: string | null;
+        specialite: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
     }[]>;
     findOne(id: string): Promise<{
         id: string;
-        email: string;
+        email: string | null;
+        code: string | null;
         nom: string;
         prenom: string;
         role: import("@prisma/client").$Enums.UserRole;
+        telephone: string | null;
+        specialite: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
@@ -44,10 +79,13 @@ export declare class UsersController {
         userAgent: string;
     }): Promise<{
         id: string;
-        email: string;
+        email: string | null;
+        code: string | null;
         nom: string;
         prenom: string;
         role: import("@prisma/client").$Enums.UserRole;
+        telephone: string | null;
+        specialite: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;

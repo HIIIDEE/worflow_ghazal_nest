@@ -67,12 +67,13 @@ let WorkflowsService = class WorkflowsService {
                                 email: true,
                             },
                         },
-                        technicien: {
+                        assignedUser: {
                             select: {
                                 id: true,
                                 nom: true,
                                 prenom: true,
                                 specialite: true,
+                                telephone: true,
                             },
                         },
                     },
@@ -121,12 +122,13 @@ let WorkflowsService = class WorkflowsService {
                                 email: true,
                             },
                         },
-                        technicien: {
+                        assignedUser: {
                             select: {
                                 id: true,
                                 nom: true,
                                 prenom: true,
                                 specialite: true,
+                                telephone: true,
                             },
                         },
                     },
@@ -318,16 +320,16 @@ let WorkflowsService = class WorkflowsService {
         }
         const updatedEtape = await this.prisma.$transaction(async (tx) => {
             const updateData = { ...updateEtapeDto };
-            if (updateData.technicienId !== undefined) {
-                const technicienId = updateData.technicienId;
-                delete updateData.technicienId;
-                if (technicienId && technicienId !== '') {
-                    updateData.technicien = {
-                        connect: { id: technicienId },
+            if (updateData.assignedUserId !== undefined) {
+                const assignedUserId = updateData.assignedUserId;
+                delete updateData.assignedUserId;
+                if (assignedUserId && assignedUserId !== '') {
+                    updateData.assignedUser = {
+                        connect: { id: assignedUserId },
                     };
                 }
                 else {
-                    updateData.technicien = {
+                    updateData.assignedUser = {
                         disconnect: true,
                     };
                 }
@@ -337,6 +339,9 @@ let WorkflowsService = class WorkflowsService {
             }
             if (updateData.signatureTechnicien === '') {
                 updateData.signatureTechnicien = null;
+            }
+            if (updateData.signatureControleur === '') {
+                updateData.signatureControleur = null;
             }
             if (updateData.signatureClientReception === '') {
                 updateData.signatureClientReception = null;
@@ -350,11 +355,16 @@ let WorkflowsService = class WorkflowsService {
                 };
                 delete updateData.valideParId;
             }
-            if (numeroEtape === 1) {
-                if (updateEtapeDto.statut === 'EN_COURS' && etape.statut === 'EN_ATTENTE' && !etape.sousStatutReception) {
+            if (updateEtapeDto.statut === 'EN_COURS' && etape.statut === 'EN_ATTENTE') {
+                if (etape.numeroEtape === 1 && !etape.sousStatutReception) {
                     updateData.sousStatutReception = 'RECEPTION';
                 }
-                if (updateEtapeDto.statut === 'TERMINE') {
+                else if ([2, 3, 4, 5, 6, 7, 8, 9, 10, 11].includes(etape.numeroEtape) && !etape.sousStatutTechnique) {
+                    updateData.sousStatutTechnique = 'CONTROLE_TECHNICIEN';
+                }
+            }
+            if (updateEtapeDto.statut === 'TERMINE') {
+                if (etape.numeroEtape === 1) {
                     const currentSousStatut = etape.sousStatutReception;
                     if (currentSousStatut === 'RECEPTION') {
                         updateData.sousStatutReception = 'VERIFICATION';
@@ -364,6 +374,32 @@ let WorkflowsService = class WorkflowsService {
                     }
                     else if (currentSousStatut === 'VERIFICATION') {
                         updateData.dateVerification = new Date();
+                        updateData.statut = 'TERMINE';
+                        updateData.dateFin = new Date();
+                    }
+                }
+                else if ([2, 3, 4, 5, 6, 7, 8, 9, 10, 11].includes(etape.numeroEtape)) {
+                    const currentSousStatut = etape.sousStatutTechnique;
+                    if (currentSousStatut === 'CONTROLE_TECHNICIEN') {
+                        if (userRole !== 'ADMIN' && userRole !== 'TECHNICIEN') {
+                            throw new common_1.ForbiddenException('Seuls les techniciens peuvent valider le contrôle technicien');
+                        }
+                        if (!updateData.signatureTechnicien) {
+                            throw new common_1.BadRequestException('La signature du technicien est requise pour terminer le contrôle technicien');
+                        }
+                        updateData.sousStatutTechnique = 'CONTROLE_INTEROPERATION';
+                        updateData.dateControleTechnicien = new Date();
+                        updateData.statut = 'EN_COURS';
+                        delete updateData.dateFin;
+                    }
+                    else if (currentSousStatut === 'CONTROLE_INTEROPERATION') {
+                        if (userRole !== 'ADMIN' && userRole !== 'CONTROLEUR') {
+                            throw new common_1.ForbiddenException('Seuls les contrôleurs peuvent valider le contrôle interopération');
+                        }
+                        if (!updateData.signatureControleur) {
+                            throw new common_1.BadRequestException('La signature du contrôleur est requise pour terminer le contrôle interopération');
+                        }
+                        updateData.dateControleInterop = new Date();
                         updateData.statut = 'TERMINE';
                         updateData.dateFin = new Date();
                     }

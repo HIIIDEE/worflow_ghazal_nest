@@ -48,8 +48,26 @@ export class UpdateUserDto {
     required: false,
   })
   @IsOptional()
-  @IsEnum(UserRole, { message: 'Le rôle doit être ADMIN ou GESTIONNAIRE' })
+  @IsEnum(UserRole, { message: 'Le rôle doit être ADMIN, GESTIONNAIRE, TECHNICIEN ou CONTROLEUR' })
   role?: UserRole;
+
+  @ApiProperty({
+    description: 'Numéro de téléphone de l\'utilisateur',
+    example: '+213 555 12 34 56',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  telephone?: string;
+
+  @ApiProperty({
+    description: 'Spécialité de l\'utilisateur (pour TECHNICIEN/CONTROLEUR)',
+    example: 'Installation GPL',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  specialite?: string;
 
   @ApiProperty({
     description: 'Statut actif de l\'utilisateur',

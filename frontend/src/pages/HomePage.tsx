@@ -1,7 +1,6 @@
 import { Container, Typography, Card, CardActionArea, Box, Grid, Avatar } from '@mui/material';
 import { Link } from 'react-router-dom';
 import PeopleIcon from '@mui/icons-material/People';
-import EngineeringIcon from '@mui/icons-material/Engineering';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import LockPersonIcon from '@mui/icons-material/LockPerson';
@@ -85,13 +84,6 @@ export default function HomePage() {
             icon={PeopleIcon}
             to="/users"
             color="#2563eb"
-          />
-          <MenuCard
-            title="Techniciens"
-            description="Administrer l'équipe technique et les assignations."
-            icon={EngineeringIcon}
-            to="/techniciens"
-            color="#059669"
           />
           <MenuCard
             title="Véhicules"

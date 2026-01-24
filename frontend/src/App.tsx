@@ -2,28 +2,48 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import type { ReactNode } from 'react';
-import HomePage from './pages/HomePage';
-import UsersPage from './pages/UsersPage';
-import TechniciensPage from './pages/TechniciensPage';
-import VehiclesPage from './pages/VehiclesPage';
-import WorkflowsPage from './pages/WorkflowsPage';
-import WorkflowDetailPage from './pages/WorkflowDetailPage';
-import EtapePermissionsPage from './pages/EtapePermissionsPage';
-import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
-import MainLayout from './layouts/MainLayout';
+import { lazy, Suspense, type ReactNode } from 'react';
 import { useAuth } from './stores/useAuthStore';
 import { WebSocketProvider } from './context/WebSocketContext';
 import { OnlineStatusIndicator } from './components/OnlineStatusIndicator';
 import theme from './theme/theme';
 import './App.css';
+import { Box, CircularProgress } from '@mui/material';
+
+// Lazy load des pages pour réduire le bundle initial
+const HomePage = lazy(() => import('./pages/HomePage'));
+const UsersPage = lazy(() => import('./pages/UsersPage'));
+const VehiclesPage = lazy(() => import('./pages/VehiclesPage'));
+const WorkflowsPage = lazy(() => import('./pages/WorkflowsPage'));
+const WorkflowDetailPage = lazy(() => import('./pages/WorkflowDetailPage'));
+const EtapePermissionsPage = lazy(() => import('./pages/EtapePermissionsPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const MainLayout = lazy(() => import('./layouts/MainLayout'));
+
+// Composant de chargement
+function PageLoader() {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+      }}
+    >
+      <CircularProgress />
+    </Box>
+  );
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes - données fraîches pendant 5 min
+      gcTime: 10 * 60 * 1000, // 10 minutes - garde en cache 10 min
     },
   },
 });
@@ -70,29 +90,30 @@ function App() {
         <OnlineStatusIndicator />
         <WebSocketProvider>
           <BrowserRouter basename="/workflow">
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
 
-              {/* Protected Routes wrapped in MainLayout */}
-              <Route element={
-                <ProtectedRoute>
-                  <MainLayout />
-                </ProtectedRoute>
-              }>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/users" element={<UsersPage />} />
-                <Route path="/techniciens" element={<TechniciensPage />} />
-                <Route path="/vehicles" element={<VehiclesPage />} />
-                <Route path="/workflows" element={<WorkflowsPage />} />
-                <Route path="/workflows/:id" element={<WorkflowDetailPage />} />
-                <Route path="/admin/etape-permissions" element={
-                  <AdminRoute>
-                    <EtapePermissionsPage />
-                  </AdminRoute>
-                } />
-              </Route>
-            </Routes>
+                {/* Protected Routes wrapped in MainLayout */}
+                <Route element={
+                  <ProtectedRoute>
+                    <MainLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/users" element={<UsersPage />} />
+                  <Route path="/vehicles" element={<VehiclesPage />} />
+                  <Route path="/workflows" element={<WorkflowsPage />} />
+                  <Route path="/workflows/:id" element={<WorkflowDetailPage />} />
+                  <Route path="/admin/etape-permissions" element={
+                    <AdminRoute>
+                      <EtapePermissionsPage />
+                    </AdminRoute>
+                  } />
+                </Route>
+              </Routes>
+            </Suspense>
           </BrowserRouter>
         </WebSocketProvider>
       </ThemeProvider>

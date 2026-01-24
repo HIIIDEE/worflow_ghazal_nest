@@ -51,7 +51,7 @@ interface WorkflowListProps {
 export default function WorkflowList({ workflows }: WorkflowListProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // Mobile uniquement
-  const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
+  const [viewMode, setViewMode] = useState<'kanban' | 'list'>('list');
   const [selected, setSelected] = useState<string[]>([]);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [selectedWorkflowToCancel, setSelectedWorkflowToCancel] = useState<Workflow | null>(null);

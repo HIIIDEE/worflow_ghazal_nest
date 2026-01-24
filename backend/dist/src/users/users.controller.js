@@ -31,11 +31,17 @@ let UsersController = class UsersController {
     }
     async create(createUserDto, currentUser, clientInfo) {
         const newUser = await this.usersService.create(createUserDto);
-        this.securityLogger.logUserCreated(newUser.id, newUser.email, currentUser?.userId || 'system', currentUser?.email || 'system', clientInfo.ip);
+        this.securityLogger.logUserCreated(newUser.id, newUser.email || `User-${newUser.id}`, currentUser?.userId || 'system', currentUser?.email || 'system', clientInfo.ip);
         return newUser;
     }
     findAll() {
         return this.usersService.findAll();
+    }
+    getTechnicians() {
+        return this.usersService.findTechnicians();
+    }
+    getActiveTechnicians() {
+        return this.usersService.findActiveTechnicians();
     }
     findOne(id) {
         return this.usersService.findOne(id);
@@ -43,13 +49,13 @@ let UsersController = class UsersController {
     async update(id, updateUserDto, currentUser, clientInfo) {
         const updatedUser = await this.usersService.update(id, updateUserDto);
         const changes = Object.keys(updateUserDto);
-        this.securityLogger.logUserUpdated(updatedUser.id, updatedUser.email, currentUser?.userId || 'system', currentUser?.email || 'system', clientInfo.ip, changes);
+        this.securityLogger.logUserUpdated(updatedUser.id, updatedUser.email || `User-${updatedUser.id}`, currentUser?.userId || 'system', currentUser?.email || 'system', clientInfo.ip, changes);
         return updatedUser;
     }
     async remove(id, currentUser, clientInfo) {
         const userToDelete = await this.usersService.findOne(id);
         await this.usersService.remove(id);
-        this.securityLogger.logUserDeleted(userToDelete.id, userToDelete.email, currentUser?.userId || 'system', currentUser?.email || 'system', clientInfo.ip);
+        this.securityLogger.logUserDeleted(userToDelete.id, userToDelete.email || `User-${userToDelete.id}`, currentUser?.userId || 'system', currentUser?.email || 'system', clientInfo.ip);
     }
 };
 exports.UsersController = UsersController;
@@ -69,6 +75,20 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('technicians'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all technicians and controllers' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "getTechnicians", null);
+__decorate([
+    (0, common_1.Get)('technicians/active'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get active technicians and controllers' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "getActiveTechnicians", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),

@@ -56,9 +56,19 @@ let AuthService = class AuthService {
     }
     async validateUser(email, pass) {
         const user = await this.usersService.findByEmailWithPassword(email);
-        if (user && await bcrypt.compare(pass, user.password)) {
+        if (user && user.password && await bcrypt.compare(pass, user.password)) {
             const { password, ...result } = user;
             return result;
+        }
+        return null;
+    }
+    async validateUserByCode(code) {
+        const user = await this.usersService.findByCode(code);
+        if (user && user.isActive) {
+            if (user.role === 'TECHNICIEN' || user.role === 'CONTROLEUR') {
+                const { password, ...result } = user;
+                return result;
+            }
         }
         return null;
     }

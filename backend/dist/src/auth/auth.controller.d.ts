@@ -17,4 +17,19 @@ export declare class AuthController {
             role: any;
         };
     }>;
+    loginByCode(req: {
+        code: string;
+    }, clientInfo: {
+        ip: string;
+        userAgent: string;
+    }): Promise<{
+        access_token: string;
+        user: {
+            id: any;
+            email: any;
+            nom: any;
+            prenom: any;
+            role: any;
+        };
+    }>;
 }

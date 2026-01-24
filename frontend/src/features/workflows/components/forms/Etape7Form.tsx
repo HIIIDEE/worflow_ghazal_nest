@@ -1,8 +1,8 @@
 import { Box, Typography, Checkbox, FormControlLabel, Paper, Grid } from '@mui/material';
-import FactCheckIcon from '@mui/icons-material/FactCheck';
+import CableIcon from '@mui/icons-material/Cable';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
-interface Etape7FormProps {
+interface Etape5FormProps {
     formData: {
         controles?: { [key: string]: boolean };
     };
@@ -11,19 +11,14 @@ interface Etape7FormProps {
 }
 
 const CONTROLES = [
-    "Faire l'appoint du liquide de refroidissement",
-    "Teste d'étanchéité",
-    'Remplissage',
-    'Poly vanne',
-    'Cuivre Ø 8',
-    'Cuivre Ø 6',
-    'Détendeur',
-    'Électrovanne gaz',
-    'Régime moteur stable au ralenti',
-    'Absence de check au tableau de bord',
+    'Fixation réservoir avec un couple de 25 ± 2 Nm',
+    'Raccordement de tuyau HP Ø6 et Ø8 au réservoir',
+    'Couple serrage tuyau HP Ø6 11 ± 1Nm',
+    'Couple serrage tuyau HP Ø8 14 ± 1 Nm',
+    'Placement cache protection de polyvanne',
 ];
 
-export default function Etape7Form({ formData, onChange, disabled = false }: Etape7FormProps) {
+export default function Etape5Form({ formData, onChange, disabled = false }: Etape5FormProps) {
     const controles = formData?.controles || {};
 
     const handleControleChange = (controle: string, checked: boolean) => {
@@ -40,9 +35,9 @@ export default function Etape7Form({ formData, onChange, disabled = false }: Eta
             <Paper sx={{ p: 3, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }} elevation={0}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <FactCheckIcon sx={{ mr: 1, color: '#2563eb' }} />
+                        <CableIcon sx={{ mr: 1, color: '#2563eb' }} />
                         <Typography variant="h6" fontWeight="bold" sx={{ color: '#1e293b' }}>
-                            Points de contrôle
+                            Montage réservoir
                         </Typography>
                     </Box>
                     <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 600 }}>
@@ -51,7 +46,7 @@ export default function Etape7Form({ formData, onChange, disabled = false }: Eta
                 </Box>
 
                 <Typography variant="body2" sx={{ mb: 3, color: '#64748b' }}>
-                    Vérifiez chaque point avant le contrôle final
+                    Vérifiez chaque point lors du montage et fixation du réservoir
                 </Typography>
 
                 <Grid container spacing={1.5}>
@@ -125,7 +120,7 @@ export default function Etape7Form({ formData, onChange, disabled = false }: Eta
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <CheckCircleOutlineIcon sx={{ mr: 1, color: '#059669' }} />
                             <Typography variant="body2" sx={{ color: '#059669', fontWeight: 600 }}>
-                                Tous les points de contrôle ont été vérifiés
+                                Toutes les opérations de montage du réservoir ont été effectuées
                             </Typography>
                         </Box>
                     </Box>

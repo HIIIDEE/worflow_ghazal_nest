@@ -15,7 +15,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import SaveIcon from '@mui/icons-material/Save';
 import { useQuery } from '@tanstack/react-query';
 import type { WorkflowEtape } from '../types';
-import { techniciensApi } from '../../techniciens/services/techniciens.api';
+import { axiosInstance } from '../../../lib/axios';
 import Etape1Form from './forms/Etape1Form';
 //import Etape2Form from './forms/Etape2Form';
 import SignaturePad from './SignaturePad';
@@ -55,7 +55,7 @@ export default function WorkflowSidePanel({
     const { data: techniciens } = useQuery({
         queryKey: ['techniciens-active'],
         queryFn: async () => {
-            const response = await techniciensApi.getAllActive();
+            const response = await axiosInstance.get('/users/technicians/active');
             return response.data;
         },
     });
@@ -134,12 +134,12 @@ export default function WorkflowSidePanel({
                                 <FormControl fullWidth disabled={!canEdit || isPending}>
                                     <InputLabel>Technicien assigné</InputLabel>
                                     <Select
-                                        value={formData.technicienId || ''}
-                                        onChange={(e) => onChange('technicienId', e.target.value)}
+                                        value={formData.assignedUserId || ''}
+                                        onChange={(e) => onChange('assignedUserId', e.target.value)}
                                         label="Technicien assigné"
                                     >
                                         <MenuItem value=""><em>Aucun technicien</em></MenuItem>
-                                        {techniciens?.map((tech) => (
+                                        {techniciens?.map((tech: any) => (
                                             <MenuItem key={tech.id} value={tech.id}>
                                                 {tech.prenom} {tech.nom} {tech.specialite ? `(${tech.specialite})` : ''}
                                             </MenuItem>

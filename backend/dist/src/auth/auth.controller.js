@@ -33,6 +33,15 @@ let AuthController = class AuthController {
         this.securityLogger.logLoginSuccess(user.email, user.id, clientInfo.ip, clientInfo.userAgent);
         return this.authService.login(user);
     }
+    async loginByCode(req, clientInfo) {
+        const user = await this.authService.validateUserByCode(req.code);
+        if (!user) {
+            this.securityLogger.logLoginFailed(`Code: ${req.code}`, clientInfo.ip, clientInfo.userAgent, 'Invalid code');
+            throw new common_1.UnauthorizedException('Code incorrect ou non autorisé');
+        }
+        this.securityLogger.logLoginSuccess(user.email || `Code: ${req.code}`, user.id, clientInfo.ip, clientInfo.userAgent);
+        return this.authService.login(user);
+    }
 };
 exports.AuthController = AuthController;
 __decorate([
@@ -43,6 +52,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
+__decorate([
+    (0, common_1.Post)('login/code'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, client_info_decorator_1.ClientInfo)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "loginByCode", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService,

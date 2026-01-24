@@ -73,9 +73,10 @@ export default function WorkflowDetailPage() {
     setFormData({
       commentaires: etape.commentaires || '',
       validePar: etape.validePar || '',
-      technicienId: (etape as any).technicienId || '',
+      assignedUserId: (etape as any).assignedUserId || '',
       signatureGestionnaire: (etape as any).signatureGestionnaire || '',
       signatureTechnicien: (etape as any).signatureTechnicien || '',
+      signatureControleur: (etape as any).signatureControleur || '',
       signatureClientReception: (etape as any).signatureClientReception || '',
       signatureGestionnaireVerification: (etape as any).signatureGestionnaireVerification || '',
       formulaireData: etape.formulaire || {},
@@ -120,9 +121,33 @@ export default function WorkflowDetailPage() {
         // VERIFICATION : signature gestionnaire vérification uniquement
         dataToSave.signatureGestionnaireVerification = formData.signatureGestionnaireVerification || null;
       }
-    } else {
-      // Autres étapes : gestionnaire + technicien
-      dataToSave.technicienId = formData.technicienId || null;
+    }
+    // Gestion spécifique pour les étapes 2-11 selon le sous-statut (double contrôle)
+    else if ([2, 3, 4, 5, 6, 7, 8, 9, 10, 11].includes(selectedEtape.numeroEtape)) {
+      const sousStatut = selectedEtape.sousStatutTechnique;
+      dataToSave.formulaire = formData.formulaireData || {};
+
+      if (sousStatut === 'CONTROLE_TECHNICIEN') {
+        // Phase 1 : Signature du technicien uniquement
+        dataToSave.signatureTechnicien = formData.signatureTechnicien || null;
+      } else if (sousStatut === 'CONTROLE_INTEROPERATION') {
+        // Phase 2 : Signature du contrôleur uniquement
+        dataToSave.signatureControleur = formData.signatureControleur || null;
+      }
+    }
+    // Étapes 12, 13 et 14 (Postes 5, 6 et 7) : CONTROLEUR uniquement
+    else if (selectedEtape.numeroEtape === 12 || selectedEtape.numeroEtape === 13 || selectedEtape.numeroEtape === 14) {
+      dataToSave.signatureControleur = formData.signatureControleur || null;
+      dataToSave.formulaire = formData.formulaireData || {};
+    }
+    // Étape 15 : GESTIONNAIRE uniquement
+    else if (selectedEtape.numeroEtape === 15) {
+      dataToSave.signatureGestionnaire = formData.signatureGestionnaire || null;
+      dataToSave.formulaire = formData.formulaireData || {};
+    }
+    // Autres étapes : gestionnaire + technicien (si ajouté dans le futur)
+    else {
+      dataToSave.assignedUserId = formData.assignedUserId || null;
       dataToSave.signatureGestionnaire = formData.signatureGestionnaire || null;
       dataToSave.signatureTechnicien = formData.signatureTechnicien || null;
       dataToSave.formulaire = formData.formulaireData || {};

@@ -11,6 +11,7 @@ interface AuthState {
 
     // Actions
     login: (credentials: { email: string; password: string }) => Promise<void>;
+    loginByCode: (code: string) => Promise<void>;
     logout: () => void;
     updateUser: (user: Partial<User>) => void;
     setToken: (token: string) => void;
@@ -29,6 +30,28 @@ export const useAuthStore = create<AuthState>()(
                 set({ isLoading: true });
                 try {
                     const response = await authApi.login(credentials);
+                    const { access_token, user } = response.data;
+
+                    // Synchronize token with localStorage immediately for axios interceptor
+                    localStorage.setItem('token', access_token);
+                    localStorage.setItem('user', JSON.stringify(user));
+
+                    set({
+                        user,
+                        token: access_token,
+                        isAuthenticated: true,
+                        isLoading: false,
+                    });
+                } catch (error) {
+                    set({ isLoading: false });
+                    throw error;
+                }
+            },
+
+            loginByCode: async (code) => {
+                set({ isLoading: true });
+                try {
+                    const response = await authApi.loginByCode(code);
                     const { access_token, user } = response.data;
 
                     // Synchronize token with localStorage immediately for axios interceptor
@@ -93,6 +116,7 @@ export const useAuth = () => {
     const isAuthenticated = useAuthStore(selectIsAuthenticated);
     const isLoading = useAuthStore(selectIsLoading);
     const login = useAuthStore((state) => state.login);
+    const loginByCode = useAuthStore((state) => state.loginByCode);
     const logout = useAuthStore((state) => state.logout);
 
     return {
@@ -101,6 +125,7 @@ export const useAuth = () => {
         isAuthenticated,
         isLoading,
         login,
+        loginByCode,
         logout,
     };
 };

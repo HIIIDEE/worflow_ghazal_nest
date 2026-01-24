@@ -4,4 +4,7 @@ import type { AuthResponse } from '../types';
 export const authApi = {
     login: (credentials: { email: string; password: string }) =>
         axiosInstance.post<AuthResponse>('/auth/login', credentials),
+
+    loginByCode: (code: string) =>
+        axiosInstance.post<AuthResponse>('/auth/login/code', { code }),
 };

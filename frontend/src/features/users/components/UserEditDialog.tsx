@@ -80,7 +80,27 @@ export default function UserEditDialog({
                             <MenuItem value="ADMIN">Administrateur</MenuItem>
                             <MenuItem value="GESTIONNAIRE">Gestionnaire</MenuItem>
                             <MenuItem value="TECHNICIEN">Technicien</MenuItem>
+                            <MenuItem value="CONTROLEUR">Contrôleur</MenuItem>
                         </TextField>
+                        {(user.role === 'TECHNICIEN' || user.role === 'CONTROLEUR') && (
+                            <>
+                                <TextField
+                                    name="telephone"
+                                    label="Téléphone"
+                                    value={user.telephone || ''}
+                                    onChange={onChange}
+                                    fullWidth
+                                />
+                                <TextField
+                                    name="specialite"
+                                    label="Spécialité"
+                                    value={user.specialite || ''}
+                                    onChange={onChange}
+                                    fullWidth
+                                    placeholder="Ex: Installation GPL"
+                                />
+                            </>
+                        )}
                         <TextField
                             name="password"
                             label="Nouveau mot de passe (optionnel)"

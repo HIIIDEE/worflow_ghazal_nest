@@ -1,5 +1,7 @@
 import type { Vehicle } from '../vehicles/vehicleTypes';
 
+export type SousStatutTechnique = 'CONTROLE_TECHNICIEN' | 'CONTROLE_INTEROPERATION';
+
 export interface WorkflowEtape {
     id: string;
     workflowId: string;
@@ -8,18 +10,22 @@ export interface WorkflowEtape {
     description?: string;
     statut: 'EN_ATTENTE' | 'EN_COURS' | 'TERMINE' | 'BLOQUE';
     sousStatutReception?: 'RECEPTION' | 'VERIFICATION' | 'RESTITUTION';
+    sousStatutTechnique?: SousStatutTechnique;
     formulaire?: any;
     dateDebut?: string;
     dateFin?: string;
     validePar?: string;
     signatureGestionnaire?: string;
     signatureTechnicien?: string;
+    signatureControleur?: string;
     signatureClientReception?: string;
     signatureGestionnaireVerification?: string;
     signatureClientRestitution?: string;
     dateReception?: string;
     dateVerification?: string;
     dateRestitution?: string;
+    dateControleTechnicien?: string;
+    dateControleInterop?: string;
     commentaires?: string;
     createdAt: string;
     updatedAt: string;

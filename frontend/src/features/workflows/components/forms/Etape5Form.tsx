@@ -1,5 +1,5 @@
 import { Box, Typography, Checkbox, FormControlLabel, Paper, Grid } from '@mui/material';
-import CableIcon from '@mui/icons-material/Cable';
+import EngineeringIcon from '@mui/icons-material/Engineering';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
 interface Etape5FormProps {
@@ -11,13 +11,10 @@ interface Etape5FormProps {
 }
 
 const CONTROLES = [
-    'Couple de serrage réservoir',
-    'Couple serrage cuivre Ø6',
-    'Couple serrage cuivre Ø8',
-    'Passage du tuyau en cuivre Ø6',
-    "Passage fil d'indication de niveau",
-    'Raccordement de cuivre Ø6 et Ø8 ou réservoir',
-    'Montage réservoir',
+    'Fixation support porte fiche électrique',
+    'Raccordement « T » d\'eau aux durites du chauffage',
+    'Emplacement les écarteurs des tuyaux d\'eau',
+    'Serrage support détendeur avec un couple de 9 ± 1,5Nm',
 ];
 
 export default function Etape5Form({ formData, onChange, disabled = false }: Etape5FormProps) {
@@ -33,13 +30,12 @@ export default function Etape5Form({ formData, onChange, disabled = false }: Eta
 
     return (
         <Box>
-            {/* Section Points de contrôle */}
             <Paper sx={{ p: 3, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }} elevation={0}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <CableIcon sx={{ mr: 1, color: '#2563eb' }} />
+                        <EngineeringIcon sx={{ mr: 1, color: '#059669' }} />
                         <Typography variant="h6" fontWeight="bold" sx={{ color: '#1e293b' }}>
-                            Points de contrôle
+                            Partie Moteur
                         </Typography>
                     </Box>
                     <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 600 }}>
@@ -48,7 +44,7 @@ export default function Etape5Form({ formData, onChange, disabled = false }: Eta
                 </Box>
 
                 <Typography variant="body2" sx={{ mb: 3, color: '#64748b' }}>
-                    Vérifiez chaque point de contrôle lors du raccordement
+                    Vérifiez chaque point lors de l'installation des éléments moteur
                 </Typography>
 
                 <Grid container spacing={1.5}>
@@ -61,13 +57,13 @@ export default function Etape5Form({ formData, onChange, disabled = false }: Eta
                                 <Paper
                                     sx={{
                                         p: 2,
-                                        bgcolor: controles[controle] ? '#eff6ff' : 'white',
-                                        border: controles[controle] ? '2px solid #2563eb' : '1px solid #e2e8f0',
+                                        bgcolor: controles[controle] ? '#d1fae5' : 'white',
+                                        border: controles[controle] ? '2px solid #059669' : '1px solid #e2e8f0',
                                         transition: 'all 0.2s',
                                         height: '100%',
                                         '&:hover': !disabled ? {
-                                            borderColor: '#2563eb',
-                                            boxShadow: '0 2px 8px rgba(37, 99, 235, 0.1)',
+                                            borderColor: '#059669',
+                                            boxShadow: '0 2px 8px rgba(5, 150, 105, 0.1)',
                                         } : {},
                                     }}
                                     elevation={0}
@@ -84,7 +80,7 @@ export default function Etape5Form({ formData, onChange, disabled = false }: Eta
                                                 sx={{
                                                     color: '#94a3b8',
                                                     '&.Mui-checked': {
-                                                        color: '#2563eb',
+                                                        color: '#059669',
                                                     },
                                                     pointerEvents: 'auto',
                                                 }}
@@ -122,7 +118,7 @@ export default function Etape5Form({ formData, onChange, disabled = false }: Eta
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <CheckCircleOutlineIcon sx={{ mr: 1, color: '#059669' }} />
                             <Typography variant="body2" sx={{ color: '#059669', fontWeight: 600 }}>
-                                Tous les points de contrôle ont été vérifiés
+                                Toutes les opérations de la partie moteur ont été effectuées
                             </Typography>
                         </Box>
                     </Box>

@@ -1,5 +1,5 @@
 import { Box, Typography, Checkbox, FormControlLabel, Paper, Grid } from '@mui/material';
-import EngineeringIcon from '@mui/icons-material/Engineering';
+import BuildIcon from '@mui/icons-material/Build';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
 interface Etape4FormProps {
@@ -11,17 +11,9 @@ interface Etape4FormProps {
 }
 
 const CONTROLES = [
-    "Perçage collecteur d'admission",
-    'Montage buse collecteur',
-    'Fixation rail injecteur couple de serrage',
-    "Branchement des tuyaux d'injecteurs",
-    'Raccordement tuyau de gaz au détendeur',
-    'Montage de la buse de compensation',
-    'Fixation support de remplissage',
-    'Couple de serrage rail d\'injecteurs sur le support',
-    'Fixation bouchon de remplissage',
-    'Raccordement cuivre Ø8 à la prise de remplissage',
-    'Serrage Raccordement cuivre Ø8 au couple',
+    'Fixation Détendeur',
+    'Couple de serrage support Détendeur 9 ± 1,5Nm',
+    'Remontage et fixation du garde boue avant',
 ];
 
 export default function Etape4Form({ formData, onChange, disabled = false }: Etape4FormProps) {
@@ -37,13 +29,12 @@ export default function Etape4Form({ formData, onChange, disabled = false }: Eta
 
     return (
         <Box>
-            {/* Section Points de contrôle */}
             <Paper sx={{ p: 3, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }} elevation={0}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <EngineeringIcon sx={{ mr: 1, color: '#2563eb' }} />
+                        <BuildIcon sx={{ mr: 1, color: '#2563eb' }} />
                         <Typography variant="h6" fontWeight="bold" sx={{ color: '#1e293b' }}>
-                            Points de contrôle
+                            Partie Garde-boue
                         </Typography>
                     </Box>
                     <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 600 }}>
@@ -52,7 +43,7 @@ export default function Etape4Form({ formData, onChange, disabled = false }: Eta
                 </Box>
 
                 <Typography variant="body2" sx={{ mb: 3, color: '#64748b' }}>
-                    Vérifiez chaque point de contrôle dans le compartiment moteur
+                    Vérifiez chaque point lors du montage du garde-boue
                 </Typography>
 
                 <Grid container spacing={1.5}>
@@ -65,7 +56,7 @@ export default function Etape4Form({ formData, onChange, disabled = false }: Eta
                                 <Paper
                                     sx={{
                                         p: 2,
-                                        bgcolor: controles[controle] ? '#eff6ff' : 'white',
+                                        bgcolor: controles[controle] ? '#dbeafe' : 'white',
                                         border: controles[controle] ? '2px solid #2563eb' : '1px solid #e2e8f0',
                                         transition: 'all 0.2s',
                                         height: '100%',
@@ -126,7 +117,7 @@ export default function Etape4Form({ formData, onChange, disabled = false }: Eta
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <CheckCircleOutlineIcon sx={{ mr: 1, color: '#059669' }} />
                             <Typography variant="body2" sx={{ color: '#059669', fontWeight: 600 }}>
-                                Tous les points de contrôle ont été vérifiés
+                                Toutes les opérations du garde-boue ont été effectuées
                             </Typography>
                         </Box>
                     </Box>

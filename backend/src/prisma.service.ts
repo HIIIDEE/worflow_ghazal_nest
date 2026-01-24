@@ -32,10 +32,6 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return this.prisma.user;
   }
 
-  get technicien() {
-    return this.prisma.technicien;
-  }
-
   get vehicle() {
     return this.prisma.vehicle;
   }

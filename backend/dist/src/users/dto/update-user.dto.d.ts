@@ -5,5 +5,7 @@ export declare class UpdateUserDto {
     nom?: string;
     prenom?: string;
     role?: UserRole;
+    telephone?: string;
+    specialite?: string;
     isActive?: boolean;
 }

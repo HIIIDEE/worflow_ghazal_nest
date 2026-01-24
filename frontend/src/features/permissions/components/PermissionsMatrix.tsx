@@ -156,7 +156,7 @@ export default function PermissionsMatrix() {
             return (
                 user.nom.toLowerCase().includes(query) ||
                 user.prenom.toLowerCase().includes(query) ||
-                user.email.toLowerCase().includes(query)
+                (user.email?.toLowerCase().includes(query) ?? false)
             );
         }
         return true;

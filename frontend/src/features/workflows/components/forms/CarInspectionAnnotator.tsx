@@ -23,6 +23,7 @@ import {
   Delete as DeleteIcon,
   Info as InfoIcon,
 } from '@mui/icons-material';
+import { useTabletStyles } from '../../../../hooks/useTabletMode';
 
 export interface Annotation {
   id: string;
@@ -60,6 +61,9 @@ export default function CarInspectionAnnotator({
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const imageContainerRef = useRef<HTMLDivElement>(null);
+
+  // Mode tablette pour optimiser l'UI tactile
+  const tabletStyles = useTabletStyles();
 
   const handleAnomalySelect = (_event: React.MouseEvent<HTMLElement>, value: number | null) => {
     if (disabled) return;
@@ -104,8 +108,15 @@ export default function CarInspectionAnnotator({
 
   return (
     <Box>
-      <Typography variant="body2" sx={{ mb: 2, color: '#64748b' }}>
-        Sélectionnez une anomalie puis cliquez sur l'image pour la placer
+      <Typography
+        variant="body2"
+        sx={{
+          mb: tabletStyles.spacing,
+          color: '#64748b',
+          fontSize: tabletStyles.fontSize
+        }}
+      >
+        Sélectionnez une anomalie puis {tabletStyles.isTablet ? 'touchez' : 'cliquez sur'} l'image pour la placer
       </Typography>
 
       {/* Anomaly Selector */}
@@ -114,10 +125,10 @@ export default function CarInspectionAnnotator({
         exclusive
         onChange={handleAnomalySelect}
         sx={{
-          mb: 3,
+          mb: tabletStyles.spacing,
           display: 'flex',
           flexWrap: 'wrap',
-          gap: 1,
+          gap: tabletStyles.isTablet ? 1.5 : 1,
           '& .MuiToggleButtonGroup-grouped': {
             border: '1px solid #e2e8f0',
             borderRadius: '8px !important',
@@ -143,18 +154,28 @@ export default function CarInspectionAnnotator({
             value={anomaly.id}
             disabled={disabled}
             sx={{
-              px: 2,
-              py: 1,
+              px: tabletStyles.isTablet ? 2.5 : 2,
+              py: tabletStyles.isTablet ? 1.5 : 1,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               gap: 0.5,
               textTransform: 'none',
-              minWidth: '110px',
+              minWidth: tabletStyles.isTablet ? '130px' : '110px',
+              minHeight: tabletStyles.isTablet ? tabletStyles.touchTargetSize : 'auto',
             }}
           >
-            <Box sx={{ color: anomaly.color }}>{anomaly.icon}</Box>
-            <Typography variant="caption" sx={{ fontSize: '0.7rem', lineHeight: 1.2, textAlign: 'center' }}>
+            <Box sx={{ color: anomaly.color, fontSize: tabletStyles.isTablet ? '1.5rem' : '1rem' }}>
+              {anomaly.icon}
+            </Box>
+            <Typography
+              variant="caption"
+              sx={{
+                fontSize: tabletStyles.isTablet ? '0.85rem' : '0.7rem',
+                lineHeight: 1.2,
+                textAlign: 'center'
+              }}
+            >
               {anomaly.label}
             </Typography>
           </ToggleButton>
@@ -179,8 +200,7 @@ export default function CarInspectionAnnotator({
         onClick={handleImageClick}
       >
            <img
-              //src="/car-inspection.png"
-              src={`${import.meta.env.BASE_URL}/car-inspection.png`}
+              src="/car-inspection.png"
               alt="Inspection du véhicule"
               style={{
                 width: '100%',
@@ -189,7 +209,6 @@ export default function CarInspectionAnnotator({
                 maxWidth: '800px',
               }}
               onLoad={() => setImageLoaded(true)}
-             
             />
 
             {/* Markers */}
@@ -249,11 +268,15 @@ export default function CarInspectionAnnotator({
                         '& .MuiBadge-badge': {
                           bgcolor: getAnomalyColor(annotation.anomalyId),
                           color: 'white',
-                          width: isHovered ? 38 : 32,
-                          height: isHovered ? 38 : 32,
+                          width: tabletStyles.isTablet
+                            ? (isHovered ? 50 : 44)
+                            : (isHovered ? 38 : 32),
+                          height: tabletStyles.isTablet
+                            ? (isHovered ? 50 : 44)
+                            : (isHovered ? 38 : 32),
                           borderRadius: '50%',
                           border: '3px solid white',
-                          fontSize: '0.85rem',
+                          fontSize: tabletStyles.isTablet ? '1.1rem' : '0.85rem',
                           fontWeight: 'bold',
                           boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
                           transition: 'all 0.2s',
@@ -315,18 +338,20 @@ export default function CarInspectionAnnotator({
                   </Typography>
                 </Box>
                 <IconButton
-                  size="small"
+                  size={tabletStyles.isTablet ? "medium" : "small"}
                   onClick={() => handleDeleteAnnotation(annotation.id)}
                   disabled={disabled}
                   sx={{
                     color: '#94a3b8',
+                    minWidth: tabletStyles.isTablet ? tabletStyles.touchTargetSize : 'auto',
+                    minHeight: tabletStyles.isTablet ? tabletStyles.touchTargetSize : 'auto',
                     '&:hover': {
                       color: '#ef4444',
                       bgcolor: '#fee2e2',
                     },
                   }}
                 >
-                  <DeleteIcon fontSize="small" />
+                  <DeleteIcon fontSize={tabletStyles.isTablet ? "medium" : "small"} />
                 </IconButton>
               </Paper>
             ))}

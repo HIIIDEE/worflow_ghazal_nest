@@ -19,6 +19,8 @@ class UpdateUserDto {
     nom;
     prenom;
     role;
+    telephone;
+    specialite;
     isActive;
 }
 exports.UpdateUserDto = UpdateUserDto;
@@ -72,9 +74,29 @@ __decorate([
         required: false,
     }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(client_1.UserRole, { message: 'Le rôle doit être ADMIN ou GESTIONNAIRE' }),
+    (0, class_validator_1.IsEnum)(client_1.UserRole, { message: 'Le rôle doit être ADMIN, GESTIONNAIRE, TECHNICIEN ou CONTROLEUR' }),
     __metadata("design:type", String)
 ], UpdateUserDto.prototype, "role", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Numéro de téléphone de l\'utilisateur',
+        example: '+213 555 12 34 56',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "telephone", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Spécialité de l\'utilisateur (pour TECHNICIEN/CONTROLEUR)',
+        example: 'Installation GPL',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "specialite", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'Statut actif de l\'utilisateur',

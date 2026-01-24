@@ -33,7 +33,7 @@ export class UpdateEtapeDto {
 
   @IsOptional()
   @IsString()
-  technicienId?: string;
+  assignedUserId?: string;
 
   @IsOptional()
   @IsString()
@@ -54,6 +54,14 @@ export class UpdateEtapeDto {
   @IsOptional()
   @IsString()
   signatureClientRestitution?: string;
+
+  @IsOptional()
+  @IsString()
+  signatureControleur?: string;
+
+  @IsOptional()
+  @IsEnum(['CONTROLE_TECHNICIEN', 'CONTROLE_INTEROPERATION'])
+  sousStatutTechnique?: 'CONTROLE_TECHNICIEN' | 'CONTROLE_INTEROPERATION';
 
   @IsOptional()
   @IsString()

@@ -1,8 +1,8 @@
 import { Box, Typography, Checkbox, FormControlLabel, Paper, Grid } from '@mui/material';
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import EngineeringIcon from '@mui/icons-material/Engineering';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
-interface Etape6FormProps {
+interface Etape4FormProps {
     formData: {
         controles?: { [key: string]: boolean };
     };
@@ -11,19 +11,17 @@ interface Etape6FormProps {
 }
 
 const CONTROLES = [
-    'Montage centrale GPL',
-    'Couple de serrage central',
-    'Montage faisceaux électriques',
-    'Passage commutateur',
-    'Perçage commutateur',
-    'Branchement des fils de OBD',
-    'Remontage le tapis coffre',
-    'Remise en place de la roue de secours',
-    "Fixation de l'extincteur",
-    'Montage plaque GPL',
+    "Perçage collecteur d'admission",
+    "Montage buse d'air",
+    'Montage buse collecteur',
+    'Fixation support rail d\'injecteur avec un couple de serrage 9,5 ±1,5Nm',
+    "Branchement tuyaux d'injecteurs",
+    'Couple de serrage rail d\'injecteurs sur le support 3± 0,5 Nm',
+    'Raccordement tuyau de gaz au détendeur',
+    'Positionnement des écarteurs de tuyaux de gaz',
 ];
 
-export default function Etape6Form({ formData, onChange, disabled = false }: Etape6FormProps) {
+export default function Etape4Form({ formData, onChange, disabled = false }: Etape4FormProps) {
     const controles = formData?.controles || {};
 
     const handleControleChange = (controle: string, checked: boolean) => {
@@ -40,7 +38,7 @@ export default function Etape6Form({ formData, onChange, disabled = false }: Eta
             <Paper sx={{ p: 3, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }} elevation={0}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <AutoFixHighIcon sx={{ mr: 1, color: '#2563eb' }} />
+                        <EngineeringIcon sx={{ mr: 1, color: '#2563eb' }} />
                         <Typography variant="h6" fontWeight="bold" sx={{ color: '#1e293b' }}>
                             Points de contrôle
                         </Typography>
@@ -51,7 +49,7 @@ export default function Etape6Form({ formData, onChange, disabled = false }: Eta
                 </Box>
 
                 <Typography variant="body2" sx={{ mb: 3, color: '#64748b' }}>
-                    Vérifiez chaque point de contrôle lors de la finition
+                    Vérifiez chaque point de contrôle dans le compartiment moteur
                 </Typography>
 
                 <Grid container spacing={1.5}>
@@ -98,8 +96,7 @@ export default function Etape6Form({ formData, onChange, disabled = false }: Eta
                                                 variant="body2"
                                                 sx={{
                                                     color: controles[controle] ? '#1e293b' : '#64748b',
-                                                    fontWeight: controles[controle] ? 600 : 400,
-                                                    userSelect: 'none',
+                                                    fontWeight: controles[controle] ? 600 : 400
                                                 }}
                                             >
                                                 {controle}
